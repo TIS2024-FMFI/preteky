@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="sk" dir="ltr" class="js"><head>
+  <link rel="profile" href="http://www.w3.org/1999/xhtml/vocab">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="Generator" content="Drupal 7 (http://drupal.org)">
+<link rel="shortcut icon" href="https://is.orienteering.sk/sites/default/files/favicon.png" type="image/png">
+  <title>API | Informačný systém SZOŠ</title>
+  <style>
+@import url("https://is.orienteering.sk/modules/system/system.base.css?s5gtxk");
+</style>
+<style>
+@import url("https://is.orienteering.sk/sites/all/modules/jquery_update/replace/ui/themes/base/minified/jquery.ui.core.min.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/modules/jquery_update/replace/ui/themes/base/minified/jquery.ui.theme.min.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/libraries/ms-Dropdown/css/msdropdown/dd.css?s5gtxk");
+</style>
+<style>
+@import url("https://is.orienteering.sk/modules/field/theme/field.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/modules/logintoboggan/logintoboggan.css?s5gtxk");
+@import url("https://is.orienteering.sk/modules/node/node.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/modules/szos/css/style.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/modules/ckeditor/css/ckeditor.css?s5gtxk");
+</style>
+<style>
+@import url("https://is.orienteering.sk/sites/all/libraries/jquery-ui-multiselect-widget/jquery.multiselect.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/libraries/jquery-ui-multiselect-widget/jquery.multiselect.filter.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/modules/jquery_ui_multiselect_widget/jquery_ui_multiselect_widget.css?s5gtxk");
+@import url("https://is.orienteering.sk/sites/all/modules/lang_dropdown/msdropdown/css/msdropdown/ldsSkin.css?s5gtxk");
+</style>
+<link type="text/css" rel="stylesheet" href="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/bootstrap.css" media="all">
+<link type="text/css" rel="stylesheet" href="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/drupal-bootstrap.css" media="all">
+  <!-- HTML5 element support for IE6-8 -->
+  <!--[if lt IE 9]>
+    <script src="https://cdn.jsdelivr.net/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+  <script type="text/javascript" async="" src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/analytics.js"></script><script type="text/javascript" async="" src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/js_002"></script><script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery-1.10.2.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery-extend-3.4.0.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery-html-prefilter-3.5.0-backport.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery.once.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/drupal.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery_browser.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery-ui.min.js"></script>
+<script>window.jQuery.ui || document.write("<script src='/sites/all/modules/jquery_update/replace/ui/ui/minified/jquery-ui.min.js'>\x3C/script>")</script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/bootstrap.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/tooltips.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/sk_i-dXAF0E3iaBpxgS0mMmdtyiY_20bLU1FQ8eIGNdRxo.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/tableheader.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery.dd.min.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/googleanalytics.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/js"></script>
+<script>window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments)};gtag("js", new Date());gtag("config", "UA-47096687-3", {"groups":"default","debug_mode":true});</script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/lang_dropdown.js"></script>
+<script>jQuery.extend(Drupal.settings, {"basePath":"\/","pathPrefix":"","setHasJsCookie":0,"ajaxPageState":{"theme":"orienteering","theme_token":"mDln33pmMFRiHWG_cYPd1bGoUcu3UsD81E6_K2zunX0","js":{"sites\/all\/libraries\/jquery-ui-multiselect-widget\/src\/jquery.multiselect.js":1,"sites\/all\/libraries\/jquery-ui-multiselect-widget\/src\/jquery.multiselect.filter.js":1,"sites\/all\/modules\/jquery_ui_multiselect_widget\/jquery_ui_multiselect_widget.js":1,"sites\/all\/themes\/bootstrap\/js\/bootstrap.js":1,"https:\/\/code.jquery.com\/jquery-1.10.2.js":1,"misc\/jquery-extend-3.4.0.js":1,"misc\/jquery-html-prefilter-3.5.0-backport.js":1,"misc\/jquery.once.js":1,"misc\/drupal.js":1,"sites\/all\/modules\/jquery_update\/js\/jquery_browser.js":1,"\/\/ajax.googleapis.com\/ajax\/libs\/jqueryui\/1.10.2\/jquery-ui.min.js":1,"0":1,"https:\/\/cdn.jsdelivr.net\/npm\/bootstrap@3.3.7\/dist\/js\/bootstrap.js":1,"sites\/all\/modules\/szos\/js\/tooltips.js":1,"public:\/\/languages\/sk_i-dXAF0E3iaBpxgS0mMmdtyiY_20bLU1FQ8eIGNdRxo.js":1,"misc\/tableheader.js":1,"sites\/all\/libraries\/ms-Dropdown\/js\/msdropdown\/jquery.dd.min.js":1,"sites\/all\/modules\/google_analytics\/googleanalytics.js":1,"https:\/\/www.googletagmanager.com\/gtag\/js?id=UA-47096687-3":1,"1":1,"sites\/all\/modules\/lang_dropdown\/lang_dropdown.js":1},"css":{"modules\/system\/system.base.css":1,"misc\/ui\/jquery.ui.core.css":1,"misc\/ui\/jquery.ui.theme.css":1,"sites\/all\/libraries\/ms-Dropdown\/css\/msdropdown\/dd.css":1,"modules\/field\/theme\/field.css":1,"sites\/all\/modules\/logintoboggan\/logintoboggan.css":1,"modules\/node\/node.css":1,"sites\/all\/modules\/szos\/css\/style.css":1,"sites\/all\/modules\/ckeditor\/css\/ckeditor.css":1,"sites\/all\/libraries\/jquery-ui-multiselect-widget\/jquery.multiselect.css":1,"sites\/all\/libraries\/jquery-ui-multiselect-widget\/jquery.multiselect.filter.css":1,"sites\/all\/modules\/jquery_ui_multiselect_widget\/jquery_ui_multiselect_widget.css":1,"sites\/all\/modules\/lang_dropdown\/msdropdown\/css\/msdropdown\/ldsSkin.css":1,"https:\/\/cdn.jsdelivr.net\/npm\/bootstrap@3.3.7\/dist\/css\/bootstrap.css":1,"https:\/\/cdn.jsdelivr.net\/npm\/@unicorn-fail\/drupal-bootstrap-styles@0.0.2\/dist\/3.3.1\/7.x-3.x\/drupal-bootstrap.css":1}},"jquery_ui_multiselect_widget":{"module_path":"sites\/all\/modules\/jquery_ui_multiselect_widget","multiple":1,"filter":1,"subselector":".multiselect-widget","selectedlist":"4","autoOpen":0,"header":1,"height":"175","classes":"","filter_auto_reset":1,"filter_width":"150","jquery_ui_multiselect_widget_path_match_exclude":"admin\/*"},"page_lang":"sk","urlIsAjaxTrusted":{"\/api":true},"lang_dropdown":{"language":{"jsWidget":{"widget":"msdropdown","visibleRows":"5","roundedCorner":1,"animStyle":"slideDown","event":"click","mainCSS":"ldsSkin"}}},"googleanalytics":{"account":["UA-47096687-3"],"trackOutbound":1,"trackMailto":1,"trackDownload":1,"trackDownloadExtensions":"7z|aac|arc|arj|asf|asx|avi|bin|csv|doc(x|m)?|dot(x|m)?|exe|flv|gif|gz|gzip|hqx|jar|jpe?g|js|mp(2|3|4|e?g)|mov(ie)?|msi|msp|pdf|phps|png|ppt(x|m)?|pot(x|m)?|pps(x|m)?|ppam|sld(x|m)?|thmx|qtm?|ra(m|r)?|sea|sit|tar|tgz|torrent|txt|wav|wma|wmv|wpd|xls(x|m|b)?|xlt(x|m)|xlam|xml|z|zip"},"bootstrap":{"anchorsFix":"0","anchorsSmoothScrolling":"0","formHasError":0,"popoverEnabled":1,"popoverOptions":{"animation":1,"html":0,"placement":"right","selector":"","trigger":"click","triggerAutoclose":1,"title":"","content":"","delay":0,"container":"body"},"tooltipEnabled":1,"tooltipOptions":{"animation":1,"html":0,"placement":"auto left","selector":"","trigger":"hover focus","delay":0,"container":"body"}}});</script>
+</head>
+<body class="html not-front logged-in no-sidebars page-api" style="">
+  <div id="skip-link">
+    <a href="#main-content" class="element-invisible element-focusable">Skočiť na hlavný obsah</a>
+  </div>
+    <div class="header-top container">
+    <div class="region region-header-top">
+    <section id="block-lang-dropdown-language" class="block block-lang-dropdown clearfix">
+
+      
+  <form class="lang_dropdown_form language" id="lang_dropdown_form_language" action="/api" method="post" accept-charset="UTF-8"><div><div class="form-item form-item-lang-dropdown-select form-type-select form-group"><div style="height: 0px; overflow: hidden; position: absolute;" class="ddOutOfVision" id="lang-dropdown-select-language_msddHolder"><select class="lang-dropdown-select-element form-control form-select" id="lang-dropdown-select-language" style="width:150px" name="lang_dropdown_select" tabindex="-1"><option value="sk" selected="selected">Slovenčina</option><option value="en">English</option></select></div><div class="ldsSkin ddcommon borderRadius" style="width: 150px;" id="lang-dropdown-select-language_msdd" tabindex="0"><div class="ddTitle borderRadiusTp"><span class="divider"></span><span class="ddArrow arrowoff"></span><span class="ddTitleText " id="lang-dropdown-select-language_title"><span class="ddlabel">Slovenčina</span><span class="description" style="display: none;"></span></span></div><input id="lang-dropdown-select-language_titleText" type="text" autocomplete="off" class="text shadow borderRadius" style="display: none;"><div class="ddChild ddchild_ border shadow" id="lang-dropdown-select-language_child" style="z-index: 9999; display: none; position: absolute; visibility: visible; height: 63px;"><ul><li class="enabled _msddli_ selected"><span class="ddlabel">Slovenčina</span><div class="clear"></div></li><li class="enabled _msddli_"><span class="ddlabel">English</span><div class="clear"></div></li></ul></div></div></div><input type="hidden" name="sk" value="/api">
+<input type="hidden" name="en" value="/en/api">
+<noscript><div>
+<button type="submit" id="edit-submit" name="op" value="Prejsť" class="btn btn-default form-submit">Prejsť</button>
+
+</div></noscript><input type="hidden" name="form_build_id" value="form-JIYXJ8dllGYS5QkVBBdfPbPuiOF6d8DhKqSGkw4QhtM">
+<input type="hidden" name="form_token" value="wpvWB8pcXrpN26EZERn5eQ2iQu1EBpSDoSI6lpxMO3c">
+<input type="hidden" name="form_id" value="lang_dropdown_form">
+</div></form>
+</section>
+<section id="block-szos-szos-user-menu" class="block block-szos clearfix">
+
+      
+  <ul class="breadcrumb"><li class="menu-2 first"><a href="https://is.orienteering.sk/user" class="btn btn-link">Môj účet (Richard Balogh)</a></li>
+<li class="menu-15 last"><a href="https://is.orienteering.sk/user/logout" class="btn btn-link">Odhlásiť</a></li>
+</ul>
+</section>
+  </div>
+</div>
+
+<header id="navbar" role="banner" class="navbar container navbar-default">
+  <div class="container">
+    <div class="navbar-header">
+              <a class="logo navbar-btn pull-left" href="https://is.orienteering.sk/" title="Domov">
+          <img src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/logoszos.png" alt="Domov">
+        </a>
+      
+                      <a class="name navbar-brand" href="https://is.orienteering.sk/" title="Domov">Informačný systém </a>
+      
+              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+          <span class="sr-only">Prepnúť navigáciu</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+          </div>
+
+          <div class="navbar-collapse collapse" id="navbar-collapse">
+        <nav role="navigation">
+                      <ul class="menu nav navbar-nav"><li class="first collapsed"><a href="https://is.orienteering.sk/competitions">Preteky</a></li>
+<li class="collapsed"><a href="https://is.orienteering.sk/clubs">Kluby</a></li>
+<li class="collapsed"><a href="https://is.orienteering.sk/ranking">Ranking</a></li>
+<li class="expanded dropdown"><a href="https://is.orienteering.sk/registry" title="" class="dropdown-toggle" data-toggle="dropdown">Evidencie <span class="caret"></span></a><ul class="dropdown-menu"><li class="first leaf"><a href="https://is.orienteering.sk/registry/clubs">Kluby</a></li>
+<li class="collapsed"><a href="https://is.orienteering.sk/runners">Pretekári</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/registry/experts">Športoví odborníci</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/registry/referees-activity">Rozhodcovská aktivita</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/registry/representations">Reprezentácie</a></li>
+<li class="last leaf"><a href="https://is.orienteering.sk/registry/talents">Talentovaní športovci</a></li>
+</ul></li>
+<li class="collapsed"><a href="https://is.orienteering.sk/statistics">Štatistiky</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/competition-proposals" title="">Tvorba kalendára</a></li>
+<li class="leaf active-trail active"><a href="https://is.orienteering.sk/api" class="active-trail active">API</a></li>
+<li class="last expanded dropdown"><a href="https://is.orienteering.sk/#" title="" class="dropdown-toggle" data-toggle="dropdown">Pomoc <span class="caret"></span></a><ul class="dropdown-menu"><li class="first leaf"><a href="https://is.orienteering.sk/faq">FAQ</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/sprava-pretekarov">Správa pretekárov</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/sprava-klubov">Správa klubov</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/sprava-ziadosti">Správa žiadostí</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/sprava-pretekov">Správa pretekov</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/sprava-vysledkov">Správa výsledkov</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/sprava-prihlasok">Správa prihlášok</a></li>
+<li class="leaf"><a href="https://is.orienteering.sk/prihlasovanie-na-preteky">Prihlasovanie na preteky</a></li>
+<li class="last leaf"><a href="https://is.orienteering.sk/registracia-do-systemu">Registrácia do systému</a></li>
+</ul></li>
+</ul>                            </nav>
+      </div>
+      </div>
+</header>
+
+<div class="main-container container">
+
+  <header role="banner" id="page-header">
+    
+      </header> <!-- /#page-header -->
+
+  <div class="row">
+
+    
+    <section class="col-sm-12">
+            <ol class="breadcrumb"><li><a href="https://is.orienteering.sk/">Domov</a></li>
+<li class="active">API</li>
+</ol>      <a id="main-content"></a>
+                    <h1 class="page-header">API</h1>
+                                                          <div class="region region-content">
+    <section id="block-system-main" class="block block-system clearfix">
+
+      
+ <h2>API - špecifikácia - v1.0 (7.4.2021)</h2><h3>Všeobecné informácie</h3>
+
+<ul>
+	<li>API rozhranie je dostupné online na URL adrese&nbsp;<strong>https://is.orienteering.sk/api</strong> (ide o <a href="https://en.wikipedia.org/wiki/Representational_state_transfer">REST rozhranie</a>)
+
+	<ul>
+		<li>K tejto URL adrese sa následne pridáva konkrétna metóda s jej 
+parametrami (napr. /clubs/24), čiže výsledná URL adresa pre toto volanie
+ bude: "https://is.orienteering.sk/api/clubs/24"</li>
+		<li>V niektorých metódach je možné poslať jeden, alebo viac 
+filtrovacích parametrov (ako&nbsp;GET parametre) - ak je poslaných viac 
+takýchto parametrov, tak sú aplikované spoločne cez logickú spojku A 
+(AND)</li>
+	</ul>
+	</li>
+	<li>Formát výmeny údajov je <a href="https://en.wikipedia.org/wiki/JSON">JSON</a>, tj. pri GET requestoch API vracia JSON string, pri POST requestoch klient posiela JSON string (raw)</li>
+	<li>Podporované metódy: GET (pre získanie dát, napr. zoznam pretekov) a <a href="https://en.wikipedia.org/wiki/POST_(HTTP)">POST</a> (pre ukladanie dát, napr. nová prihláška)</li>
+	<li>Prenos údajov je zabezpečený formou API kľúča - každý klub si môže vygenerovať 1x API kľuč na tejto stránke
+	<ul>
+		<li>Ak dôjde ku kompromitácii kľúča, alebo je potrebné ho 
+pregenerovať, je to možné tak, že ho klub vymaže a následne znovu 
+vygeneruje</li>
+		<li>Správu API kľúčov môže vykonávať iba osoba s právami "klubový administrátor"</li>
+		<li>Autentifikácia cez API kľúč prebieha vložením nového poľa do <a href="https://en.wikipedia.org/wiki/List_of_HTTP_header_fields" target="_blank">hlavičky každého HTTP requestu</a>&nbsp;
+		<ul>
+			<li>Pole s API kľúčom má mať&nbsp;názov „x-szos-api-key“ a hodnotu kľúča pre daný klub -&nbsp;viď napr.:</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+</ul>
+
+<pre class="rteindent3">{
+     'x-szos-api-key: DOHODNUTY_KLUC', //nové header pole
+     'Content-Type: application/json', //existujúce header pole
+}</pre>
+
+<ul>
+	<li>Treba mať na zreteli, že všetky operácie sú vykonávané pod klubom, 
+ktorého identifikuje daný API kľúč - teda nie je možné napr. cez API 
+kľúč HBB vytvoriť klubovú prihlášku za klub EBB, a podobne</li>
+	<li>Stav spracovania požiadavky sa vracia <a href="https://en.wikipedia.org/wiki/List_of_HTTP_status_codes">HTTP Statusom</a>, tj.:
+	<ul>
+		<li>2xx&nbsp;- OK stav (v tomto prípade nemusí prísť žiadna textová odpoveď, samotný status 200 sa považuje za úspešnú operáciu),</li>
+		<li>4xx&nbsp;- chybový stav:&nbsp;chybová hláška je v odpovedi v poli&nbsp;“message”:
+		<ul>
+			<li>Prístup zamietnutý: volanie vracia vždy: 403: Unauthorized</li>
+			<li>Resource not found: volanie vracia vždy: 404: Not found</li>
+			<li>Iná chyba (default):&nbsp;4XX</li>
+		</ul>
+		</li>
+		<li>5xx - server error: chybová hláška je v odpovedi v poli “message”,</li>
+	</ul>
+	</li>
+	<li>Kódovanie prenosu údajov cez API je <a href="https://en.wikipedia.org/wiki/UTF-8">UTF8</a></li>
+	<li>Ak nie je uvedené inak, textové polia majú maximálnu dĺžku 254 znakov</li>
+	<li>Na testovanie komunikácie zo strany klubov je možné použiť program <a href="https://www.getpostman.com/">POSTMAN</a> (existuje aj ako rozšírenie do Google Chrome), na vyžiadanie poskytneme hotovú POSTMAN collection</li>
+	<li>Všetky operácie cez API sú zaznamenávané a vyhodnocované pre prípadné zneužitie</li>
+	<li>API v tejto fáze slúž&nbsp;hlavne na preberanie a čítanie informácií&nbsp;z IS SZOŠ a tiež na agendu prihlasovania na preteky
+	<ul>
+		<li>Momentálne nie je možné cez API spravovať preteky, prihlášky, 
+alebo výsledky, avšak ak sa API osvedčí a o tieto funkcie bude záujem, 
+bude možné ich dopracovať</li>
+	</ul>
+	</li>
+</ul>
+
+<h3>Pokyny k používaniu</h3>
+
+<ul>
+	<li>API kľúč a prístupy k API je zakázané šíriť&nbsp;tretím stranám - 
+jediný oprávnený subjekt na využívanie API je klub, ktorý má daný API 
+kľúč vygenerovaný</li>
+	<li>Dáta dostupné cez API IS SZOŠ patria SZOŠ a na ich šírenie tretím stranám&nbsp;je potrebný súhlas</li>
+	<li>API je možné využívať na nekomerčné účely pre potreby jednotlivých 
+klubov (napr. zobrazenie kalendára, integrácia na agendu prihlasovania 
+na preteky, ...)</li>
+	<li>Ak dôjde ku kompromitácii API kľúča, je potrebné bezpodmienečne vygenerovať nový kľúč</li>
+	<li>API prosíme využívať s rozumom a bez nadmerného zaťažovania - jedná
+ sa o pilotnú prevádzku a optimalizácie na strane servera ešte budú 
+prebiehať. Každopádne kluby prosíme o využitie cachovania, alebo inej 
+formy dočasného ukladania dát z API na ich strane (pri údajoch, kde je 
+to možné a prínosné)</li>
+	<li>Každú chybu, alebo návrh na zlepšenie prosíme nahlásiť na email: <a href="mailto:webmaster@orienteering.sk">webmaster@orienteering.sk</a></li>
+</ul>
+
+<h3>API dokumentácia (metódy)</h3>
+
+<p>--------------------------------------</p>
+
+<ul>
+	<li><a href="#clubs">Zoznam klubov</a></li>
+	<li><a href="#clubs-registrations">Registrácie klubu</a></li>
+	<li><a href="#competitions">Zoznam pretekov</a></li>
+	<li><a href="#competition-detail">Detail pretekov</a></li>
+	<li><a href="#competition-entries">Zoznam prihlášok na preteky</a></li>
+	<li><a href="#create-entry">Vytvorenie prihlášky pretekára na preteky</a></li>
+	<li><a href="#delete-entry">Vymazanie pretekára z prihlášky na preteky</a></li>
+	<li><a href="#competition-results">Zoznam výsledkov etapy pretekov</a></li>
+	<li><a href="#runner-detail">Detail pretekára</a></li>
+	<li><a href="#runner-results">Zoznam výsledkov pretekára</a></li>
+	<li><a href="#registration-detail">Detail registrácie</a></li>
+	<li><a href="#allowed-categories">Zoznam kategórií, kam sa môže daný pretekár prihlásiť</a></li>
+	<li><a href="#competitor-list">CompetitorList (IOF XML v3, offline verzia)</a></li>
+	<li><a href="#lists">Číselníky</a></li>
+</ul>
+
+<p>--------------------------------------</p>
+
+<p><a id="clubs" name="clubs"><u><strong>Zoznam klubov</strong></u></a></p>
+
+<p>Vráti zoznam všetkých klubov registrovaných v SZOŠ. Nevracia zahraničné a neregistrované kluby.</p>
+
+<p>URL: <strong>/clubs</strong><br>
+Metóda: GET<br>
+Vstupné GET parametre (filter):</p>
+
+<ul>
+	<li>„region_id“ - ID regiónu, nepovinné, ak je zadané, volanie vráti iba kluby pre daný región (viď číselník)</li>
+</ul>
+
+<p>Výstup:</p>
+
+<pre>[
+    {
+        "id": "2", <em>//ID klubu</em>
+        "name": "KOBRA Bratislava", <em>//názov klubu</em>
+        "shortcut": "BBA", //skratka klubu
+        "country": "SK", <em>//krajina</em>
+        "region_id": "1", <em>//ID regiónu, viď číselník</em>
+        "city_id": "248", <em>//ID mesta, viď číselník</em>
+        "ident_number": "30845602", <em>//IČO</em>
+        "web": "http://www.kobra-orienteering.sk/", <em>//webstránka</em>
+        "first_name": "Štefan", <em>//kontaktná osoba - meno</em>
+        "surname": "Máj", <em>//kontaktná osoba - priezvisko</em>
+        "phone": "0910 684505", <em>//kontaktná osoba - telefón</em>
+        "email": "maj.stefan@slsp.sk", <em>//kontaktná osoba - email</em>
+        "address": "Pod Rovnicami 41, 84104 Bratislava - mestská časť Karlova Ves",<em> //adresa</em>
+        "lat": 48.1585, <em>//GPS latitude</em>
+        "lon": 17.0559 <em>//GPS longitude</em>
+    },
+    {
+        "id": "7",
+        "name": "TJ Slávia Ekonóm UMB Banská Bystrica",
+        "shortcut": "EBB",
+        "country": "SK",
+        "region_id": "2",
+        "city_id": "73",
+        "ident_number": "00631116",
+        "web": "https://ekonombb.sk/",
+        "first_name": "",
+        "surname": "",
+        "phone": "",
+        "email": "juraj.nemec@umb.sk",
+        "address": "",
+        "lat": 48.7386,
+        "lon": 19.1374
+    },
+    {...},
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="clubs-registrations" name="clubs-registrations"><u><strong>Registrácie klubu</strong></u></a></p>
+
+<p>Vráti zoznam všetkých aktívnych registrácii vybraného klubu (všetky 
+typy, vrátane virtuálnych registrácií).&nbsp;Nevracia historické 
+registrácie. Volanie nie je obmedzené iba na klub, ktorý API používa, 
+nakoľko ide o verejné informácie.</p>
+
+<p>URL:&nbsp;<strong>/clubs/{CLUB_ID}/registrations</strong><br>
+Metóda: GET</p>
+
+<p>Výstup:</p>
+
+<pre>[   
+    {
+        "id": "2586", <em>//ID registrácie</em>
+        "runner_id": "1425", <em>//ID pretekára</em>
+        "registration_type_id": "1", <em>//ID typu registrácie (viď číselník)</em>
+        "club_id": "7", <em>//ID klubu</em>
+        "date_from": "2004-11-16", <em>//dátum registrácie OD</em>
+        "date_to": null, <em>//dátum registrácie DO</em>
+        "reg_number": "EBB9201", <em>//registračné číslo</em>
+        "runner": { <em>//informácie o pretekárovi</em>
+            "id": "1425",<em> //ID pretekára</em>
+            "gender": "2", <em>//pohlavie (viď číselník)</em>
+            "first_name": "Andrej", <em>//meno</em>
+            "surname": "Nemec", <em>//priezvisko</em>
+            "birth_name": "", <em>//rodné meno</em>
+            "sportident": "207857", <em>//sportident</em>
+            "has_account": 0 <em>//či má účet v IS SZOŠ</em>
+        }
+    },
+    {
+        "id": "2689",
+        "runner_id": "1831",
+        "registration_type_id": "1",
+        "club_id": "7",
+        "date_from": "2006-10-23",
+        "date_to": null,
+        "reg_number": "EBB6801",
+        "runner": {
+            "id": "1831",
+            "gender": "2",
+            "first_name": "Ivan",
+            "surname": "Pecník",
+            "birth_name": "",
+            "sportident": "",
+            "has_account": 0
+        }
+    },
+    {...},
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="competitions" name="competitions"><u><strong>Zoznam pretekov</strong></u></a></p>
+
+<p>Vráti zoznam pretekov podľa parametrov.&nbsp;Maximálny počet záznamov
+ v odpovedi je 50, takže aj v prípade nastavenia parametra "count" na 
+viac ako 50 bude počet obmedzený na 50 pretekov.</p>
+
+<p>URL:&nbsp;<strong>/competitions</strong><br>
+Metóda: GET<br>
+Vstupné GET parametre (filter):</p>
+
+<ul>
+	<li>„segment_id“ - ID segmentu, nepovinné, ak je zadané, volanie vráti iba preteky daného segmentu (viď číselník)</li>
+	<li>„classification_id“ - ID klasifikácie pretekov, nepovinné, ak je 
+zadané, volanie vráti iba preteky danej klasifikácie&nbsp;(viď číselník)</li>
+	<li>„discipline_id“&nbsp;- ID disciplíny, nepovinné, ak je zadané, volanie vráti iba preteky s danou disciplínou&nbsp;(viď číselník)</li>
+	<li>„club_id“&nbsp;- ID klubu, nepovinné, ak je zadané, volanie vráti iba preteky, ktoré organizuje daný klub</li>
+	<li>„date_from“&nbsp;- dátum, od ktorého sa majú preteky vyhľadávať 
+(tvar yyyy-mm-dd), nepovinné (preteky sú zoradené od daného dátumu do 
+budúcnosti)</li>
+	<li>„date_to“&nbsp;- dátum, do ktorého sa majú preteky vyhľadávať (tvar
+ yyyy-mm-dd), nepovinné (preteky sú zoradené od daného dátumu do 
+minulosti)</li>
+	<li>„only_ranking“&nbsp;- [0/1], nepovinné, ak je zadané "1", volanie vráti iba preteky, ktoré sa počítajú do rankingu</li>
+	<li>„count“&nbsp;- počet záznamov, ktoré má volanie vrátiť</li>
+</ul>
+
+<p>Výstup:</p>
+
+<pre>[
+    {
+        "id": "1569", <em>//ID pretekov</em>
+        "title_sk": "Slovenský rebríček", <em>//názov pretekov SK</em>
+        "title_en": "", <em>//názov pretekov EN</em>
+        "date_from": "2020-09-19", <em>//dátum pretekov OD</em>
+        "date_to": "2020-09-20",<em> //dátum pretekov DO</em>
+        "cancelled": "0",<em> //či sú preteky zrušené [0/1]</em>
+        "place": "Lučenec"<em>, //miesto pretekov</em>
+        "lat": 48.3286,<em> //GPS latitude</em>
+        "lon": 19.6289,<em> //GPS longitude</em>
+        "segment_id": "1", <em>//ID segmentu pretekov (viď číselník)</em>
+        "classification_id": "2", <em>//ID klasifikácie pretekov (viď číselník)</em>
+        "organizers": [ <em>//pole organizátorov pretekov (1-X)</em>
+            47<em> //ID klubu</em>
+        ],
+        "organizer_txt": "", <em>//textový názov organizátora (použije sa, ak je pole organizátorov prázdne)</em>
+        "events": [ <em>//pole etáp pretekov (1-X)</em>
+            {
+                "id": "311", <em>//ID etapy</em>
+                "discipline_id": "3", <em>//ID disciplíny (viď číselník)</em>
+                "title_sk": "Slovenský rebríček - E1", <em>//názov SK</em>
+                "title_en": "", <em>//názov EN</em>
+                "date": "2020-09-19"<em> //dátum etapy</em>
+            },
+            {...},
+        ],
+        "documents": [ <em>//pole dokumentov pretekov (1-X)</em>
+            {
+                "id": "5831", <em>//ID dokumentu (môže byť 0, ak nejde o fyzicky nahratý dokument, ale iba odkaz na výsledky do IS SZOŠ)</em>
+                "doc_name_sk": "Propozície", <em>//názov dokumentu SK</em>
+                "doc_name_en": "Invitation",<em> //názov dokumentu EN</em>
+                "link_sk": "http://ob-is.loc/sites/default/files/competition_documents/2020/09/1569/1569_invitation_sk_0.pdf", <em>//adresa na dokument SK</em>
+                "link_en": "", <em>//adresa na dokument EN</em>
+                "type_id": "2" <em>//ID typu dokumentu (viď číselník)</em>
+            },
+            {
+                "id": "5712",
+                "doc_name_sk": "Webstránka",
+                "doc_name_en": "",
+                "link_sk": "http://www.bbocup.com/",
+                "link_en": "",
+                "type_id": "1"
+            },
+            {
+                "id": "5859",
+                "doc_name_sk": "Pokyny",
+                "doc_name_en": "Instructions",
+                "link_sk": "http://ob-is.loc/sites/default/files/competition_documents/2020/09/1569/1569_instructions_sk_2.pdf",
+                "link_en": "",
+                "type_id": "3"
+            },
+            {
+                "id": "5868",
+                "doc_name_sk": "Výsledky - sobota",
+                "doc_name_en": "",
+                "link_sk": "http://ob-is.loc/sites/default/files/competition_documents/2020/09/1569/1569_results_sk.pdf",
+                "link_en": "",
+                "type_id": "5"
+            },
+            {
+                "id": 0,
+                "doc_name_sk": "Výsledky",
+                "doc_name_en": "Results",
+                "link_sk": "http://ob-is.loc/competitions/1569/results",
+                "link_en": "http://ob-is.loc/competitions/1569/results",
+                "type_id": 5
+            },
+            {...},
+        ],
+        "www": "http://www.bbocup.com/",<em> //webstránka pretekov</em>
+        "readonly": "0", <em>//či sú preteky iba na čítanie (neobsluhované IS SZOŠ) [0/1]</em>
+        "entries_open": 0 <em>//či sú otvorené prihlášky [0/1]</em>
+    },
+    {...},
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="competition-detail" name="competition-detail"><u><strong>Detail pretekov</strong></u></a></p>
+
+<p>Vráti detailné informácie o pretekoch a jeho nastavení.</p>
+
+<p>URL:&nbsp;<strong>/competitions/{COMPETITION_ID}</strong><br>
+Metóda: GET</p>
+
+<p>Výstup (<u>popísané sú iba nové elementy, oproti zoznamu pretekov</u>):</p>
+
+<pre>{
+    "id": "1569",
+    "title_sk": "Slovenský rebríček",
+    "title_en": "",
+    "date_from": "2020-09-19",
+    "date_to": "2020-09-20",
+    "cancelled": "0",
+    "place": "Lučenec",
+    "lat": 48.3286,
+    "lon": 19.6289,
+    "segment_id": "1",
+    "classification_id": "2",
+    "organizers": [
+        47
+    ],
+    "organizer_txt": "",
+    "events": [
+        {
+            "id": "311",
+            "discipline_id": "3",
+            "title_sk": "Slovenský rebríček - E1",
+            "title_en": "",
+            "date": "2020-09-19"
+        },
+        {
+            "id": "312",
+            "discipline_id": "2",
+            "title_sk": "Slovenský rebríček - E2",
+            "title_en": "",
+            "date": "2020-09-20"
+        }
+    ],
+    "services": [ <em>//pole služieb pretekov (1-X)</em>
+        {
+            "id": "213", <em>//ID služby</em>
+            "price_type_id": "1", <em>//ID typu služby (viď číselník)</em>
+            "name_sk": "Požičanie SI",<em> //názov SK</em>
+            "name_en": "", <em>//názov EN</em>
+            "price": "2.00", <em>//cena</em>
+            "price_variant": "0", <em>//variant ceny (viď číselník)</em>
+            "administrative": "0", <em>//či je služba administratívna [0/1]</em>
+            "max_limit": "50" <em>//limit počtu prihlásení</em>
+        },
+        {
+            "id": "214",
+            "price_type_id": "2",
+            "name_sk": "Ubytovanie telocvičňa sob.-ned.",
+            "name_en": "",
+            "price": "4.00",
+            "price_variant": "1",
+            "administrative": "0",
+            "max_limit": "200"
+        },
+        {
+            "id": "223",
+            "price_type_id": "4",
+            "name_sk": "Storno 3,5",
+            "name_en": "",
+            "price": "3.50",
+            "price_variant": "0",
+            "administrative": "1",
+            "max_limit": "200"
+        },
+        {...},
+    ],
+    "entry_dates": [ <em>//pole termínov na prihlasovanie (1-X)</em>
+        {
+            "id": "191",<em> //ID termínu</em>
+            "weight": "0", <em>//váha (na zoradenie)</em>
+            "entries_from": "2020-08-10", <em>//dátum OD (vrátane)</em>
+            "entries_to": "2020-09-06" <em>//dátum DO (vrátane)</em>
+        },
+        {
+            "id": "204",
+            "weight": "0",
+            "entries_from": "2020-09-07",
+            "entries_to": "2020-09-07"
+        },
+        {...},
+    ],
+    "categories": [ <em>//pole kategórií pretekov (1-X)</em>
+        {
+            "id": "5335", <em>//ID kategórie pretekov</em>
+            "category_id": "1",<em> //ID kategórie (viď číselník)</em>
+            "category_coeficient_id": "2",<em> //ID koeficientu kategórie (viď číselník)</em>
+            "coeficient": "0.90",<em> //rankingový koeficient</em>
+            "coeficientz": "0.00", <em>//zrážkový koeficient</em>
+            "weight": "-50",<em> //váha</em>
+            "entry_prices": [ <em>//pole cien za prihlášky podľa termínov (1-X, záznam pre každý termín prihlášok)</em>
+                {
+                    "entry_date_id": "191",<em> //ID termínu prihlášok</em>
+                    "competition_category_id": "5335", <em>//ID kategórie pretekov</em>
+                    "start_price": "7.00", <em>//štartovné za etapu</em>
+                    "start_price_all": "0.00" <em>//štartovné za etapu v prípade, ak sa prihlási na všetky etapy</em>
+                },
+                {
+                    "entry_date_id": "204",
+                    "competition_category_id": "5335",
+                    "start_price": "11.00",
+                    "start_price_all": "0.00"
+                }
+            ]
+        },
+        {
+            "id": "5336",
+            "category_id": "2",
+            "category_coeficient_id": "2",
+            "coeficient": "0.90",
+            "coeficientz": "0.00",
+            "weight": "-49",
+            "entry_prices": [
+                {
+                    "entry_date_id": "191",
+                    "competition_category_id": "5336",
+                    "start_price": "7.00",
+                    "start_price_all": "0.00"
+                },
+                {
+                    "entry_date_id": "204",
+                    "competition_category_id": "5336",
+                    "start_price": "11.00",
+                    "start_price_all": "0.00"
+                }
+            ]
+        },
+        {...},
+    ],
+    "documents": [
+        {
+            "id": "5831",
+            "doc_name_sk": "Propozície",
+            "doc_name_en": "Invitation",
+            "link_sk": "http://ob-is.loc/sites/default/files/competition_documents/2020/09/1569/1569_invitation_sk_0.pdf",
+            "link_en": "",
+            "type_id": "2"
+        },
+        {
+            "id": "5712",
+            "doc_name_sk": "Webstránka",
+            "doc_name_en": "",
+            "link_sk": "http://www.bbocup.com/",
+            "link_en": "",
+            "type_id": "1"
+        },
+        {
+            "id": "5859",
+            "doc_name_sk": "Pokyny",
+            "doc_name_en": "Instructions",
+            "link_sk": "http://ob-is.loc/sites/default/files/competition_documents/2020/09/1569/1569_instructions_sk_2.pdf",
+            "link_en": "",
+            "type_id": "3"
+        },
+        {
+            "id": "5868",
+            "doc_name_sk": "Výsledky - sobota",
+            "doc_name_en": "",
+            "link_sk": "http://ob-is.loc/sites/default/files/competition_documents/2020/09/1569/1569_results_sk.pdf",
+            "link_en": "",
+            "type_id": "5"
+        },
+        {
+            "id": 0,
+            "doc_name_sk": "Výsledky",
+            "doc_name_en": "Results",
+            "link_sk": "http://ob-is.loc/competitions/1569/results",
+            "link_en": "http://ob-is.loc/competitions/1569/results",
+            "type_id": 5
+        },
+    ],
+    "www": "http://www.bbocup.com/",
+    "readonly": "0",
+    "entries_open": 0
+}</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="competition-entries" name="competition-entries"><u><strong>Zoznam prihlášok na preteky</strong></u></a></p>
+
+<p>Vráti zoznam prihlášok na preteky podľa parametrov. Niektoré polia vo
+ výsledku sa zobrazujú iba pre prihlášku daného klubu (ako napr. ceny, 
+komentáre, ...).</p>
+
+<p>URL:&nbsp;<strong>/competitions/{COMPETITION_ID}/entries</strong><br>
+Metóda: GET<br>
+Vstupné GET parametre (filter):</p>
+
+<ul>
+	<li>„club_id“&nbsp;- ID klubu, nepovinné, ak je zadané, volanie vráti iba prihlášku daného klubu na dané preteky</li>
+</ul>
+
+<p>Výstup:</p>
+
+<pre>[
+    {
+        "id": "2280",<em> //ID prihlášky</em>
+        "competition_id": "1569", <em>//ID pretekov</em>
+        "club_id": "18",<em> //ID klubu</em>
+        "comment": ""<em>, //komentár prihlášky (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+        "total_price": 0, <em>//celková cena (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+        "created": 0,<em> //dátum vytvorenia (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+        "changed": 0, <em>//dátum poslednej zmeny (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+        "runners": [ <em>//pole pretekárov v prihláške (1-X)</em>
+            {
+                "id": "23285",<em> //ID pretekára v prihláške</em>
+                "entry_id": "2280",<em> //ID prihlášky</em>
+                "registration_id": "1487",<em> //ID registrácie</em>
+                "first_name": "Medard",<em> //meno</em>
+                "surname": "Féder", <em>//priezvisko</em>
+                "reg_number": "PEZ7303", <em>//registračné číslo</em>
+                "sportident": ""<em>, //sportident</em>
+                "comment": "", <em>//komentár (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+                "total_price": 0, <em>//celková cena (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+                "created": 0,<em> //dátum vytvorenia (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+                "changed": 0, <em>//dátum poslednej zmeny (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+                "categories": [ <em>//pole prihlásenia na jednotlivé etapy (1-X, v poli budú iba etapy, na ktoré je prihlásený)</em>
+                    {
+                        "entry_runner_id": "23285", <em>//ID pretekára v prihláške</em>
+                        "competition_event_id": "312", <em>//ID etapy pretekov</em>
+                        "competition_category_id": "5344", <em>//ID kategórie pretekov</em>
+                        "price": 0<em> //cena (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+                    }
+                ],
+                "services": [<em> //pole služieb, ktoré má objednané (1-X, v poli budú iba služby, ktoré má objednané)</em>
+                    {
+                        "entry_runner_id": "23285",<em> //ID pretekára v prihláške</em>
+                        "competition_price_id": "224", <em>//ID služby v pretekoch</em>
+                        "price": 0 <em>//cena (zobrazí sa iba ak klub prihlášky = klub, ktorý vykonáva API request)</em>
+                    }
+                ]
+            },
+            {
+                "id": "23282",
+                "entry_id": "2280",
+                "registration_id": "2794",
+                "first_name": "Medard",
+                "surname": "Féder",
+                "reg_number": "PEZ0102",
+                "sportident": "",
+                "comment": "",
+                "total_price": 0,
+                "created": 0,
+                "changed": 0,
+                "categories": [
+                    {
+                        "entry_runner_id": "23282",
+                        "competition_event_id": "312",
+                        "competition_category_id": "5339",
+                        "price": 0
+                    }
+                ],
+                "services": [
+                    {
+                        "entry_runner_id": "23282",
+                        "competition_price_id": "224",
+                        "price": 0
+                    }
+                ]
+            }
+        ]
+    },
+    {...},
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="create-entry" name="create-entry"><u><strong>Vytvorenie prihlášky pretekára na preteky</strong></u></a></p>
+
+<p>Uloží novú prihlášku pretekára na preteky. Prihlášku je možné iba 
+pridať, nie upraviť. Ak je potrebná úprava, odporúčame prihlášku zmazať a
+ pridať znovu. Prihláška je vytvorená pod klubom, ktorý vykonáva API a 
+do pretekov podľa URL adresy. Prihlásenie pretekárov z iného klubu nie 
+je možné. Na parametre a proces platia rovnaké pravidlá, ako pri 
+prihlasovaní cez administráciu IS SZOŠ.</p>
+
+<p>URL:&nbsp;<strong>/competitions/{COMPETITION_ID}/entries/save</strong><br>
+Metóda: POST</p>
+
+<p>Vstup:</p>
+
+<pre>{
+&nbsp; &nbsp; "registration_id": "0", <em>//ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu</em>
+&nbsp; &nbsp; "first_name": "Medard", <em>//meno</em>
+&nbsp; &nbsp; "surname": "Féder",<em> //priezvisko</em>
+&nbsp; &nbsp; "reg_number": "PEZ0102", <em>//registračné číslo</em>
+&nbsp; &nbsp; "sportident": "123456", <em>//sportident</em>
+&nbsp; &nbsp; "comment": "prosím štart na konci", <em>//poznámka</em>
+&nbsp; &nbsp; "categories": [ <em>//pole kategórií, kam sa prihlasuje (1-X, v poli sú iba tie kategórie, kam sa prihlasuje)</em>
+&nbsp; &nbsp; &nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "competition_event_id": "312", <em>//ID etapy pretekov</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "competition_category_id": "5339", <em>//ID kategórie pretekov</em>
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; ],
+&nbsp; &nbsp; "services": [ <em>//pole služieb, ktoré si chce objednať (1-X, v poli sú iba tie služby, ktoré si objednáva)</em>
+&nbsp; &nbsp; &nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "service_id": "224", <em>//ID služby pretekov</em>
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; ]
+}
+</pre>
+
+<p>Výstup:</p>
+
+<pre>{
+    "entry_id": "2392", <em>//ID prihlášky</em>
+    "entry_runner_id": "24347" <em>//ID pretekára v prihláške</em>
+}</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="delete-entry" name="delete-entry"><u><strong>Vymazanie pretekára z prihlášky na preteky</strong></u></a></p>
+
+<p>Vymaže pretekára z prihlášky na preteky. Na proces platia rovnaké pravidlá, ako pri prihlasovaní cez administráciu IS SZOŠ.</p>
+
+<p>URL:&nbsp;<strong>/competitions/{COMPETITION_ID}/entries/delete</strong><br>
+Metóda: POST</p>
+
+<p>Vstup:</p>
+
+<pre>{
+    "entry_runner_id": "24347" <em>//ID pretekára v prihláške</em>
+}</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="competition-results" name="competition-results"><u><strong>Zoznam výsledkov etapy pretekov</strong></u></a></p>
+
+<p>Vráti zoznam výsledkov pre danú etapu pretekov podľa parametrov.</p>
+
+<p>URL:&nbsp;<strong>/competitions/{COMPETITION_ID}/results/{EVENT_ID}</strong><br>
+Metóda: GET<br>
+Vstupné GET parametre (filter):</p>
+
+<ul>
+	<li>„competition_category_id“&nbsp;- ID kategórie pretekov, nepovinné, 
+ak je zadané, volanie vráti iba výsledky pre danú kategóriu pretekov a 
+etapu</li>
+</ul>
+
+<p>Výstup:</p>
+
+<pre>[
+    {
+        "id": "88692", <em>//ID výsledku</em>
+        "registration_id": "4294", <em>//ID registrácie (ak je zadané, tak sa údaje o pretekárovi ako meno a priezvisko načítavajú z údajov pretekára, inak z údajov nižšie)</em>
+        "event_id": "311",<em> //ID etapy pretekov</em>
+        "competition_category_id": "5335", <em>//ID kategórie pretekov</em>
+        "result_type_id": "1",<em> //ID typu výsledku (viď číselník)</em>
+        "time_min": "22",<em> //čas (min)</em>
+        "time_sec": "24", <em>//čas (sec)</em>
+        "place": "1",<em> //umiestnenie v kategórii</em>
+        "first_name": "Michač",<em> //meno</em>
+        "surname": "Samuel", <em>//priezvisko</em>
+        "reg_number": "HBB0802",<em> //registračné číslo</em>
+        "sportident": ""<em> //sportident</em>
+    },
+    {
+        "id": "88693",
+        "registration_id": "3425",
+        "event_id": "311",
+        "competition_category_id": "5335",
+        "result_type_id": "1",
+        "time_min": "28",
+        "time_sec": "58",
+        "place": "2",
+        "first_name": "Ondovčík",
+        "surname": "Daniel",
+        "reg_number": "SPE0801",
+        "sportident": ""
+    },
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="runner-detail" name="runner-detail"><u><strong>Detail pretekára</strong></u></a></p>
+
+<p>Zobrazí detailné informácie o pretekárovi (zobrazujú sa iba verejné informácie).</p>
+
+<p>URL:&nbsp;<strong>/runners/{RUNNER_ID}</strong><br>
+Metóda: GET</p>
+
+<p>Výstup:</p>
+
+<pre>[
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; "id": "1420", <em>//ID pretekára</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "gender": "2", <em>//pohlavie, viď číselník</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "first_name": "Juraj", <em>//meno</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "surname": "Nemec", <em>//priezvisko</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "birth_name": "", <em>//rodné meno</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "sportident": "406961", <em>//sportident</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "has_account": 1, <em>//informácia, či má účet v IS SZOŠ [0/1]</em>
+&nbsp; &nbsp; &nbsp; &nbsp; "registrations": [ <em>//pole registrácií (1-X, zobrazujú sa iba aktívne registrácie)</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "id": "2494", <em>//ID registrácie</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "runner_id": "1420", <em>//ID pretekára</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "registration_type_id": "1", <em>//ID typu registrácie (viď číselník)</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "club_id": "7", <em>//ID klubu</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "date_from": "2003-11-16", <em>//dátum registrácie OD</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "date_to": null, <em>//dátum registrácie DO</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "reg_number": "EBB8901" <em>//registračné číslo</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; &nbsp; &nbsp; ]
+&nbsp; &nbsp; }
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="runner-results" name="runner-results"><u><strong>Zoznam výsledkov pretekára</strong></u></a></p>
+
+<p>Vráti zoznam výsledkov pre daného pretekára.</p>
+
+<p>URL:&nbsp;<strong>/runners/{RUNNER_ID}/results</strong><br>
+Metóda: GET<br>
+Vstupné GET parametre (filter):</p>
+
+<ul>
+	<li>„date_from“&nbsp;- dátum od, kedy sa majú výsledky hľadať</li>
+	<li>„date_to“ - dátum do, kedy sa majú výsledky hľadať</li>
+</ul>
+
+<p>Výstup:</p>
+
+<pre>[
+    {
+        "id": "88692", <em>//ID výsledku</em>
+        "registration_id": "4294", <em>//ID registrácie (ak je zadané, tak sa údaje o pretekárovi ako meno a priezvisko načítavajú z údajov pretekára, inak z údajov nižšie)</em>
+        "event_id": "311",<em> //ID etapy pretekov</em>
+        "competition_category_id": "5335", <em>//ID kategórie pretekov</em>
+        "result_type_id": "1",<em> //ID typu výsledku (viď číselník)</em>
+        "time_min": "22",<em> //čas (min)</em>
+        "time_sec": "24", <em>//čas (sec)</em>
+        "place": "1",<em> //umiestnenie v kategórii</em>
+        "first_name": "Michač",<em> //meno</em>
+        "surname": "Samuel", <em>//priezvisko</em>
+        "reg_number": "HBB0802",<em> //registračné číslo</em>
+        "sportident": ""<em> //sportident</em>
+    },
+    {...},
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="registration-detail" name="registration-detail"><u><strong>Detail registrácie</strong></u></a></p>
+
+<p>Zobrazí detailné informácie o registrácii pretekára (zobrazujú sa iba verejné informácie).</p>
+
+<p>URL:&nbsp;<strong>/registrations/{REGISTRATION_ID}</strong><br>
+Metóda: GET</p>
+
+<p>Výstup:</p>
+
+<pre>[
+&nbsp; &nbsp; {
+&nbsp; &nbsp; &nbsp; &nbsp; "id": "2494", <em>//ID </em>registrácie
+&nbsp; &nbsp; &nbsp; &nbsp; "runner_id": "1420", //ID pretekára
+&nbsp; &nbsp; &nbsp; &nbsp; "registration_type_id": "1", //ID typu registrácie (viď číselník)
+&nbsp; &nbsp; &nbsp; &nbsp; "club_id": "7", //ID klubu
+&nbsp; &nbsp; &nbsp; &nbsp; "date_from": "2003-11-16", //dátum registrácie OD
+&nbsp; &nbsp; &nbsp; &nbsp; "date_to": null, //dátum registrácie DO
+&nbsp; &nbsp; &nbsp; &nbsp; "reg_number": "EBB8901" //registračné číslo
+&nbsp; &nbsp; &nbsp; &nbsp; "runner": { <em>//informácie o pretekárovi danej registrácie</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "id": "1420", <em>//ID pretekára</em>
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "gender": "2", //pohlavie, viď číselník
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;"first_name": "Juraj", //meno
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;"surname": "Nemec", //priezvisko
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;"birth_name": "", //rodné meno
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;"sportident": "406961", //sportident
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp;"has_account": 1, //informácia, či má účet v IS SZOŠ [0/1]
+&nbsp; &nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; },
+&nbsp; &nbsp;&nbsp;{...},
+]</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="allowed-categories" name="allowed-categories"><u><strong>Zoznam kategórií, kam sa môže daný pretekár prihlásiť</strong></u></a></p>
+
+<p>Vráti zoznam všetkých kategórií, kam sa môže pretekár s danou 
+registráciou prihlásiť (overuje podľa dátumu etapy a dátumu narodenia 
+pretekára).&nbsp;</p>
+
+<p>URL:<strong>&nbsp;/registrations/{REGISTRATION_ID}/categories/{EVENT_ID}</strong><br>
+Metóda: GET</p>
+
+<p>Výstup:</p>
+
+<pre>[ <em>//pole ID kategórií (viď číselník), na ktoré sa môže pretekár s danou registráciou prihlásiť</em>
+&nbsp; &nbsp; 6,
+&nbsp; &nbsp; 34,
+&nbsp; &nbsp; 35,
+&nbsp; &nbsp; 36,
+&nbsp; &nbsp; 37,
+&nbsp; &nbsp; 38,
+&nbsp; &nbsp; 135
+]
+</pre>
+
+<p>&nbsp;</p>
+
+<p><a id="competitor-list" name="competitor-list"><strong><u>CompetitorList (IOF XML v3, offline verzia)</u></strong></a></p>
+
+<p>Vráti zoznam všetkých registrácií pretekárov, ktorí&nbsp;sú 
+registrovaní&nbsp;v SZOŠ (klasické registrácie a čestní členovia), 
+platné k dátumu generovania exportu. Nevracia virtuálne registrácie, 
+alebo registrácie klubov, ktoré nie sú členmi SZOŠ. Z dôvodu ochrany je 
+tento export dostupný iba offline, formou stiahnutia. Na rozdiel od 
+ostatných volaní v API tento export generuje XML súbor vo formáte IOF 
+XML v3 - typ CompetitorList.&nbsp;</p>
+
+<p>URL:<strong>&nbsp;/competitor-list</strong></p>
+
+<p>&nbsp;</p>
+
+<p><a id="lists" name="lists"><u><strong>Číselníky</strong></u></a></p>
+
+<p>Vráti zoznam údajov vybraného číselníka.</p>
+
+<p>URL:<strong>&nbsp;/lists/{LIST_ID}</strong><br>
+Metóda: GET</p>
+
+<p>Výstup (podľa typu číselníka):</p>
+
+<ul>
+	<li><u>category</u>
+
+	<ul>
+		<li><u>​</u>kategórie a ich nastavenie</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": "1", //ID kategórie
+        "name": "M -12", //názov
+        "weight": "1", //váha
+        "group": "2", //skupina
+        "age_from": "0", //vek OD
+        "age_to": "12", //vek DO
+        "gender": "2", //pohlavie (viď číselník)
+        "ranking_category": "1" //či je rankingová kategória [0/1]
+    },
+    {...},
+]</pre>
+
+<ul>
+	<li><u>category_coeficient</u>
+
+	<ul>
+		<li>​koeficienty kategórií (A, B, E, ...)</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 1,
+        "text": "E"
+    },
+    {
+        "id": 2,
+        "text": "A"
+    },
+​    {...},
+]</pre>
+
+<ul>
+	<li><u>city</u>
+
+	<ul>
+		<li>​mestá a obce</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 1,
+        "name": "Ábelová"
+    },
+​    {...},
+]</pre>
+
+<ul>
+	<li><u>classification</u>
+
+	<ul>
+		<li>​klasifikácie pretekov</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": "1", //ID klasifikácie
+        "shortcut": "MSR", //skratka
+        "name_sk": "Majstrovstvá Slovenska", //názov SK
+        "name_en": "Slovak Championship", //názov EN
+        "priority": "10" //poradie
+    },
+​​    {...},
+]</pre>
+
+<ul>
+	<li><u>discipline</u>
+
+	<ul>
+		<li>​disciplíny jednotlivých odvetví</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": "1", //ID disciplíny
+        "name_sk": "Šprint", //názov SK
+        "name_en": "Sprint", //názov EN
+        "team_runners": "1" //počet pretekárov
+    },
+​​    {...},
+]</pre>
+
+<ul>
+	<li><u>document_type</u>
+
+	<ul>
+		<li>​typy dokumentov</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": "2", //ID typu dokumentu
+        "name": "invitation", //univerzálny názov
+        "name_sk": "Propozície", //názov SK
+        "name_en": "Invitation" //názov EN
+    },
+​​    {...},
+]</pre>
+
+<ul>
+	<li><u>gender</u>
+
+	<ul>
+		<li><u>​</u>pohlavia</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 1,
+        "name": "Žena"
+    },
+    {
+        "id": 2,
+        "name": "Muž"
+    }
+]</pre>
+
+<ul>
+	<li><u>price_type</u>
+
+	<ul>
+		<li><u>​</u>typy (kategórie) služieb na pretekoch</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": "1",
+        "name_sk": "SportIdent",
+        "name_en": "SportIdent"
+    },
+​​    {...},
+]</pre>
+
+<ul>
+	<li><u>price_variant</u>
+
+	<ul>
+		<li><u>​</u>varianty cien služieb na pretekoch</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 0,
+        "name": "Za etapu"
+    },
+    {
+        "id": 1,
+        "name": "Jednorazová"
+    }
+]</pre>
+
+<ul>
+	<li><u>region</u>
+
+	<ul>
+		<li><u>​</u>oblasti SK</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 1,
+        "name": "Západ"
+    },
+    {
+        "id": 2,
+        "name": "Stred"
+    },
+    {
+        "id": 3,
+        "name": "Východ"
+    }
+]</pre>
+
+<ul>
+	<li><u>registration_type</u>
+
+	<ul>
+		<li><u>​</u>typy registrácií</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 0,
+        "name": "virtuálna"
+    },
+​​​    {...},
+]</pre>
+
+<ul>
+	<li><u>result_type</u>
+
+	<ul>
+		<li><u>​</u>typy výsledkov</li>
+	</ul>
+	</li>
+</ul>
+
+<pre>[
+    {
+        "id": 1,
+        "name": "ok"
+    },
+​​​​    {...},
+]</pre>
+
+<ul>
+	<li><u>segment</u>
+
+	<ul>
+		<li>​sekcie orientačných športov</li>
+	</ul>
+	</li>
+</ul>
+
+<pre><u>​</u>[
+    {
+        "id": "1",
+        "shortcut": "OB",
+        "name_sk": "Orientačný beh",
+        "name_en": "Foot Orienteering"
+    },
+​​​​    {...},
+]</pre>
+
+</section>
+  </div>
+    </section>
+
+    
+  </div>
+</div>
+
+  <footer class="footer container">
+      <div class="region region-footer">
+    <section id="block-block-1" class="block block-block clearfix">
+
+      
+  <p>©2021,&nbsp;<a href="http://www.orienteering.sk/" target="_blank">Slovenský zväz orientačných športov</a><br>
+<strong>Verzia</strong>:&nbsp;<a href="https://is.orienteering.sk/changelog">2.3&nbsp;(27.1.2023)</a></p>
+
+</section>
+  </div>
+  </footer>
+  <script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery.multiselect.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery.multiselect.filter.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/jquery_ui_multiselect_widget.js"></script>
+<script src="API%20_%20Informa%C4%8Dn%C3%BD%20syst%C3%A9m%20SZO%C5%A0_subory/bootstrap_002.js"></script>
+
+
+</body></html>
