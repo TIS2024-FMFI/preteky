@@ -14,13 +14,10 @@ Vyvíjaný informačný systém bude slúžiť na synchronizáciu a spracovanie 
 - <b>SZOS</b> - Slovenský zväz orientačných športov
 
 ### 1.4 Referencie
-<ol type="a">
- <li> Github repozitár pripravovaného systému: <p> https://github.com/TIS2024-FMFI/preteky.git </p></li>
- <li> Github predošlého projektu zameraného na túto tému: <p> https://github.com/TIS2023-FMFI/sportovy-pretek </p</li>
- <li> [Opis API]()</li>
-
-
-</ol>
+  1. [Github repozitár pripravovaného systému](https://github.com/TIS2024-FMFI/preteky.git)
+  2. [Github predošlého projektu zameraného na túto tému](https://github.com/TIS2023-FMFI/sportovy-pretek)
+  3. [Opis API](https://github.com/TIS2024-FMFI/preteky/tree/main/API/is.orienteering.sk) 
+ 
 
 ### 1.5 Prehlad nasledujúcich kapitol
  
