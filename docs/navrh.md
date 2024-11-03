@@ -15,49 +15,23 @@ Tento dokument je úzko prepojený s katalógom požiadaviek a špecifikuje vše
 ## 2.1 
 ## 2.2
 ## 2.3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
-Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Popisuje tri hlavné operácie: pripojenie k databáze, import vybraných pretekov a export prihlásených bežcov do CSV.
-### 1. Pripojenie k databáze Sandberg
-Pripojenie na databázu sa vykonáva pomocou SQLAlchemy na vytváranie SQL dotazov, ktoré sú potom odosielané ako HTTP POST požiadavky na URL servera Sandberg.
-### 2. Import vybraných pretekov do SQLite databázy Sandberg
-Pre každý vybraný pretek sa vykonajú nasledujúce kroky:
-- Vytvorí sa jedinečné `id` kombináciou `id pretekov` a `id eventu`, aby sa predišlo kolíziam alebo duplicite.
-- Vkontroluje sa, či už takéto `id` existuje:
-    - Ak áno, vypíše sa správa, že preteky už existujú a nepridajú sa do databázy.
-    - Ak nie, tak pomocou príkazu `insert` z SQLAlchemy sa vytvorí záznam s následujúcimi parametrami:
-        - `id` (integer) -> id pretekov
-        - `nazov` (string) -> názov udalosti, title_sk
-        - `datum` (string, formát Y-m-d H:i:s) -> dátum udalosti
-        - `deadline` (string, formát Y-m-d H:i:s) -> deadline udalosti
-        - `aktiv` (integer) -> 1 znamená, že sa da prihlásiť na preteky a 0 znamená opak
-        - `poznamka` (text)
-        
-- Pridanie kategórie pretekov:
-    - Každý pretek má detaily obsahujúce categories, ktoré majú číselník. Na základe id kategórie sa nájde jej názov a ošetrí sa na alfa-numerický výraz.
-    - Pri hľadaní zhody v kategóriách v lokálnej databáze, ktoré sú tiež ošetrené na alfa-numerický výraz, môžu nastať dve situácie:
-        - Zhodu nájdeme: priradí sa kategória pretekom a vloží sa záznam obsahujúci:
-            - `id` (integer)
-            - `id_pret` (integer) ->id pretekov
-            - `id_kat` (integer) -> id kategórie, ktorá má zhodu názvu s našou kategóriou pretekov
-    
-        - Zhodu nenájdeme: vytvorí sa nová kategória s novým jedinečným id, pridá sa do tabuľky `Kategórie` záznam obsahujúci:
-            - `id_kat` (integer) -> id kategórie
-            - `nazov` (text)
-        Potom postup je rovnaký ako pri nájdení zhody.
--Všetky SQL výrazy sa pošlú ako POST požiadavka na URL servera vo formáte JSON, pričom sa dotaz skompiluje do SQL reťazca pomocou SQLite dialektu. Odpoveď určí úspešnosť operácie.
+Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg.Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
 
-### 3. Export prihlásených bežcov do CSV
-Pri exporte prihlásených bežcov sa použije `id pretekov`,  ktorého si na vyselectovanie všetkých bežcov v tabuľke `Prihlaseni`, ktorí majú rovnaké `id pretekov`. Zároveň sa vyžiadajú údaje o používateľovi z tabuľky `Pouzivatelia` a o kategórií z tabuľky `Kategorie`.
-Exportované parametre sú:
-- `meno` (string) -> meno používateľa
-- `priezvisko` (string) -> priezvisko používateľa
-- `os_i_c` (string)
-- `cip` (string)
-- `nazov` -> kategória, do ktorej je zaradený
-- `poznamka` (string)
+# 1. Použitie RESTful API
+RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov.
+- Implementácia v Sandberg aplikácii: Vytvoria sa endpointy pre každú funkciu, ktorú chceme použiť. Tieto endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON.
+- Implementácia v našej aplikácii: Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí.
 
-Tieto údaje sa pošlú ako POST požiadavka na URL servera vo formáte JSON, pričom sa dotaz skompiluje do SQL reťazca pomocou SQLite dialektu. Odpoveď určí úspešnosť operácie a následne sa údaje exportujú do CSV súboru.
-
+# 2. Použitie súborov
+Sandberg aplikácia a naša aplikácia môžu komunikovať prostredníctvom súborov. Sandberg aplikácia môže zapisovať údaje do súborov, ktoré potom naša číta a naopak.
+- Implementácia v Sandberg aplikácii: Vytvoríme nové php skripty, ako komunikačné mosty. PHP skript zapisuje údaje do textového súboru alebo prijíma súbor na import.
+- Implementácia v našej aplikácii: Python skript číta údaje zo súboru a spracováva ich alebo zapisuje údaje do textového súboru.
   
+# 3. Použitie databázy
+Obidve aplikácie môžu pristupovať k rovnakej databáze, čo umožňuje zdieľanie údajov. Databáza slúži ako spoločný úložný priestor, kde môžu obe aplikácie ukladať a načítavať údaje.
+- Implementácia v Sandberg aplikácii: Sandberg aplikácia vytvára databázu a tabuľky, zapisuje a číta údaje o bežcoch a pretekoch.
+- Implementácia v našej aplikácii:  Naša aplikácia zapisuje a číta údaje o bežcoch a pretekoch z tej istej databázy.
+
 ## 3 Návrh dátového modelu
 Dátový model je reprezentovaný entitno-relačným diagramom, ktorý ilustruje vzťahy medzi jednotlivými entitami. Entita predstavuje objekt, ktorý existuje samostatne a nezávisle od iných objektov. Vzťahy medzi entitami opisujú prepojenia a interakcie medzi týmito objektmi
 Dátovy model je prevzatý z existujúcej aplikácie.
