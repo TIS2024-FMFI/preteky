@@ -14,7 +14,37 @@ Tento dokument je úzko prepojený s katalógom požiadaviek a špecifikuje vše
 - [API roznhranie is.orientering.sk](https://github.com/TIS2024-FMFI/preteky/tree/main/API/is.orienteering.sk)
 ## 2 Špecifikácia vonkajších interfacov
 ## 2.1 Návrh komunikácie medzi konzolovou aplikáciou a stránkou is.orientering.sk 
-V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.orienteering.sk) pomoco restfull API. Všetky 
+V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.orienteering.sk) pomoco restfull API. Všetku komunikáciu vieme rozdeliť na dva módy: Get a Post 
+
+Mód Get
+- používame keď sa snažíme získať dáta z is.orienteering.sk
+- dáta ktoré získavame:
+    - preteky v mesiaci ktorý zadáme
+    - kategórie pretekárov na daných pretekoch (hľadáme podľa ID pretekov)
+    - všetky informácie o pretekárovy ktorého sme si vybrali (na základe ID pretekára)
+        - počítajú sa tu aj výsledky na pretekoch
+    - informácie o registrácii jednotlivých pretekárov ale aj celého klubu (na zaklade ID klubu/pretekára)
+    - informácie o registrácii na dané preteky (podľa ID pretekov)
+        - kto je na nich prihlásený
+    - detalnejšie informácie o katekóriach na daných pretekoch (može sa daný pretekár prihlásiť s touto kategóriou?)
+
+Mód Post
+- používame keď vkladáme dáta na is.orienteering.sk
+- dáta ktoré vkladáme:
+    - registácia pretekára na dané preteky (podľa ID pretekov)
+    - zrušenie registrácie pretekára na dané preteky (podľa ID pretekov)
+ 
+----------- 
+- na používanie API je potrebný bezpečnostný klúč
+    - bude uložený v konfig subore 
+- na každý request z modu Get budeme mať samostatnú funkciu ktorá vráti JSON string
+- pri mode Post vkladáme JSON stiring ako parameter a vraciame Boolovsku hodnotu či sa vloženie podarilo
+- pomocné triedy
+    -  parser a creator JSON stringov
+    -  úprava dátumov do správneho tvaru
+    -  čítanie konfig súboru
+
+
 ## 2.2
 ## 2.3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
 Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg.Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
