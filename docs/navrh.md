@@ -10,24 +10,56 @@ Tento dokument je úzko prepojený s katalógom požiadaviek a špecifikuje vše
 - Github repozitár projektu zameraného na tvorbu systému Športového klubu Sandberg z roku 2017: 
     [https://github.com/TIS2017/SportovyKlub](https://github.com/TIS2017/SportovyKlub)
 - Github repozitár projektu z roku 2023, ktorí menili časť databázy:
-    [https://github.com/TIS2023-FMFI/sportovy-pretek-web]({https://github.com/TIS2023-FMFI/sportovy-pretek-web)
+    [https://github.com/TIS2023-FMFI/sportovy-pretek-web](https://github.com/TIS2023-FMFI/sportovy-pretek-web)
+- [API roznhranie is.orientering.sk](https://github.com/TIS2024-FMFI/preteky/tree/main/API/is.orienteering.sk)
 ## 2 Špecifikácia vonkajších interfacov
-## 2.1 
+## 2.1 Návrh komunikácie medzi konzolovou aplikáciou a stránkou is.orientering.sk 
+V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.orienteering.sk) pomoco restfull API. Všetku komunikáciu vieme rozdeliť na dva módy: Get a Post 
+
+Mód Get
+- používame keď sa snažíme získať dáta z is.orienteering.sk
+- dáta ktoré získavame:
+    - preteky v mesiaci ktorý zadáme
+    - kategórie pretekárov na daných pretekoch (hľadáme podľa ID pretekov)
+    - všetky informácie o pretekárovy ktorého sme si vybrali (na základe ID pretekára)
+        - počítajú sa tu aj výsledky na pretekoch
+    - informácie o registrácii jednotlivých pretekárov ale aj celého klubu (na zaklade ID klubu/pretekára)
+    - informácie o registrácii na dané preteky (podľa ID pretekov)
+        - kto je na nich prihlásený
+    - detalnejšie informácie o katekóriach na daných pretekoch (može sa daný pretekár prihlásiť s touto kategóriou?)
+
+Mód Post
+- používame keď vkladáme dáta na is.orienteering.sk
+- dáta ktoré vkladáme:
+    - registácia pretekára na dané preteky (podľa ID pretekov)
+    - zrušenie registrácie pretekára na dané preteky (podľa ID pretekov)
+ 
+----------- 
+- na používanie API je potrebný bezpečnostný klúč
+    - bude uložený v konfig subore 
+- na každý request z modu Get budeme mať samostatnú funkciu ktorá vráti JSON string
+- pri mode Post vkladáme JSON stiring ako parameter a vraciame Boolovsku hodnotu či sa vloženie podarilo
+- pomocné triedy
+    -  parser a creator JSON stringov
+    -  úprava dátumov do správneho tvaru
+    -  čítanie konfig súboru
+
+
 ## 2.2
 ## 2.3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
 Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg.Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
 
-# 1. Použitie RESTful API
+### 1. Použitie RESTful API
 RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov.
 - Implementácia v Sandberg aplikácii: Vytvoria sa endpointy pre každú funkciu, ktorú chceme použiť. Tieto endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON.
 - Implementácia v našej aplikácii: Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí.
 
-# 2. Použitie súborov
+### 2. Použitie súborov
 Sandberg aplikácia a naša aplikácia môžu komunikovať prostredníctvom súborov. Sandberg aplikácia môže zapisovať údaje do súborov, ktoré potom naša číta a naopak.
 - Implementácia v Sandberg aplikácii: Vytvoríme nové php skripty, ako komunikačné mosty. PHP skript zapisuje údaje do textového súboru alebo prijíma súbor na import.
 - Implementácia v našej aplikácii: Python skript číta údaje zo súboru a spracováva ich alebo zapisuje údaje do textového súboru.
   
-# 3. Použitie databázy
+### 3. Použitie databázy
 Obidve aplikácie môžu pristupovať k rovnakej databáze, čo umožňuje zdieľanie údajov. Databáza slúži ako spoločný úložný priestor, kde môžu obe aplikácie ukladať a načítavať údaje.
 - Implementácia v Sandberg aplikácii: Sandberg aplikácia vytvára databázu a tabuľky, zapisuje a číta údaje o bežcoch a pretekoch.
 - Implementácia v našej aplikácii:  Naša aplikácia zapisuje a číta údaje o bežcoch a pretekoch z tej istej databázy.
