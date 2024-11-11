@@ -130,20 +130,26 @@ Dátovy model je prevzatý z existujúcej aplikácie.
 ## 4 Analýza použitých technológií
 - PHP 5.6, SQLite - prevzaté z pôvodnej aplikácie
 ## 5 Návrh konzolového rozhrania
+Úvodné okno ktoré sa zobrazí
 ![Uvodne okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_akcie.png)
+Po zvolení Import sa zobrazí výber mesiaca
 ![Mesiace okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_mesiaca.png)
-
+Zoznam pretekov, vyobrazí sa po zvolení mesiaca v Importe, po zvolení prihlásenia na preteky a po zvolení exportu do súboru
 ![Preteky okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_preteku.png)
 
+Voľba formátu na export
 ![Formaty okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_formatu.png)
+Path uloženia vyexportovaného súboru (pri exporte a štatistikách)
 ![Path okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_path.png)
 ![Path input](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Input_window_path.png)
 
+Vyhľadávanie pretekára v štatistike
 ![Filter okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_filtru_vyhladanie_hraca.png)
 ![Pretekar okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_pretekara.png)
+Zadávanie parametrov štatistiky
 ![Interval okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Nastavenie_intervalu_merania_statistiky.png)
 ![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_statistiky.png)
-
+Po stlačení q, ukončuje konzolovú aplikáciu
 ![quit](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/quit.png)
 
 
