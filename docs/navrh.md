@@ -130,6 +130,24 @@ Dátovy model je prevzatý z existujúcej aplikácie.
 ## 4 Analýza použitých technológií
 - PHP 5.6, SQLite - prevzaté z pôvodnej aplikácie
 ## 5 Návrh konzolového rozhrania
+![Uvodne okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_akcie.png)
+![Mesiace okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_mesiaca.png)
+
+![Preteky okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_preteku.png)
+
+![Formaty okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_formatu.png)
+![Path okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_path.png)
+![Path input](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Input_window_path.png)
+
+![Filter okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_filtru_vyhladanie_hraca.png)
+![Pretekar okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_pretekara.png)
+![Interval okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Nastavenie_intervalu_merania_statistiky.png)
+![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_statistiky.png)
+
+![quit](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/quit.png)
+
+
+
 ## 6 Návrh zobrazenia štatistík
 ## 7 Diagramy
 ## 8 Harmonogram implementácie
