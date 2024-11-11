@@ -1,0 +1,1 @@
+Priecinok pre obrazky
