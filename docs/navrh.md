@@ -92,6 +92,34 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 		- poznamka (string): Poznámka
 - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
 
+- ## 2.3 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
+
+V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní automatické pridanie udalostí do kalendára admina pri prihlásení bežcov na preteky. Implementácia bude prebiehať prostredníctvom Google Calendar API, čo zabezpečí synchronizáciu medzi našou aplikáciou a kalendárom.
+
+### Implementácia funkčnosti
+1. **Autorizácia a autentifikácia:**
+   - Na komunikáciu s Google Calendar API je potrebný OAuth 2.0 prístupový token. Pri prvej synchronizácii sa admin prihlási do svojho Google účtu a autorizuje aplikáciu na správu jeho kalendára. Token sa následne uloží v konfiguračnom súbore alebo zabezpečenej databáze, aby sa zamedzilo opakovanému prihlasovaniu.
+
+2. **Automatické vytvorenie udalosti:**
+   - Po registrácii bežcov na preteky aplikácia zavolá API endpoint na vytvorenie udalosti v kalendári. Parametre udalosti, ktoré sa odosielajú cez API, zahŕňajú:
+     - **Názov udalosti:** Obsahuje názov pretekov.
+     - **Dátum a čas:** Definované podľa rozpisu pretekov.
+     - **Umiestnenie:** Miesto konania pretekov, ak je dostupné.
+     - **Poznámka:** Ďalšie informácie alebo URL odkaz na detaily o pretekoch.
+
+3. **Zrušenie alebo úprava udalosti:**
+   - Pri zrušení registrácie bežca alebo pri zmene údajov pretekov aplikácia automaticky aktualizuje alebo odstráni príslušnú udalosť z Google Kalendára prostredníctvom PUT (update) alebo DELETE (delete) požiadavky na daný event ID.
+
+4. **Formátovanie dátumu a času:**
+   - Dátumy a časy budú formátované podľa štandardu ISO 8601, ktorý vyžaduje Google Calendar API.
+
+5. **Výstup a potvrdenie:**
+   - Po úspešnom pridelení udalosti v kalendári API vráti ID udalosti, ktoré sa uloží pre budúce operácie (napr. zrušenie alebo úprava). Funkcia vracia bool hodnotu úspešnosti.
+
+---
+
+Táto časť zabezpečí, že admin bude mať vždy aktuálne informácie o pretekoch vo svojom Google Kalendári, čo mu umožní lepšiu organizáciu a prehľad.
+
 ## 3 Návrh dátového modelu
 Dátový model je reprezentovaný entitno-relačným diagramom, ktorý ilustruje vzťahy medzi jednotlivými entitami. Entita predstavuje objekt, ktorý existuje samostatne a nezávisle od iných objektov. Vzťahy medzi entitami opisujú prepojenia a interakcie medzi týmito objektmi
 Dátovy model je prevzatý z existujúcej aplikácie.
