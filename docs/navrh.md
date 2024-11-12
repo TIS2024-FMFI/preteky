@@ -155,5 +155,13 @@ Po stlačení q, ukončuje konzolovú aplikáciu
 
 
 ## 6 Návrh zobrazenia štatistík
+Ako zobrazenie štatistík pretekára má užívateľ možnosť ich zobraziť a vyexportovať v PDF súbore za pomoci default Python knižnice MatPlotLib
+### Graf počtu účastí na pretekoch za mesiac
+![graf1](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/ucast_graf.png)
+### Graf umiestnení na pretekoch, ktorých sa zúčastnil
+´- 1,2,3 reprezentujú miesta, zlomky (napr. 1/4) reprezentujú, že v koľkej štvrtine počtu umiestnení sa umiestnil
+![graf2](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/umiestnenie_graf.png)
+### Graf časového rozdielu od prvého pretekára na jednotlivých pretekoch
+![graf3](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/cas_graf.png)
 ## 7 Diagramy
 ## 8 Harmonogram implementácie
