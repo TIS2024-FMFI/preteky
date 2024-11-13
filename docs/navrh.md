@@ -12,8 +12,7 @@ Tento dokument je úzko prepojený s katalógom požiadaviek a špecifikuje vše
 - Github repozitár projektu z roku 2023, ktorí menili časť databázy:
     [https://github.com/TIS2023-FMFI/sportovy-pretek-web](https://github.com/TIS2023-FMFI/sportovy-pretek-web)
 - [API roznhranie is.orientering.sk](https://github.com/TIS2024-FMFI/preteky/tree/main/API/is.orienteering.sk)
-## 2 Špecifikácia vonkajších interfacov
-## 2.1 Návrh komunikácie medzi konzolovou aplikáciou a stránkou is.orienteering.sk 
+## 2 Návrh komunikácie medzi konzolovou aplikáciou a stránkou is.orienteering.sk 
 V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.orienteering.sk) pomoco restfull API. Všetku komunikáciu vieme rozdeliť na dva módy: Get a Post 
 
 Mód Get
@@ -44,55 +43,51 @@ Mód Post
     -  úprava dátumov do správneho tvaru
     -  čítanie konfig súboru
 
-## 2.2 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
+## 3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
 Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
 
 ### 1. Použitie RESTful API
 RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov.
-- Implementácia v Sandberg aplikácii: Vytvoria sa endpointy pre každú funkciu, ktorú chceme použiť. Tieto endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON.
+- Implementácia v Sandberg aplikácii: Vytvoria sa endpointy pre každú funkciu, ktorú chceme použiť, budú uložené v jedno php skripte, čo bude centrálny bod komunikácie. Tieto endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON.
 - Implementácia v našej aplikácii: Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí.
 
-### 2. Použitie súborov
-Sandberg aplikácia a naša aplikácia môžu komunikovať prostredníctvom súborov. Sandberg aplikácia môže zapisovať údaje do súborov, ktoré potom naša číta a naopak.
-- Implementácia v Sandberg aplikácii: Vytvoríme nové php skripty, ako komunikačné mosty. PHP skript zapisuje údaje do textového súboru alebo prijíma súbor na import.
-- Implementácia v našej aplikácii: Python skript číta údaje zo súboru a spracováva ich alebo zapisuje údaje do textového súboru.
-  
-Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované v súbore https://github.com/TIS2017/SportovyKlub/blob/master/source/preteky.php.
+Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované v súbore [https://github.com/TIS2017/SportovyKlub/blob/master/source/preteky.php](https://github.com/TIS2023-FMFI/sportovy-pretek-web/tree/master/source).
 1. Import pretekov do našej aplikácie
-- Tabuľky, ktoré sa budú používať:
+ - Tabuľky, ktoré sa budú používať:
   	- Preteky
   	- Kategorie
   	- Kategorie_pre
-- Funkcie:
+ - Funkcie:
 	- pridaj_pretek($nazov, $datum, $deadline, $poznamka): Pridá nový pretek do databázy.
 	- pridaj_kategoriu($nazov): Pridá novú kategóriu do databázy.
 	- pridaj_kat_preteku($id_pret, $id_kat): Priradí kategóriu k preteku.
-- Vstupný formát pre funkciu pridaj_pretek bude obsahovať nasledovné parametre:
- - NAZOV (String): Názov preteku.
- - DATUM (String): Dátum preteku vo formáte YYYY-MM-DD.
- - DEADLINE (String): Deadline pre registráciu vo formáte YYYY-MM-DD.
- - POZNAMKA (String): Poznámka k preteku, ktorá môže obsahovať aj URL odkazy.
-   
+    - vypis_zoznam_kategorii()
+ - Vstupný formát pre funkciu pridaj_pretek bude obsahovať nasledovné parametre:
+    - NAZOV (String): Názov preteku.
+    - DATUM (String): Dátum preteku vo formáte YYYY-MM-DD.
+    - DEADLINE (String): Deadline pre registráciu vo formáte YYYY-MM-DD.
+    - POZNAMKA (String): Poznámka k preteku, ktorá môže obsahovať aj URL odkazy.
+
 2. Export prihlásených bežcov
-- Tabuľky, ktoré sa budú používať:
-	- Exporty
+  - Tabuľky, ktoré sa budú používať:
+    - Exporty
     - Prihlaseni
     - Pouzivatelia
     - Kategorie
-- Funkcie:
+ - Funkcie:
 	- exportuj($id_pret)
  - Výstupný súbor je vo formáte CSV. Podrobnosti o formáte a parametre výstupu:
-	- Hlavičky vo výstupe: Hlavičky v CSV súbore sú mapované z poľa prepis a budú preložené do výrazov ako "MENO", "PRIEZVISKO", "OS.ČÍSLO", "ČIP", "KATEGÓRIA", a "POZNÁMKA".
-	- Parametre:
-		- meno (string): Meno prihláseného bežca 
-   		- priezvisko (string): Priezvisko prihláseného bežca 
+    - Hlavičky vo výstupe: Hlavičky v CSV súbore sú mapované z poľa prepis a budú preložené do výrazov ako "MENO", "PRIEZVISKO", "OS.ČÍSLO", "ČIP", "KATEGÓRIA", a "POZNÁMKA".
+	  - Parametre:
+        - meno (string): Meno prihláseného bežca 
+        - priezvisko (string): Priezvisko prihláseného bežca 
 		- os_i_c (string): Osobné číslo prihláseného bežca 
-  		- cip (string): Číslo čipu prihláseného bežca 
+        - cip (string): Číslo čipu prihláseného bežca 
 		- nazov (string): Kategória
 		- poznamka (string): Poznámka
-- Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
+ - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
 
-- ## 2.3 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
+## 4 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
 
 V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní automatické pridanie udalostí do kalendára admina pri prihlásení bežcov na preteky. Implementácia bude prebiehať prostredníctvom Google Calendar API, čo zabezpečí synchronizáciu medzi našou aplikáciou a kalendárom.
 
@@ -120,48 +115,80 @@ V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní aut
 
 Táto časť zabezpečí, že admin bude mať vždy aktuálne informácie o pretekoch vo svojom Google Kalendári, čo mu umožní lepšiu organizáciu a prehľad.
 
-## 3 Návrh dátového modelu
+## 5 Návrh dátového modelu
 Dátový model je reprezentovaný entitno-relačným diagramom, ktorý ilustruje vzťahy medzi jednotlivými entitami. Entita predstavuje objekt, ktorý existuje samostatne a nezávisle od iných objektov. Vzťahy medzi entitami opisujú prepojenia a interakcie medzi týmito objektmi
 Dátovy model je prevzatý z existujúcej aplikácie.
 
 ![datovy_model](https://github.com/user-attachments/assets/fa6856e0-0aec-4070-9817-27235892dd93)
 
 
-## 4 Analýza použitých technológií
-- PHP 5.6, SQLite - prevzaté z pôvodnej aplikácie
-## 5 Návrh konzolového rozhrania
-Úvodné okno ktoré sa zobrazí
+## 6 Analýza použitých technológií
+- RESTful API: Na komunikáciu medzi našou aplikáciou a stránkou is.orienteering.sk, ako aj medzi konzolovou aplikáciou a lokálnou databázou Sandberg.
+- HTTP protokol: Na volanie API endpointov a spracovanie odpovedí.
+- JSON: Na formátovanie dát pre GET a POST požiadavky.
+- OAuth 2.0: Na autorizáciu a autentifikáciu pri komunikácii s Google Calendar API.
+- Google Calendar API: Na synchronizáciu udalostí medzi našou aplikáciou a Google Kalendárom.
+- SQLite: Použitá v pôvodnej aplikácii pre databázové operácie.
+- PHP: Použitá v pôvodnej aplikácii Sandberg.
+- Python: Použitá vo vašej aplikácii na implementáciu rôznych funkcií a komunikáciu s API.
+- Matplotlib: Na zobrazenie a export štatistík pretekára do PDF súboru.
+  
+## 7 Návrh konzolového rozhrania
+Úvodné okno, ktoré sa zobrazí
+
 ![Uvodne okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_akcie.png)
+
 Po zvolení Import sa zobrazí výber mesiaca
+
 ![Mesiace okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_mesiaca.png)
+
 Zoznam pretekov, vyobrazí sa po zvolení mesiaca v Importe, po zvolení prihlásenia na preteky a po zvolení exportu do súboru
+
 ![Preteky okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_preteku.png)
 
 Voľba formátu na export
+
 ![Formaty okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_formatu.png)
+
 Path uloženia vyexportovaného súboru (pri exporte a štatistikách)
+
 ![Path okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_path.png)
 ![Path input](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Input_window_path.png)
 
 Vyhľadávanie pretekára v štatistike
+
 ![Filter okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_filtru_vyhladanie_hraca.png)
 ![Pretekar okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_pretekara.png)
+
 Zadávanie parametrov štatistiky
+
 ![Interval okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Nastavenie_intervalu_merania_statistiky.png)
 ![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_statistiky.png)
+
 Po stlačení q, ukončuje konzolovú aplikáciu
+
 ![quit](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/quit.png)
 
 
-
-## 6 Návrh zobrazenia štatistík
+## 8 Návrh zobrazenia štatistík
 Ako zobrazenie štatistík pretekára má užívateľ možnosť ich zobraziť a vyexportovať v PDF súbore za pomoci default Python knižnice MatPlotLib
 ### Graf počtu účastí na pretekoch za mesiac
+
 ![graf1](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/ucast_graf.png)
+
 ### Graf umiestnení na pretekoch, ktorých sa zúčastnil
-´- 1,2,3 reprezentujú miesta, zlomky (napr. 1/4) reprezentujú, že v koľkej štvrtine počtu umiestnení sa umiestnil
+- 1,2,3 reprezentujú miesta, zlomky (napr. 1/4) reprezentujú, že v koľkej štvrtine počtu umiestnení sa umiestnil
+
 ![graf2](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/umiestnenie_graf.png)
+
 ### Graf časového rozdielu od prvého pretekára na jednotlivých pretekoch
+
 ![graf3](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/cas_graf.png)
-## 7 Diagramy
-## 8 Harmonogram implementácie
+
+## 9 Diagramy
+### 9.1 Use-case diagram
+Slúži na pomenovanie základných hrubých používateľských scenárov a zobrazuje všetky činnosti, ktoré bude vykonávať správca systému. Diagram slúži najmä ako sumarizujúci pohľad a prehľad všetkých používateľských scenárov.
+
+![use_case](https://github.com/user-attachments/assets/56a6db35-176f-44a0-9ec6-5aee665ead55)
+
+## 10 Harmonogram implementácie
