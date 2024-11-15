@@ -148,7 +148,7 @@ Dátovy model je prevzatý z existujúcej aplikácie.
 - SQLite: Použitá v pôvodnej aplikácii pre databázové operácie.
 - PHP: Použitá v pôvodnej aplikácii Sandberg.
 - Python: Použitá vo vašej aplikácii na implementáciu rôznych funkcií a komunikáciu s API.
-- Matplotlib: Na zobrazenie a export štatistík pretekára do PDF súboru.
+- Matplotlib: Na zobrazenie štatistík pretekára.
   
 ## 8 Návrh konzolového rozhrania
 Úvodné okno, ktoré sa zobrazí
@@ -214,21 +214,21 @@ Implementáciu a testovanie rozdelíme na vlny. Každá vlna sa skladá z troch 
 Jednotlivé vlny budú vyzerať takto:
 ##### 1 vlna:
 - implementácia:
-	- podmoduly procesora - JSON string procesor, error handler, date_converter, config file reader
+	- podmoduly procesora -  error handler, date_converter, config file reader, file writer
  	- UI
-  	- Pripojenie do Google kalendara   
 - testing:
- 	- podmoduly procesora - JSON string procesor, error handler, date_converter
+ 	- podmoduly procesora -  error handler, date_converter
  	- UI
-  	- Pripojenie do Google kalendara
 ##### 2 vlna:
 - implementácia:
-	- Get_mode
- 	- Post_mode
+	- Pripojenie do Google kalendara
+  	- Get_mode
+ 	- Post_mode 
   	- Pripojenie na sandberg databazu
   		- import
   	 	- export
 - testing:
+	- Pripojenie na Google 
 	- Get_mode
  	- Post_mode
   	- Pripojenie na sandberg databazu
