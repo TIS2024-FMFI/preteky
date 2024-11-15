@@ -13,35 +13,40 @@ Tento dokument je úzko prepojený s katalógom požiadaviek a špecifikuje vše
     [https://github.com/TIS2023-FMFI/sportovy-pretek-web](https://github.com/TIS2023-FMFI/sportovy-pretek-web)
 - [API roznhranie is.orientering.sk](https://github.com/TIS2024-FMFI/preteky/tree/main/API/is.orienteering.sk)
 ## 2 Návrh komunikácie medzi konzolovou aplikáciou a stránkou is.orienteering.sk 
-V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.orienteering.sk) pomoco restfull API. Všetku komunikáciu vieme rozdeliť na dva módy: Get a Post 
+V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.orienteering.sk) pomocou restfull API. Všetku komunikáciu vieme rozdeliť na dva módy: Get a Post. Komunikácia je zabezpečená skrz bezpečnostný klúč ktorý je uložený v config súbore
 
-Mód Get
-- používame keď sa snažíme získať dáta z is.orienteering.sk
-- dáta ktoré získavame:
-    - preteky v mesiaci, ktorý zadáme
-    - kategórie pretekárov na daných pretekoch (hľadáme podľa ID pretekov)
-    - všetky informácie o pretekárovi, ktorého sme si vybrali (na základe ID pretekára)
-        - počítajú sa tu aj výsledky na pretekoch
-    - informácie o registrácii jednotlivých pretekárov, ale aj celého klubu (na zaklade ID klubu/pretekára)
-    - informácie o registrácii na dané preteky (podľa ID pretekov)
-        - kto je na nich prihlásený
-    - detailnejšie informácie o kategóriach na daných pretekoch (može sa daný pretekár prihlásiť s touto kategóriou?)
-
-Mód Post
+#### Mód Get
+- používame keď získavame dáta z is.orienteering.sk
+- na každý request bude samostantná funkcia
+- funkcie vracajú JSON string
+- ako parametre funkcí vkladamáme udaje na zaklade ktorých chceme dáta z is.orienteering.sk filtrovať
+- requesty:
+	- preteky v mesiaci
+    		- podla mesiaca, ktorý zadáme	 
+    	- registracie (registrovaný pretekáry) v danom klube
+    		- podla id klubu
+	- detailné informácie o pretekárovy
+ 		- podla id pretekara
+   	- detaily pretekov
+   		- podla id pretekov
+   	- vysledky pretekára v intervale medzi dvoma dátumami
+   		- podla id pretekara
+   	 	- datumy sú vo formáte YYYY-MM-DD
+  	- výledky preteku
+  		- podla id pretekov a id eventu
+  	- registrácia klubu na pretek
+  		- podla id pretekov a id klubu
+  	- kategorie na ktoré sa bežec môže prihlásiť
+  		- podla id registracie pretekara a id eventu     
+#### Mód Post
 - používame keď vkladáme dáta na is.orienteering.sk
-- dáta, ktoré vkladáme:
-    - registrácia pretekára na dané preteky (podľa ID pretekov)
-    - zrušenie registrácie pretekára na dané preteky (podľa ID pretekov)
+- na každý request bude samostantná funkcia
+- ako parameter vkladame id pretekov a data nakonfigurované v JSON stringu
+- funkcie vracaju JSON string s informaciou o registracii alebo True pri zrušení registrácie pretekara
+- requesty:
+    - registrácia pretekára na preteky
+    - zrušenie registrácie pretekára na preteky
  
------------ 
-- na používanie API je potrebný bezpečnostný klúč
-    - bude uložený v konfig súbore 
-- na každý request z modu Get budeme mať samostatnú funkciu, ktorá vráti JSON string
-- pri mode Post vkladáme JSON string ako parameter a vraciame boolovskú hodnotu, či sa vloženie podarilo
-- pomocné triedy
-    -  parser a creator JSON stringov
-    -  úprava dátumov do správneho tvaru
-    -  čítanie konfig súboru
 
 ## 3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
 Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
@@ -86,8 +91,20 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 		- nazov (string): Kategória
 		- poznamka (string): Poznámka
  - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
+## 4 Návrh "Procesora"
+Táto kapitola opisuje centrálny modul procesor, ktorý má na starosti:
+- riadenie chodu aplikácie
+- prepája medzi sebou jednotlivé moduly ktoré komunikujú s vonkajším prostredím (is.orienteering.sk, Sandberg, Google kalendár, UI)
+- poskytuje modulom pomocné podmoduly:
+	- JSON string procesor
+ 	- date_converter
+  	- error handler
+  	- config file reader
+  	- file writer  	 
 
-## 4 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
+
+
+## 5 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
 
 V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní automatické pridanie udalostí do kalendára admina pri prihlásení bežcov na preteky. Implementácia bude prebiehať prostredníctvom Google Calendar API, čo zabezpečí synchronizáciu medzi našou aplikáciou a kalendárom.
 
@@ -115,14 +132,14 @@ V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní aut
 
 Táto časť zabezpečí, že admin bude mať vždy aktuálne informácie o pretekoch vo svojom Google Kalendári, čo mu umožní lepšiu organizáciu a prehľad.
 
-## 5 Návrh dátového modelu
+## 6 Návrh dátového modelu
 Dátový model je reprezentovaný entitno-relačným diagramom, ktorý ilustruje vzťahy medzi jednotlivými entitami. Entita predstavuje objekt, ktorý existuje samostatne a nezávisle od iných objektov. Vzťahy medzi entitami opisujú prepojenia a interakcie medzi týmito objektmi
 Dátovy model je prevzatý z existujúcej aplikácie.
 
 ![datovy_model](https://github.com/user-attachments/assets/fa6856e0-0aec-4070-9817-27235892dd93)
 
 
-## 6 Analýza použitých technológií
+## 7 Analýza použitých technológií
 - RESTful API: Na komunikáciu medzi našou aplikáciou a stránkou is.orienteering.sk, ako aj medzi konzolovou aplikáciou a lokálnou databázou Sandberg.
 - HTTP protokol: Na volanie API endpointov a spracovanie odpovedí.
 - JSON: Na formátovanie dát pre GET a POST požiadavky.
@@ -133,7 +150,7 @@ Dátovy model je prevzatý z existujúcej aplikácie.
 - Python: Použitá vo vašej aplikácii na implementáciu rôznych funkcií a komunikáciu s API.
 - Matplotlib: Na zobrazenie a export štatistík pretekára do PDF súboru.
   
-## 7 Návrh konzolového rozhrania
+## 8 Návrh konzolového rozhrania
 Úvodné okno, ktoré sa zobrazí
 
 ![Uvodne okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Vyber_akcie.png)
@@ -170,7 +187,7 @@ Po stlačení q, ukončuje konzolovú aplikáciu
 ![quit](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/quit.png)
 
 
-## 8 Návrh zobrazenia štatistík
+## 9 Návrh zobrazenia štatistík
 Ako zobrazenie štatistík pretekára má užívateľ možnosť ich zobraziť a vyexportovať v PDF súbore za pomoci default Python knižnice MatPlotLib
 ### Graf počtu účastí na pretekoch za mesiac
 
@@ -185,10 +202,51 @@ Ako zobrazenie štatistík pretekára má užívateľ možnosť ich zobraziť a 
 
 ![graf3](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/cas_graf.png)
 
-## 9 Diagramy
-### 9.1 Use-case diagram
+## 10 Diagramy
+### 10.1 Use-case diagram
 Slúži na pomenovanie základných hrubých používateľských scenárov a zobrazuje všetky činnosti, ktoré bude vykonávať správca systému. Diagram slúži najmä ako sumarizujúci pohľad a prehľad všetkých používateľských scenárov.
 
 ![use_case](https://github.com/user-attachments/assets/56a6db35-176f-44a0-9ec6-5aee665ead55)
 
-## 10 Harmonogram implementácie
+## 11 Harmonogram implementácie a testovania
+
+Implementáciu a testovanie rozdelíme na vlny. Každá vlna sa skladá z troch častí implementácia, testing, oprava. 
+Jednotlivé vlny budú vyzerať takto:
+##### 1 vlna:
+- implementácia:
+	- podmoduly procesora - JSON string procesor, error handler, date_converter, config file reader
+ 	- UI
+  	- Pripojenie do Google kalendara   
+- testing:
+ 	- podmoduly procesora - JSON string procesor, error handler, date_converter
+ 	- UI
+  	- Pripojenie do Google kalendara
+##### 2 vlna:
+- implementácia:
+	- Get_mode
+ 	- Post_mode
+  	- Pripojenie na sandberg databazu
+  		- import
+  	 	- export
+- testing:
+	- Get_mode
+ 	- Post_mode
+  	- Pripojenie na sandberg databazu
+  		- import
+  	 	- export     
+##### 3 vlna
+- implementácia:
+	- podmodul procesora  - file writer
+ 	- procesor
+  	- vykreslovanie grafov 
+- testing:
+	- podmodul procesora  - file writer
+ 	- vykreslovanie grafov
+  	- procesor
+  		- komunikácia so vsetkými modulmi    
+##### 4 vlna
+- implementácia:
+	- všetky úpravy a optimalizacie kódu
+- testing:
+	- celkové fungovanie aplikácie    
+
