@@ -92,16 +92,31 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 		- poznamka (string): Poznámka
  - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
 ## 4 Návrh "Procesora"
-Táto kapitola opisuje centrálny modul procesor, ktorý má na starosti:
+Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
 - riadenie chodu aplikácie
 - prepája medzi sebou jednotlivé moduly ktoré komunikujú s vonkajším prostredím (is.orienteering.sk, Sandberg, Google kalendár, UI)
-- poskytuje modulom pomocné podmoduly:
-	- JSON string procesor
+- poskytuje modulom pomocné moduly:
  	- date_converter
+  		- obsahuje metody na upravovanie datumov do požadovaného formátu 
   	- error handler
+  		- obsahuje metódy ktoré odchytávaju errory
+  	 		- po odchytení erroru modul zabezpečí aby sa požadovaná chybová hláška vypísala v UI  
   	- config file reader
-  	- file writer  	 
-
+  		- zabezpečuje čítanie configuračného súboru
+  	 	- súbor má nasledujúci formát:
+  ![config file](https://github.com/TIS2024-FMFI/preteky/tree/main/docs/obrazky/config.png)
+  	- file writer
+  	  	- vstupné dáta sú vo formáte JSON string
+  	  	- zapisuje ich do súboru
+  	  	- na každý formát súboru (csv, txt, html) má samostatnú metodu
+  	- graph procesor
+  		- vstupne dáta vo formate JSON string prekonvertuje na graf
+  	 	- pre vizual grafou [pozri](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/navrh.md#9-n%C3%A1vrh-zobrazenia-%C5%A1tatist%C3%ADk)
+  	  	- pre každý tip grafu má samostatnú metódu   		
+- okrem pomocných modulou obsahuje aj modul procesor
+	- na základe dopytu z UI volá funkcie z iných modulov
+ 	- modulu UI vracia dáta ktoré treba vypísať
+  	- volá si pomocné moduly ak treba  
 
 
 ## 5 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
@@ -214,10 +229,10 @@ Implementáciu a testovanie rozdelíme na vlny. Každá vlna sa skladá z troch 
 Jednotlivé vlny budú vyzerať takto:
 ##### 1 vlna:
 - implementácia:
-	- podmoduly procesora -  error handler, date_converter, config file reader, file writer
+	- podmoduly procesora -  error handler, date_converter, config file reader
  	- UI
 - testing:
- 	- podmoduly procesora -  error handler, date_converter
+ 	- podmoduly procesora -  error handler, date_converter, config file reader
  	- UI
 ##### 2 vlna:
 - implementácia:
@@ -238,10 +253,11 @@ Jednotlivé vlny budú vyzerať takto:
 - implementácia:
 	- podmodul procesora  - file writer
  	- procesor
-  	- vykreslovanie grafov 
+  		- komunikacia so vsetkymi modulmi   
+  	- graph procesor
 - testing:
 	- podmodul procesora  - file writer
- 	- vykreslovanie grafov
+ 	- graph procesor
   	- procesor
   		- komunikácia so vsetkými modulmi    
 ##### 4 vlna
