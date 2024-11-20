@@ -109,11 +109,11 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   	  	- vstupné dáta sú vo formáte JSON string
   	  	- zapisuje ich do súboru
   	  	- na každý formát súboru (csv, txt, html) má samostatnú metodu
-  	- graph procesor
+  	- graph creator
   		- vstupne dáta vo formate JSON string prekonvertuje na graf
   	 	- pre vizual grafou [pozri](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/navrh.md#9-n%C3%A1vrh-zobrazenia-%C5%A1tatist%C3%ADk)
   	  	- pre každý tip grafu má samostatnú metódu   		
-- okrem pomocných modulou obsahuje aj modul procesor
+- okrem pomocných modulou obsahuje aj modul handlerOfInputsFromUi
 	- na základe dopytu z UI volá funkcie z iných modulov
  	- modulu UI vracia dáta ktoré treba vypísať
   	- volá si pomocné moduly ak treba  
@@ -243,7 +243,7 @@ Jednotlivé vlny budú vyzerať takto:
   		- import
   	 	- export
 - testing:
-	- Pripojenie na Google 
+	- Pripojenie do Google kalendara
 	- Get_mode
  	- Post_mode
   	- Pripojenie na sandberg databazu
@@ -252,13 +252,13 @@ Jednotlivé vlny budú vyzerať takto:
 ##### 3 vlna
 - implementácia:
 	- podmodul procesora  - file writer
- 	- procesor
+ 	- phandlerOfInputsFromUi
   		- komunikacia so vsetkymi modulmi   
-  	- graph procesor
+  	- graph creator
 - testing:
 	- podmodul procesora  - file writer
- 	- graph procesor
-  	- procesor
+ 	- graph creator
+  	- handlerOfInputsFromUi
   		- komunikácia so vsetkými modulmi    
 ##### 4 vlna
 - implementácia:
