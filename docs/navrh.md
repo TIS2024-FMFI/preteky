@@ -228,6 +228,8 @@ Slúži na pomenovanie základných hrubých používateľských scenárov a zob
 
 ![component_diagram](https://github.com/TIS2024-FMFI/preteky/edit/cheetahzlesa-patch-1/docs/obrazky/component_diagram.png)
 
+
+
 ## 11 Harmonogram implementácie a testovania
 
 Implementáciu a testovanie rozdelíme na vlny. Každá vlna sa skladá z troch častí implementácia, testing, oprava. 
