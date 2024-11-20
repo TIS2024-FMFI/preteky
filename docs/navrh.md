@@ -226,7 +226,7 @@ Slúži na pomenovanie základných hrubých používateľských scenárov a zob
 
 ### 10.2 Component diagram 
 
-![component_diagram](https://github.com/TIS2024-FMFI/preteky/main/docs/obrazky/component_diagram.png)
+![component_diagram](docs/obrazky/component_diagram.png)
 
 
 
