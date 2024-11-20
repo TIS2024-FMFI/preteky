@@ -252,7 +252,7 @@ Jednotlivé vlny budú vyzerať takto:
 ##### 3 vlna
 - implementácia:
 	- podmodul procesora  - file writer
- 	- phandlerOfInputsFromUi
+ 	- handlerOfInputsFromUi
   		- komunikacia so vsetkymi modulmi   
   	- graph creator
 - testing:
