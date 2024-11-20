@@ -162,7 +162,7 @@ Dátovy model je prevzatý z existujúcej aplikácie.
 - Google Calendar API: Na synchronizáciu udalostí medzi našou aplikáciou a Google Kalendárom.
 - SQLite: Použitá v pôvodnej aplikácii pre databázové operácie.
 - PHP: Použitá v pôvodnej aplikácii Sandberg.
-- Python: Použitá vo vašej aplikácii na implementáciu rôznych funkcií a komunikáciu s API.
+- Python: Použitá v našej aplikácii na implementáciu rôznych funkcií a komunikáciu s API.
 - Matplotlib: Na zobrazenie štatistík pretekára.
   
 ## 8 Návrh konzolového rozhrania
