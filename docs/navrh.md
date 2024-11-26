@@ -49,12 +49,17 @@ V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.or
  
 
 ## 3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
-Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
+Táto kapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
 
-### 1. Použitie RESTful API
-RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov.
-- Implementácia v Sandberg aplikácii: Vytvoria sa endpointy pre každú funkciu, ktorú chceme použiť, budú uložené v jedno php skripte, čo bude centrálny bod komunikácie. Tieto endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON.
-- Implementácia v našej aplikácii: Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí.
+RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov. Endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON. Tieto endpointy budú uložené v jednom PHP skripte, ktorý bude centrálnym bodom komunikácie.
+
+**1. Implementácia v Sandberg aplikácii:**
+- Na strane PHP aplikácie vytvoríme nový PHP súbor, kde budú umiestnené endpointy. Tieto endpointy budú odchytávať HTTP požiadavky z našej aplikácie a následne zavolajú príslušné funkcie na strane PHP aplikácie. Výsledky budú vrátené vo forme JSON súboru, ktorý bude odoslaný späť do našej aplikácie.
+  
+**2. Implementácia v našej aplikácii:**
+- Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí. Vytvoríme dva spúšťacie pythonovské skripty:
+	- **Skript na import pretekov:** Tento skript bude spúšťať akciu importu vybraných pretekov. Bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
+ 	- **Skript na export prihlásených bežcov:** Tento skript bude spúšťať akciu exportu prihlásených bežcov na daný pretek. Opäť bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
 
 Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované v súbore [https://github.com/TIS2017/SportovyKlub/blob/master/source/preteky.php](https://github.com/TIS2023-FMFI/sportovy-pretek-web/tree/master/source).
 1. Import pretekov do našej aplikácie
@@ -66,7 +71,7 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 	- pridaj_pretek($nazov, $datum, $deadline, $poznamka): Pridá nový pretek do databázy.
 	- pridaj_kategoriu($nazov): Pridá novú kategóriu do databázy.
 	- pridaj_kat_preteku($id_pret, $id_kat): Priradí kategóriu k preteku.
-    - vypis_zoznam_kategorii()
+    	- vypis_zoznam_kategorii()
  - Vstupný formát pre funkciu pridaj_pretek bude obsahovať nasledovné parametre:
     - NAZOV (String): Názov preteku.
     - DATUM (String): Dátum preteku vo formáte YYYY-MM-DD.
@@ -86,10 +91,10 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 	  - Parametre:
         - meno (string): Meno prihláseného bežca 
         - priezvisko (string): Priezvisko prihláseného bežca 
-		- os_i_c (string): Osobné číslo prihláseného bežca 
+	- os_i_c (string): Osobné číslo prihláseného bežca 
         - cip (string): Číslo čipu prihláseného bežca 
-		- nazov (string): Kategória
-		- poznamka (string): Poznámka
+	- nazov (string): Kategória
+	- poznamka (string): Poznámka
  - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
 ## 4 Návrh "Procesora"
 Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
