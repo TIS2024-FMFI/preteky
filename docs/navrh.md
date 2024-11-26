@@ -37,7 +37,8 @@ V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.or
   	- registrácia klubu na pretek
   		- podla id pretekov a id klubu
   	- kategorie na ktoré sa bežec môže prihlásiť
-  		- podla id registracie pretekara a id eventu     
+  		- podla id registracie pretekara a id eventu
+  	- zoznam všetkých kategórii s detailami      
 #### Mód Post
 - používame keď vkladáme dáta na is.orienteering.sk
 - na každý request bude samostantná funkcia
@@ -226,7 +227,7 @@ Slúži na pomenovanie základných hrubých používateľských scenárov a zob
 
 ### 10.2 Component diagram 
 
-![component_diagram](docs/obrazky/component_diagram.png)
+![component_diagram](obrazky/component_diagram.png)
 
 
 
