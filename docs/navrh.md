@@ -37,7 +37,8 @@ V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.or
   	- registrácia klubu na pretek
   		- podla id pretekov a id klubu
   	- kategorie na ktoré sa bežec môže prihlásiť
-  		- podla id registracie pretekara a id eventu     
+  		- podla id registracie pretekara a id eventu
+  	- zoznam všetkých kategórii s detailami      
 #### Mód Post
 - používame keď vkladáme dáta na is.orienteering.sk
 - na každý request bude samostantná funkcia
@@ -200,7 +201,7 @@ Vyhľadávanie pretekára v štatistike
 Zadávanie parametrov štatistiky
 
 ![Interval okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Nastavenie_intervalu_merania_statistiky.png)
-![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_statistiky.png)
+![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky    "services": [ //pole služieb, ktoré si chce objednať (1-X, v poli sú iba tie služby, ktoré si objednáva)/Volba_statistiky.png)
 
 Po stlačení q, ukončuje konzolovú aplikáciu
 
@@ -231,7 +232,11 @@ Slúži na pomenovanie základných hrubých používateľských scenárov a zob
 
 ### 10.2 Component diagram 
 
-![component_diagram](docs/obrazky/component_diagram.png)
+![component_diagram](obrazky/component_diagram.png)
+
+### 10.3 Class diagram
+
+![class diagram](obrazky/clas_diagram.png)
 
 
 
