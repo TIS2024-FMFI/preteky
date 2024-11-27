@@ -236,7 +236,10 @@ Vyhľadávanie pretekára v štatistike
 Zadávanie parametrov štatistiky
 
 ![Interval okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Nastavenie_intervalu_merania_statistiky.png)
-![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky    "services": [ //pole služieb, ktoré si chce objednať (1-X, v poli sú iba tie služby, ktoré si objednáva)/Volba_statistiky.png)
+
+![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_statistiky.png)
+
+"services": [ //pole služieb, ktoré si chce objednať (1-X, v poli sú iba tie služby, ktoré si objednáva)]
 
 Po stlačení q, ukončuje konzolovú aplikáciu
 
