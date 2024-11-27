@@ -110,7 +110,9 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   	- config file reader
   		- zabezpečuje čítanie configuračného súboru
   	 	- súbor má nasledujúci formát:
-  ![config file](https://github.com/TIS2024-FMFI/preteky/tree/main/docs/obrazky/config.png)
+  	
+  ![config file](obrazky/config.png)
+  
   	- file writer
   	  	- vstupné dáta sú vo formáte JSON string
   	  	- zapisuje ich do súboru
