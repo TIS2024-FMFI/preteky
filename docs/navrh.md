@@ -125,33 +125,68 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   	- volá si pomocné moduly ak treba  
 
 
-## 5 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
+## 5. Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
 
 V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní automatické pridanie udalostí do kalendára admina pri prihlásení bežcov na preteky. Implementácia bude prebiehať prostredníctvom Google Calendar API, čo zabezpečí synchronizáciu medzi našou aplikáciou a kalendárom.
 
-### Implementácia funkčnosti
-1. **Autorizácia a autentifikácia:**
-   - Na komunikáciu s Google Calendar API je potrebný OAuth 2.0 prístupový token. Pri prvej synchronizácii sa admin prihlási do svojho Google účtu a autorizuje aplikáciu na správu jeho kalendára. Token sa následne uloží v konfiguračnom súbore alebo zabezpečenej databáze, aby sa zamedzilo opakovanému prihlasovaniu.
+## 5.1 Implementácia funkčnosti
 
-2. **Automatické vytvorenie udalosti:**
-   - Po registrácii bežcov na preteky aplikácia zavolá API endpoint na vytvorenie udalosti v kalendári. Parametre udalosti, ktoré sa odosielajú cez API, zahŕňajú:
-     - **Názov udalosti:** Obsahuje názov pretekov.
-     - **Dátum a čas:** Definované podľa rozpisu pretekov.
-     - **Umiestnenie:** Miesto konania pretekov, ak je dostupné.
-     - **Poznámka:** Ďalšie informácie alebo URL odkaz na detaily o pretekoch.
+### Autorizácia a autentifikácia
+Na komunikáciu s Google Calendar API je potrebný OAuth 2.0 prístupový token. Pri prvej synchronizácii sa admin prihlási do svojho Google účtu a autorizuje aplikáciu na správu jeho kalendára. Token sa následne uloží v konfiguračnom súbore alebo zabezpečenej databáze, aby sa zamedzilo opakovanému prihlasovaniu.
 
-3. **Zrušenie alebo úprava udalosti:**
-   - Pri zrušení registrácie bežca alebo pri zmene údajov pretekov aplikácia automaticky aktualizuje alebo odstráni príslušnú udalosť z Google Kalendára prostredníctvom PUT (update) alebo DELETE (delete) požiadavky na daný event ID.
+### Automatické vytvorenie udalosti
+Po registrácii bežcov na preteky aplikácia zavolá API endpoint na vytvorenie udalosti v kalendári. Parametre udalosti, ktoré sa odosielajú cez API, zahŕňajú:
+- **Názov udalosti**: Obsahuje názov pretekov.
+- **Dátum a čas**: Definované podľa rozpisu pretekov.
+- **Umiestnenie**: Miesto konania pretekov, ak je dostupné.
+- **Poznámka**: Ďalšie informácie alebo URL odkaz na detaily o pretekoch.
 
-4. **Formátovanie dátumu a času:**
-   - Dátumy a časy budú formátované podľa štandardu ISO 8601, ktorý vyžaduje Google Calendar API.
+### Zrušenie alebo úprava udalosti
+Pri zrušení registrácie bežca alebo pri zmene údajov pretekov aplikácia automaticky aktualizuje alebo odstráni príslušnú udalosť z Google Kalendára prostredníctvom PUT (update) alebo DELETE (delete) požiadavky na daný event ID.
 
-5. **Výstup a potvrdenie:**
-   - Po úspešnom pridelení udalosti v kalendári API vráti ID udalosti, ktoré sa uloží pre budúce operácie (napr. zrušenie alebo úprava). Funkcia vracia bool hodnotu úspešnosti.
+### Formátovanie dátumu a času
+Dátumy a časy budú formátované podľa štandardu ISO 8601, ktorý vyžaduje Google Calendar API.
+
+### Výstup a potvrdenie
+Po úspešnom pridelení udalosti v kalendári API vráti ID udalosti, ktoré sa uloží pre budúce operácie (napr. zrušenie alebo úprava). Funkcia vracia bool hodnotu úspešnosti.
 
 ---
 
-Táto časť zabezpečí, že admin bude mať vždy aktuálne informácie o pretekoch vo svojom Google Kalendári, čo mu umožní lepšiu organizáciu a prehľad.
+## 5.2 Replikácia a nastavenie API komunikácie
+
+Pre úspešnú replikáciu a implementáciu tejto funkcionality postupujte podľa nasledujúcich krokov:
+
+### 1. Vytvorenie projektu v Google Cloud Console
+1. Prihláste sa na [Google Cloud Console](https://console.cloud.google.com/).
+2. Kliknite na **Create Project** a vyplňte údaje o projekte (názov projektu, organizácia, lokácia).
+3. Po vytvorení projektu prejdite do sekcie **API & Services > Library**.
+4. Vyhľadajte **Google Calendar API** a aktivujte ho.
+
+### 2. Nastavenie OAuth 2.0 autentifikácie
+1. Prejdite do **API & Services > Credentials**.
+2. Kliknite na **Create Credentials > OAuth client ID**.
+3. Nastavte typ aplikácie na **Desktop App**.
+4. Po vytvorení stiahnite súbor `credentials.json`, ktorý obsahuje potrebné prihlasovacie údaje.
+
+### 3. Inštalácia potrebných knižníc
+Na prácu s Google Calendar API použite nasledujúci príkaz na inštaláciu knižníc:
+
+```bash
+pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+
+### 4. Implementácia funkcie
+Kód na implementáciu funkcie autentifikácie a vytvárania udalostí je dostupný v súbore 
+google_calendar_preview.py. Tento kód zabezpečuje autentifikáciu cez OAuth 2.0 a vytváranie udalostí v Google Kalendári.
+
+### 5. Pridanie ďalších používateľov
+1. V Google Cloud Console prejdite na **IAM & Admin > IAM**.
+2. Kliknite na **Add** a pridajte emailové adresy testerov, pričom im pridelíte rolu **Editor** alebo **Viewer**.
+3. Uistite sa, že pridávaný používateľ má prístup k zdieľaným kalendárom a správne oprávnenia.
+
+---
+
+
 
 ## 6 Návrh dátového modelu
 Dátový model je reprezentovaný entitno-relačným diagramom, ktorý ilustruje vzťahy medzi jednotlivými entitami. Entita predstavuje objekt, ktorý existuje samostatne a nezávisle od iných objektov. Vzťahy medzi entitami opisujú prepojenia a interakcie medzi týmito objektmi
