@@ -210,6 +210,10 @@ Po stlačení q, ukončuje konzolovú aplikáciu
 
 ## 9 Návrh zobrazenia štatistík
 Ako zobrazenie štatistík pretekára má užívateľ možnosť ich zobraziť a vyexportovať v PDF súbore za pomoci default Python knižnice MatPlotLib
+### Údaje štatistiky
+
+![graf0](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/statistika_tabulka.png)
+
 ### Graf počtu účastí na pretekoch za mesiac
 
 ![graf1](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/ucast_graf.png)
