@@ -53,6 +53,7 @@
     - **Úspešná správa:** "Štatistiky boli úspešne exportované."
 6. Štatistika umiestnení sa dá zobraziť v grafe.
     - **Úspešná správa:** "Graf štatistík bol úspešne vygenerovaný."
+    - **Vedľajšia možnosť** Používateľ si vie graf exportovať do pdf súboru
 
 **Požiadavky pokryté:**
 - **3.4 Používateľ môže zobraziť štatistiky bežcov**
