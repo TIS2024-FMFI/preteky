@@ -72,7 +72,7 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 	- pridaj_pretek($nazov, $datum, $deadline, $poznamka): Pridá nový pretek do databázy.
 	- pridaj_kategoriu($nazov): Pridá novú kategóriu do databázy.
 	- pridaj_kat_preteku($id_pret, $id_kat): Priradí kategóriu k preteku.
-    	- vypis_zoznam_kategorii()
+   - spracuj_pretek($competition, $categories): Táto funkcia bude spracovávať pretek a využívať ostatné funckie.
  - Vstupný formát pre funkciu pridaj_pretek bude obsahovať nasledovné parametre:
     - NAZOV (String): Názov preteku.
     - DATUM (String): Dátum preteku vo formáte YYYY-MM-DD.
@@ -97,6 +97,108 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 	- nazov (string): Kategória
 	- poznamka (string): Poznámka
  - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
+
+### Komunikačný protokol
+
+1. **Endpointy API:**
+   - **POST `/api/competitions/competition`**: Tento endpoint prijíma dáta o pretekoch a kategóriách.
+   - **GET `/api/competitions/{id}/export`**: Tento endpoint exportuje prihlásených bežcov pre daný pretek.
+
+2. **Formát požiadaviek a odpovedí:**
+   - **POST `/api/competitions/competition`**
+     - **Požiadavka:**
+       - Obsahuje JSON objekt s informáciami o preteku a kategóriách.
+       - Príklad:
+         ```json
+         {
+           "competition": {
+             "nazov": "Názov preteku",
+             "datum": "2024-11-28",
+             "deadline": "2024-12-01",
+             "poznamka": "Poznámka k preteku"
+           },
+           "categories": ["Kategória 1", "Kategória 2"]
+         }
+         ```
+     - **Odpoveď:**
+       - Obsahuje JSON objekt s výsledkom operácie.
+       - Príklad:
+         ```json
+         {
+           "status": "success",
+           "id": 123
+         }
+         ```
+
+   - **GET `/api/competitions/{id}/export`**
+     - **Odpoveď:**
+       - Obsahuje JSON pole s informáciami o prihlásených bežcoch.
+       - Príklad:
+         ```json
+         [
+           {
+             "OS.ČÍSLO": "SKS1952",
+             "KATEGÓRIA": "W-16",
+             "ČIP": "2047994",
+             "PRIEZVISKO": "Brňáková",
+             "MENO": "Dana",
+             "POZNÁMKA": ""
+           },
+           {
+             "OS.ČÍSLO": "SKS7852",
+             "KATEGÓRIA": "W-40",
+             "ČIP": "2049195",
+             "PRIEZVISKO": "Brňáková",
+             "MENO": "Helena",
+             "POZNÁMKA": ""
+           },
+           {
+             "OS.ČÍSLO": "SKS7801",
+             "KATEGÓRIA": "M-40",
+             "ČIP": "2049912",
+             "PRIEZVISKO": "Brňák",
+             "MENO": "Martin",
+             "POZNÁMKA": ""
+           }
+           // Ďalšie záznamy...
+         ]
+         ```
+
+3. **Spracovanie požiadaviek v `api.php`:**
+   - **POST `/api/competitions/competition`**
+     - Požiadavka je spracovaná nasledovne:
+       - Načítajú sa dáta z tela požiadavky.
+       - Skontroluje sa, či obsahujú potrebné informácie o preteku a kategóriách.
+       - Dáta sa spracujú pomocou funkcie `PRETEKY::spracuj_pretek`.
+       - Výsledok sa vráti ako JSON odpoveď.
+     - Príklad kódu:
+       ```php
+       if ($_SERVER['REQUEST_METHOD'] == 'POST' && preg_match('/\/api\/competitions\/competition/', $_SERVER['REQUEST_URI'])) {
+           $data = json_decode(file_get_contents('php://input'), true);
+
+           if (empty($data['competition']) || empty($data['categories'])) {
+               echo json_encode(["status" => "error", "message" => "Missing data for race or categories."]);
+               exit;
+           }
+
+           $result = PRETEKY::spracuj_pretek($data['competition'], $data['categories']);
+           echo json_encode($result);
+           exit;
+       }
+       ```
+
+   - **GET `/api/competitions/{id}/export`**
+     - Požiadavka je spracovaná nasledovne:
+       - Načítajú sa dáta z URL.
+       - Dáta sa exportujú pomocou funkcie `PRETEKY::exportujJSON`.
+     - Príklad kódu:
+       ```php
+       if ($_SERVER['REQUEST_METHOD'] == 'GET' && preg_match('/\/api\/competitions\/(\d+)\/export/', $_SERVER['REQUEST_URI'], $matches)) {
+           $id_pret = $matches[1];
+           PRETEKY::exportujJSON($id_pret);
+       }
+       ```
+
 ## 4 Návrh "Procesora"
 Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
 - riadenie chodu aplikácie
