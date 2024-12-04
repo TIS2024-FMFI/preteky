@@ -59,3 +59,25 @@
 - **3.4 Používateľ môže zobraziť štatistiky bežcov**
 
 ### Scenár 5: Export pretekov ako udalosti pre Google Calendar
+
+#### Prípad 5.1: Úspešné vytvorenie udalostí pre Google Calendar
+1. Admin naimportuje preteky cez aplikáciu.
+2. Aplikácia automaticky vytvorí dve udalosti v Google Kalendári:
+   - **Prvá udalosť**: dátum pretekov (celodenná udalosť, červená farba).
+   - **Druhá udalosť**: deadline prihlasovania na preteky (celodenná udalosť, červená farba).
+3. Google Calendar API vráti úspešnú odpoveď obsahujúcu ID oboch udalostí.
+4. Aplikácia zobrazí správu: „Udalosti boli úspešne pridané do Google Kalendára.“
+
+#### Vedľajšie možnosti:
+- Ak Google Calendar API nie je dostupné, zobrazí sa správa: „Synchronizácia s Google Kalendárom zlyhala. Skontrolujte pripojenie a skúste znova.“
+
+---
+
+#### Prípad 5.3: Zrušenie udalostí z Google Calendar
+1. Admin odstráni preteky z aplikácie alebo zruší ich prihlásenie.
+2. Aplikácia odošle požiadavku na odstránenie oboch udalostí v Google Kalendári pomocou uloženého ID udalostí.
+3. API vráti úspešnú odpoveď potvrdzujúcu odstránenie udalostí.
+4. Aplikácia zobrazí správu: „Udalosti boli úspešne zrušené v Google Kalendári.“
+
+#### Vedľajšie možnosti:
+- Ak API zlyhá, zobrazí sa správa: „Nepodarilo sa zrušiť udalosti. Skontrolujte pripojenie alebo údaje.“
