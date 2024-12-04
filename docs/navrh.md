@@ -50,12 +50,17 @@ V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.or
  
 
 ## 3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
-Táto podkapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
+Táto kapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg. Keďže naša aplikácia bude bežať na rovnakom serveri ako lokálna databáza Sandberg, ale bude implementovaná v inom jazyku (naša bude bežať v pythone a aplikácia Sandberg v php), je potrebný prepis a sú rôzne prístupy:
 
-### 1. Použitie RESTful API
-RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov.
-- Implementácia v Sandberg aplikácii: Vytvoria sa endpointy pre každú funkciu, ktorú chceme použiť, budú uložené v jedno php skripte, čo bude centrálny bod komunikácie. Tieto endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON.
-- Implementácia v našej aplikácii: Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí.
+RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov. Endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON. Tieto endpointy budú uložené v jednom PHP skripte, ktorý bude centrálnym bodom komunikácie.
+
+**1. Implementácia v Sandberg aplikácii:**
+- Na strane PHP aplikácie vytvoríme nový PHP súbor, kde budú umiestnené endpointy. Tieto endpointy budú odchytávať HTTP požiadavky z našej aplikácie a následne zavolajú príslušné funkcie na strane PHP aplikácie. Výsledky budú vrátené vo forme JSON súboru, ktorý bude odoslaný späť do našej aplikácie.
+  
+**2. Implementácia v našej aplikácii:**
+- Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí. Vytvoríme dva spúšťacie pythonovské skripty:
+	- **Skript na import pretekov:** Tento skript bude spúšťať akciu importu vybraných pretekov. Bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
+ 	- **Skript na export prihlásených bežcov:** Tento skript bude spúšťať akciu exportu prihlásených bežcov na daný pretek. Opäť bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
 
 Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované v súbore [https://github.com/TIS2017/SportovyKlub/blob/master/source/preteky.php](https://github.com/TIS2023-FMFI/sportovy-pretek-web/tree/master/source).
 1. Import pretekov do našej aplikácie
@@ -67,7 +72,7 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 	- pridaj_pretek($nazov, $datum, $deadline, $poznamka): Pridá nový pretek do databázy.
 	- pridaj_kategoriu($nazov): Pridá novú kategóriu do databázy.
 	- pridaj_kat_preteku($id_pret, $id_kat): Priradí kategóriu k preteku.
-    - vypis_zoznam_kategorii()
+   - spracuj_pretek($competition, $categories): Táto funkcia bude spracovávať pretek a využívať ostatné funckie.
  - Vstupný formát pre funkciu pridaj_pretek bude obsahovať nasledovné parametre:
     - NAZOV (String): Názov preteku.
     - DATUM (String): Dátum preteku vo formáte YYYY-MM-DD.
@@ -87,11 +92,113 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 	  - Parametre:
         - meno (string): Meno prihláseného bežca 
         - priezvisko (string): Priezvisko prihláseného bežca 
-		- os_i_c (string): Osobné číslo prihláseného bežca 
+	- os_i_c (string): Osobné číslo prihláseného bežca 
         - cip (string): Číslo čipu prihláseného bežca 
-		- nazov (string): Kategória
-		- poznamka (string): Poznámka
+	- nazov (string): Kategória
+	- poznamka (string): Poznámka
  - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
+
+### Komunikačný protokol
+
+1. **Endpointy API:**
+   - **POST `/api/competitions/competition`**: Tento endpoint prijíma dáta o pretekoch a kategóriách.
+   - **GET `/api/competitions/{id}/export`**: Tento endpoint exportuje prihlásených bežcov pre daný pretek.
+
+2. **Formát požiadaviek a odpovedí:**
+   - **POST `/api/competitions/competition`**
+     - **Požiadavka:**
+       - Obsahuje JSON objekt s informáciami o preteku a kategóriách.
+       - Príklad:
+         ```json
+         {
+           "competition": {
+             "nazov": "Názov preteku",
+             "datum": "2024-11-28",
+             "deadline": "2024-12-01",
+             "poznamka": "Poznámka k preteku"
+           },
+           "categories": ["Kategória 1", "Kategória 2"]
+         }
+         ```
+     - **Odpoveď:**
+       - Obsahuje JSON objekt s výsledkom operácie.
+       - Príklad:
+         ```json
+         {
+           "status": "success",
+           "id": 123
+         }
+         ```
+
+   - **GET `/api/competitions/{id}/export`**
+     - **Odpoveď:**
+       - Obsahuje JSON pole s informáciami o prihlásených bežcoch.
+       - Príklad:
+         ```json
+         [
+           {
+             "OS.ČÍSLO": "SKS1952",
+             "KATEGÓRIA": "W-16",
+             "ČIP": "2047994",
+             "PRIEZVISKO": "Brňáková",
+             "MENO": "Dana",
+             "POZNÁMKA": ""
+           },
+           {
+             "OS.ČÍSLO": "SKS7852",
+             "KATEGÓRIA": "W-40",
+             "ČIP": "2049195",
+             "PRIEZVISKO": "Brňáková",
+             "MENO": "Helena",
+             "POZNÁMKA": ""
+           },
+           {
+             "OS.ČÍSLO": "SKS7801",
+             "KATEGÓRIA": "M-40",
+             "ČIP": "2049912",
+             "PRIEZVISKO": "Brňák",
+             "MENO": "Martin",
+             "POZNÁMKA": ""
+           }
+           // Ďalšie záznamy...
+         ]
+         ```
+
+3. **Spracovanie požiadaviek v `api.php`:**
+   - **POST `/api/competitions/competition`**
+     - Požiadavka je spracovaná nasledovne:
+       - Načítajú sa dáta z tela požiadavky.
+       - Skontroluje sa, či obsahujú potrebné informácie o preteku a kategóriách.
+       - Dáta sa spracujú pomocou funkcie `PRETEKY::spracuj_pretek`.
+       - Výsledok sa vráti ako JSON odpoveď.
+     - Príklad kódu:
+       ```php
+       if ($_SERVER['REQUEST_METHOD'] == 'POST' && preg_match('/\/api\/competitions\/competition/', $_SERVER['REQUEST_URI'])) {
+           $data = json_decode(file_get_contents('php://input'), true);
+
+           if (empty($data['competition']) || empty($data['categories'])) {
+               echo json_encode(["status" => "error", "message" => "Missing data for race or categories."]);
+               exit;
+           }
+
+           $result = PRETEKY::spracuj_pretek($data['competition'], $data['categories']);
+           echo json_encode($result);
+           exit;
+       }
+       ```
+
+   - **GET `/api/competitions/{id}/export`**
+     - Požiadavka je spracovaná nasledovne:
+       - Načítajú sa dáta z URL.
+       - Dáta sa exportujú pomocou funkcie `PRETEKY::exportujJSON`.
+     - Príklad kódu:
+       ```php
+       if ($_SERVER['REQUEST_METHOD'] == 'GET' && preg_match('/\/api\/competitions\/(\d+)\/export/', $_SERVER['REQUEST_URI'], $matches)) {
+           $id_pret = $matches[1];
+           PRETEKY::exportujJSON($id_pret);
+       }
+       ```
+
 ## 4 Návrh "Procesora"
 Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
 - riadenie chodu aplikácie
@@ -122,33 +229,68 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   	- volá si pomocné moduly ak treba  
 
 
-## 5 Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
+## 5. Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
 
 V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní automatické pridanie udalostí do kalendára admina pri prihlásení bežcov na preteky. Implementácia bude prebiehať prostredníctvom Google Calendar API, čo zabezpečí synchronizáciu medzi našou aplikáciou a kalendárom.
 
-### Implementácia funkčnosti
-1. **Autorizácia a autentifikácia:**
-   - Na komunikáciu s Google Calendar API je potrebný OAuth 2.0 prístupový token. Pri prvej synchronizácii sa admin prihlási do svojho Google účtu a autorizuje aplikáciu na správu jeho kalendára. Token sa následne uloží v konfiguračnom súbore alebo zabezpečenej databáze, aby sa zamedzilo opakovanému prihlasovaniu.
+## 5.1 Implementácia funkčnosti
 
-2. **Automatické vytvorenie udalosti:**
-   - Po registrácii bežcov na preteky aplikácia zavolá API endpoint na vytvorenie udalosti v kalendári. Parametre udalosti, ktoré sa odosielajú cez API, zahŕňajú:
-     - **Názov udalosti:** Obsahuje názov pretekov.
-     - **Dátum a čas:** Definované podľa rozpisu pretekov.
-     - **Umiestnenie:** Miesto konania pretekov, ak je dostupné.
-     - **Poznámka:** Ďalšie informácie alebo URL odkaz na detaily o pretekoch.
+### Autorizácia a autentifikácia
+Na komunikáciu s Google Calendar API je potrebný OAuth 2.0 prístupový token. Pri prvej synchronizácii sa admin prihlási do svojho Google účtu a autorizuje aplikáciu na správu jeho kalendára. Token sa následne uloží v konfiguračnom súbore alebo zabezpečenej databáze, aby sa zamedzilo opakovanému prihlasovaniu.
 
-3. **Zrušenie alebo úprava udalosti:**
-   - Pri zrušení registrácie bežca alebo pri zmene údajov pretekov aplikácia automaticky aktualizuje alebo odstráni príslušnú udalosť z Google Kalendára prostredníctvom PUT (update) alebo DELETE (delete) požiadavky na daný event ID.
+### Automatické vytvorenie udalosti
+Po registrácii bežcov na preteky aplikácia zavolá API endpoint na vytvorenie udalosti v kalendári. Parametre udalosti, ktoré sa odosielajú cez API, zahŕňajú:
+- **Názov udalosti**: Obsahuje názov pretekov.
+- **Dátum a čas**: Definované podľa rozpisu pretekov.
+- **Umiestnenie**: Miesto konania pretekov, ak je dostupné.
+- **Poznámka**: Ďalšie informácie alebo URL odkaz na detaily o pretekoch.
 
-4. **Formátovanie dátumu a času:**
-   - Dátumy a časy budú formátované podľa štandardu ISO 8601, ktorý vyžaduje Google Calendar API.
+### Zrušenie alebo úprava udalosti
+Pri zrušení registrácie bežca alebo pri zmene údajov pretekov aplikácia automaticky aktualizuje alebo odstráni príslušnú udalosť z Google Kalendára prostredníctvom PUT (update) alebo DELETE (delete) požiadavky na daný event ID.
 
-5. **Výstup a potvrdenie:**
-   - Po úspešnom pridelení udalosti v kalendári API vráti ID udalosti, ktoré sa uloží pre budúce operácie (napr. zrušenie alebo úprava). Funkcia vracia bool hodnotu úspešnosti.
+### Formátovanie dátumu a času
+Dátumy a časy budú formátované podľa štandardu ISO 8601, ktorý vyžaduje Google Calendar API.
+
+### Výstup a potvrdenie
+Po úspešnom pridelení udalosti v kalendári API vráti ID udalosti, ktoré sa uloží pre budúce operácie (napr. zrušenie alebo úprava). Funkcia vracia bool hodnotu úspešnosti.
 
 ---
 
-Táto časť zabezpečí, že admin bude mať vždy aktuálne informácie o pretekoch vo svojom Google Kalendári, čo mu umožní lepšiu organizáciu a prehľad.
+## 5.2 Replikácia a nastavenie API komunikácie
+
+Pre úspešnú replikáciu a implementáciu tejto funkcionality postupujte podľa nasledujúcich krokov:
+
+### 1. Vytvorenie projektu v Google Cloud Console
+1. Prihláste sa na [Google Cloud Console](https://console.cloud.google.com/).
+2. Kliknite na **Create Project** a vyplňte údaje o projekte (názov projektu, organizácia, lokácia).
+3. Po vytvorení projektu prejdite do sekcie **API & Services > Library**.
+4. Vyhľadajte **Google Calendar API** a aktivujte ho.
+
+### 2. Nastavenie OAuth 2.0 autentifikácie
+1. Prejdite do **API & Services > Credentials**.
+2. Kliknite na **Create Credentials > OAuth client ID**.
+3. Nastavte typ aplikácie na **Desktop App**.
+4. Po vytvorení stiahnite súbor `credentials.json`, ktorý obsahuje potrebné prihlasovacie údaje.
+
+### 3. Inštalácia potrebných knižníc
+Na prácu s Google Calendar API použite nasledujúci príkaz na inštaláciu knižníc:
+
+```bash
+pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
+```
+
+### 4. Implementácia funkcie
+Kód na implementáciu funkcie autentifikácie a vytvárania udalostí je dostupný v súbore 
+google_calendar_preview.py. Tento kód zabezpečuje autentifikáciu cez OAuth 2.0 a vytváranie udalostí v Google Kalendári.
+
+### 5. Pridanie ďalších používateľov
+1. V Google Cloud Console prejdite na **IAM & Admin > IAM**.
+2. Kliknite na **Add** a pridajte emailové adresy testerov, pričom im pridelíte rolu **Editor** alebo **Viewer**.
+3. Uistite sa, že pridávaný používateľ má prístup k zdieľaným kalendárom a správne oprávnenia.
+
+---
+
+
 
 ## 6 Návrh dátového modelu
 Dátový model je reprezentovaný entitno-relačným diagramom, ktorý ilustruje vzťahy medzi jednotlivými entitami. Entita predstavuje objekt, ktorý existuje samostatne a nezávisle od iných objektov. Vzťahy medzi entitami opisujú prepojenia a interakcie medzi týmito objektmi
@@ -198,7 +340,10 @@ Vyhľadávanie pretekára v štatistike
 Zadávanie parametrov štatistiky
 
 ![Interval okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Nastavenie_intervalu_merania_statistiky.png)
-![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky    "services": [ //pole služieb, ktoré si chce objednať (1-X, v poli sú iba tie služby, ktoré si objednáva)/Volba_statistiky.png)
+
+![Statistika okno](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/Volba_statistiky.png)
+
+"services": [ //pole služieb, ktoré si chce objednať (1-X, v poli sú iba tie služby, ktoré si objednáva)]
 
 Po stlačení q, ukončuje konzolovú aplikáciu
 
@@ -207,6 +352,10 @@ Po stlačení q, ukončuje konzolovú aplikáciu
 
 ## 9 Návrh zobrazenia štatistík
 Ako zobrazenie štatistík pretekára má užívateľ možnosť ich zobraziť a vyexportovať v PDF súbore za pomoci default Python knižnice MatPlotLib
+### Údaje štatistiky
+
+![graf0](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/statistika_tabulka.png)
+
 ### Graf počtu účastí na pretekoch za mesiac
 
 ![graf1](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/obrazky/ucast_graf.png)
