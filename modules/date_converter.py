@@ -1,10 +1,10 @@
 from datetime import datetime
 import calendar
-
+number_of_months_in_year = 12
 
 def convert_month_to_number(month : str):
     try:
-        if 0 < int(month) < 13:
+        if 0 < int(month) <= number_of_months_in_year:
             return int(month)
     except:
         return datetime.strptime(month, "%B").month
