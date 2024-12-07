@@ -1,6 +1,6 @@
-import date_converter
+import modules.utilities.date_converter as date_converter
 import requests
-import ErrorHandler
+import modules.utilities.ErrorHandler as ErrorHandler
 
 class Mod_get():
     def __init__(self, api_endpoint : str, api_key : str):
