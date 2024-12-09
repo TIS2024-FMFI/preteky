@@ -12,9 +12,9 @@ class Mod_post():
         'Content-Type': 'application/json'
         }  
     
-    def _handle_response_code(response : requests.Response):
+    def _handle_response_code(self, response : requests.Response):
         if response.status_code < 200 or response.status_code >= 300:
-            raise ErrorHandler.IsOrieteeringApiError(response.text, response.status_code)
+            raise ErrorHandler.IsOrieteeringApiError(response.reason+" "+response.url, response.status_code)
         return
 
 
