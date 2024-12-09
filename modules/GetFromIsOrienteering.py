@@ -1,6 +1,6 @@
-import modules.utilities.date_converter as date_converter
+import utilities.date_converter as date_converter
 import requests
-import modules.utilities.ErrorHandler as ErrorHandler
+import utilities.ErrorHandler as ErrorHandler
 
 class Mod_get():
     def __init__(self, api_endpoint : str, api_key : str):
@@ -11,9 +11,9 @@ class Mod_get():
         'x-szos-api-key': self._api_key,
         'Content-Type': 'application/json'
         }  
-    def _handle_response_code(response : requests.Response):
+    def _handle_response_code(self, response : requests.Response):
         if response.status_code < 200 or response.status_code >= 300:
-            raise ErrorHandler.IsOrieteeringApiError(response.text, response.status_code)
+            raise ErrorHandler.IsOrieteeringApiError(response.reason+" "+response.url, response.status_code)
         return
     
     
@@ -82,3 +82,12 @@ class Mod_get():
         response = requests.get(url, headers=self._get_header())
         self._handle_response_code(response)
         return response.json()
+    
+
+
+
+g = Mod_get("https://is.orienteering.sk/ai", "NjUxODU1ZDE3YTEyMA==")
+try:
+    print(g.get_categories_details())
+except ErrorHandler.IsOrieteeringApiError as e:
+    print(e)
