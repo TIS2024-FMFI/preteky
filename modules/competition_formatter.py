@@ -45,7 +45,4 @@ class CompetitionFormatter:
 
     @staticmethod
     def date_converter(date):
-        if ' ' not in date:
-            date += ' 00:00'
-        return datetime.strptime(date, '%Y-%m-%d %H:%M').strftime('%Y-%m-%d %H:%M')
-
+        return datetime.strptime(date, '%Y-%m-%d %H:%M' if ' ' in date else '%Y-%m-%d').strftime('%Y-%m-%d %H:%M')
