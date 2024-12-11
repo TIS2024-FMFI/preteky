@@ -5,7 +5,10 @@ class CustomError(Exception):
         self.name = 'CustomError'
     def __str__(self):
         return f'{self.name}: {self.code} {self.message}'
-    
+    def __repr__(self):
+        return f'{self.name}: {self.code} {self.message}'
+
+
 class IuError(CustomError):
     def __init__(self, message, error_code=None):
         super().__init__(message, error_code)
