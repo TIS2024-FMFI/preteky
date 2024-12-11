@@ -1,13 +1,14 @@
 import requests
+from classes.correct_cleaner.ErrorHandler import SandbergDatabaseError
+from classes.correct_cleaner.response_handler_export import ResponseHandler
 
 SUCCESS_CODE = 200
-
-"""Base class providing common methods for API communication."""
+GENERIC_ERROR_CODE = 500
 
 
 class BaseAPI:
-    def __init__(self, base_urli):
-        self.base_url = base_urli
+    def __init__(self, base_url):
+        self.base_url = base_url
 
     def _build_url(self, endpoint):
         return f"{self.base_url}{endpoint}"
@@ -16,71 +17,34 @@ class BaseAPI:
     def _send_get_request(url):
         try:
             response = requests.get(url)
+            response.raise_for_status()
             return response
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-            return None
+            raise SandbergDatabaseError(f"GET request failed for {url}", GENERIC_ERROR_CODE)
+
     @staticmethod
     def _send_post_request(url, data):
         try:
             headers = {'Content-Type': 'application/json'}
             response = requests.post(url, json=data, headers=headers)
+            response.raise_for_status()
             return response
         except requests.exceptions.RequestException as e:
-            print(f"Request failed: {e}")
-            return None
+            raise SandbergDatabaseError(f"POST request failed for {url}", GENERIC_ERROR_CODE)
 
 
 class APIClient(BaseAPI):
     def process_race(self, race_data):
         url = self._build_url("/competitions/competition")
         response = self._send_post_request(url, race_data)
+        json_response = ResponseHandler.handle_response(response)
 
-        if response.status_code == SUCCESS_CODE:
-            if response.text.strip():
-                try:
-                    json_response = response.json()
-                    if json_response.get('status') == "success":
-                        print(json_response.get('message'))
-                    else:
-                        print(f"Failed to add race: {json_response.get('message')}")
-                    return json_response
-                except ValueError:
-                    return {"status": "error", "message": "Invalid JSON response"}
-            else:
-                return {"status": "error", "message": "Empty response from API"}
-        else:
-            self._log_error(response)
-            return {"status": "error", "message": f"Failed to process race. {response.text}"}
+        if json_response.get('status') != "success":
+            raise SandbergDatabaseError(f"Failed to add race: {json_response.get('message')}", response.status_code)
 
-    def export_registered_runners(self, id_pret):
-        url = self._build_url(f"/competitions/{id_pret}/export")
+        return json_response.get('message')
+
+    def export_registered_runners(self, competition_id):
+        url = self._build_url(f"/competitions/{competition_id}/export")
         response = self._send_get_request(url)
-
-        if response.status_code == SUCCESS_CODE:
-            try:
-                json_response = response.json()
-
-                if isinstance(json_response, dict):
-                    if json_response.get('status') == "success":
-                        return json_response
-                    else:
-                        print(f"Error: {json_response.get('message')}")
-                        return None
-                elif isinstance(json_response, list):
-                    return json_response
-                else:
-                    print("Unexpected response type.")
-                    return None
-            except ValueError:
-                print("Error: Invalid JSON response")
-                return None
-        else:
-            self._log_error(response)
-            return None
-
-
-
-    @staticmethod
-    def _log_error(response):
-        print(f"Error: {response.status_code} - {response.text}")
+        return ResponseHandler.handle_response(response)
