@@ -5,7 +5,7 @@ class ResponseHandler:
     @staticmethod
     def handle_response(response):
         if not response:
-            raise SandbergDatabaseError("Response is empty or None.", response.status_code)
+            raise SandbergDatabaseError("Response is empty or None.", 400)
         try:
             json_data = response.json()
             if isinstance(json_data, dict):
@@ -17,6 +17,5 @@ class ResponseHandler:
             else:
                 raise SandbergDatabaseError(f"Unexpected response type: {type(json_data)}", response.status_code)
         except ValueError:
-            raise SandbergDatabaseError("Invalid JSON response.", response.status_code)
-
+            raise SandbergDatabaseError(f"Invalid JSON response.", response.status_code)
         return json_data
