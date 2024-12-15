@@ -55,7 +55,7 @@ Táto kapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lo
 RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov. Endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON. Tieto endpointy budú uložené v jednom PHP skripte, ktorý bude centrálnym bodom komunikácie.
 
 **1. Implementácia v Sandberg aplikácii:**
-- Na strane PHP aplikácie vytvoríme dva nové PHP súbory. V súbore [api.php](API/sandberg_api/api.php) sú umiestnené endpointy a v [export_import.php](API/sandberg_api/export_import.php) sú naimplementované všetky funckie, ktoré potrebujeme (tieto súbory vieme stiahnuť na server podľa postupu pre inštaláciu [návod](https://github.com/TIS2024-FMFI/preteky?tab=readme-ov-file#preteky)). Tieto endpointy budú odchytávať HTTP požiadavky z našej aplikácie a následne zavolajú príslušné funkcie na strane PHP aplikácie. Výsledky budú vrátené vo forme JSON súboru, ktorý bude odoslaný späť do našej aplikácie.
+- Na strane PHP aplikácie vytvoríme dva nové PHP súbory. V súbore [api.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/api.php) sú umiestnené endpointy a v [export_import.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/export_import.php) sú naimplementované všetky funckie, ktoré potrebujeme (tieto súbory vieme stiahnuť na server podľa postupu pre inštaláciu [návod](https://github.com/TIS2024-FMFI/preteky?tab=readme-ov-file#preteky)). Tieto endpointy budú odchytávať HTTP požiadavky z našej aplikácie a následne zavolajú príslušné funkcie na strane PHP aplikácie. Výsledky budú vrátené vo forme JSON súboru, ktorý bude odoslaný späť do našej aplikácie.
   
 **2. Implementácia v našej aplikácii:**
 - Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí. Vytvoríme dva spúšťacie pythonovské skripty:
@@ -196,7 +196,7 @@ RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia S
        - Načítajú sa dáta z URL.
        - Dáta sa exportujú pomocou funkcie `ExportImport::exportujJSON`.
        - 
-- Kód môžete vidieť v [api.php](API/sandberg_api/api.php) .
+- Kód môžete vidieť v  [api.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/api.php) .
 
 ## 4 Návrh "Procesora"
 Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
