@@ -7,7 +7,8 @@ class Procesor():
     def __init__(self):
         self.mod_get = Mod_get() # here we need url endpoit and  api acces key from config file 
         self.mod_post = Mod_post() # same here
-
+        self.categories = {} # dict of category_id : name
+        for category in self.mod_get.get_categories_details(): self.categories[category["id"]]=category["name"]
 
 
     def get_races_from_IsOrienteering_in_month(self, month : str):
@@ -24,13 +25,15 @@ class Procesor():
         for i in  range(len(races)):
             id = races[i]["id"]
             race = self.mod_get.get_race_details(id)
-
+            ids_of_categories = [category["category_id"] for category in race["categories"]]
+            names_of_categories = [ self.categories[category_id] for category_id in ids_of_categories]
+            
             output[i]["id"] = id
             output[i]["datum"] = races[i]["events"][0]["date"]
             output[i]["nazov"] = races[i]["title_sk"]
             output[i]["deadline"] = race["entry_dates"][0]["entries_to"]
             output[i]["miesto"] = races[i]["place"]
-            output[i]["kategorie"] = race
+            output[i]["kategorie"] = names_of_categories
 
         
         return output
