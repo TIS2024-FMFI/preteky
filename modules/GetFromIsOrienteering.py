@@ -34,7 +34,6 @@ class Mod_get():
         return response.json()
            
     
-    ### asi tuto funkciu nebudeme potrebovat
     def get_runner(self, runner_id):
         url = f'{self._api_endpoint}/runners/{runner_id}'
         response = requests.get(url, headers=self._get_header())
@@ -85,9 +84,3 @@ class Mod_get():
     
 
 
-
-g = Mod_get("https://is.orienteering.sk/ai", "NjUxODU1ZDE3YTEyMA==")
-try:
-    print(g.get_categories_details())
-except ErrorHandler.IsOrieteeringApiError as e:
-    print(e)
