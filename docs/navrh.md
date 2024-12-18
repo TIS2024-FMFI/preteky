@@ -55,25 +55,33 @@ Táto kapitola predstavuje návrh komunikácie medzi konzolovou aplikáciou a lo
 RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia Sandberg môže poskytovať API endpointy, ktoré naša aplikácia volá na získanie alebo odoslanie údajov. Endpointy budú spracovávať HTTP požiadavky a vracať odpovede vo formáte JSON. Tieto endpointy budú uložené v jednom PHP skripte, ktorý bude centrálnym bodom komunikácie.
 
 **1. Implementácia v Sandberg aplikácii:**
-- Na strane PHP aplikácie vytvoríme nový PHP súbor, kde budú umiestnené endpointy. Tieto endpointy budú odchytávať HTTP požiadavky z našej aplikácie a následne zavolajú príslušné funkcie na strane PHP aplikácie. Výsledky budú vrátené vo forme JSON súboru, ktorý bude odoslaný späť do našej aplikácie.
+- Na strane PHP aplikácie vytvoríme dva nové PHP súbory. V súbore [api.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/api.php) sú umiestnené endpointy a v [export_import.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/export_import.php) sú naimplementované všetky funckie, ktoré potrebujeme (tieto súbory vieme stiahnuť na server podľa postupu pre inštaláciu [návod](https://github.com/TIS2024-FMFI/preteky?tab=readme-ov-file#preteky)). Tieto endpointy budú odchytávať HTTP požiadavky z našej aplikácie a následne zavolajú príslušné funkcie na strane PHP aplikácie. Výsledky budú vrátené vo forme JSON súboru, ktorý bude odoslaný späť do našej aplikácie.
   
 **2. Implementácia v našej aplikácii:**
 - Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí. Vytvoríme dva spúšťacie pythonovské skripty:
 	- **Skript na import pretekov:** Tento skript bude spúšťať akciu importu vybraných pretekov. Bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
  	- **Skript na export prihlásených bežcov:** Tento skript bude spúšťať akciu exportu prihlásených bežcov na daný pretek. Opäť bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
 
-Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované v súbore [https://github.com/TIS2017/SportovyKlub/blob/master/source/preteky.php](https://github.com/TIS2023-FMFI/sportovy-pretek-web/tree/master/source).
 1. Import pretekov do našej aplikácie
  - Tabuľky, ktoré sa budú používať:
   	- Preteky
   	- Kategorie
   	- Kategorie_pre
  - Funkcie:
-	- pridaj_pretek($nazov, $datum, $deadline, $poznamka): Pridá nový pretek do databázy.
-	- pridaj_kategoriu($nazov): Pridá novú kategóriu do databázy.
-	- pridaj_kat_preteku($id_pret, $id_kat): Priradí kategóriu k preteku.
-   - spracuj_pretek($competition, $categories): Táto funkcia bude spracovávať pretek a využívať ostatné funckie.
- - Vstupný formát pre funkciu pridaj_pretek bude obsahovať nasledovné parametre:
+	- `existuje_pretek($id)`: Skontroluje, či existuje pretek s daným ID.
+	- `existuje_kategoria($id)`: Skontroluje, či existuje kategória s daným ID.
+	- `existuje_kat_preteku($id_pret, $category_id)`: Skontroluje, či daná kategória existuje pre daný pretek.
+	- `pridaj_pretek_s_id($ID, $NAZOV, $DATUM, $DEADLINE, $POZNAMKA)`: Pridá nový pretek s daným ID do databázy.
+	- `pridaj_pretek_s_kontrolou($id, $nazov, $datum, $deadline, $poznamka)`: Skontroluje, či pretek existuje, a ak nie, pridá ho do databázy.
+	- `pridaj_kategoriu_s_id($id, $nazov)`: Pridá novú kategóriu do databázy s daným ID.
+	- `pridaj_kategoriu_s_kontrolou($id, $nazov)`: Skontroluje, či kategória existuje, a ak nie, pridá ju do databázy.
+	- `pridaj_kat_preteku_s_id($id_pret, $id, $id_kat)`: Pridá kategóriu k preteku s daným ID do databázy.
+	- `pridaj_kat_preteku_s_kontrolou($id_pret, $id, $id_kat)`: Skontroluje, či kategória preteku existuje, a ak nie, pridá ju.
+	- `existuje_kat_pre($id_kat)`: Skontroluje, či kategória existuje v preteku.
+	- `spracuj_pretek($competition, $categories)`: Spracuje pretek a priradí kategórie k preteku, pričom využíva ďalšie funkcie.
+
+ - Vstupný formát pre funkciu `pridaj_kat_preteku_s_id` bude obsahovať nasledovné parametre:
+    - ID (Integer): Id pretekov. 
     - NAZOV (String): Názov preteku.
     - DATUM (String): Dátum preteku vo formáte YYYY-MM-DD.
     - DEADLINE (String): Deadline pre registráciu vo formáte YYYY-MM-DD.
@@ -81,23 +89,24 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
 
 2. Export prihlásených bežcov
   - Tabuľky, ktoré sa budú používať:
-    - Exporty
     - Prihlaseni
     - Pouzivatelia
     - Kategorie
+    - Kategorie_pre
  - Funkcie:
-	- exportuj($id_pret)
- - Výstupný súbor je vo formáte CSV. Podrobnosti o formáte a parametre výstupu:
-    - Hlavičky vo výstupe: Hlavičky v CSV súbore sú mapované z poľa prepis a budú preložené do výrazov ako "MENO", "PRIEZVISKO", "OS.ČÍSLO", "ČIP", "KATEGÓRIA", a "POZNÁMKA".
-	  - Parametre:
-        - meno (string): Meno prihláseného bežca 
-        - priezvisko (string): Priezvisko prihláseného bežca 
-	- os_i_c (string): Osobné číslo prihláseného bežca 
-        - cip (string): Číslo čipu prihláseného bežca 
-	- nazov (string): Kategória
-	- poznamka (string): Poznámka
- - Funkcia zapisuje tieto hodnoty do CSV súboru a pripraví ho na stiahnutie.
-
+   - `existuju_prihlaseni($id_pret)`: Skontroluje, či existujú prihlásení účastníci pre daný pretek.
+   - `existuje_pretek($id)`: Skontroluje, či existuje pretek s daným ID.
+   - `exportujJSON($id_pret)`: Exportuje údaje o účastníkoch preteku do formátu JSON.
+     
+ - Výstupný súbor je vo formáte json.
+   - Parametre:
+	   	-  meno (string): Meno prihláseného bežca
+	   	- priezvisko (string): Priezvisko prihláseného bežca 
+		- os_i_c (string): Osobné číslo prihláseného bežca
+	   	- cip (string): Číslo čipu prihláseného bežca 
+		- id_kat (integer): id kategórie pre daný pretek
+		- poznamka (string): Poznámka
+   
 ### Komunikačný protokol
 
 1. **Endpointy API:**
@@ -117,7 +126,17 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
              "deadline": "2024-12-01",
              "poznamka": "Poznámka k preteku"
            },
-           "categories": ["Kategória 1", "Kategória 2"]
+           "categories": [
+         {
+            "id": "97531",
+            "category_id": "160",
+            "category_name": "A - muži"
+         },
+         {
+            "id": "97541",
+            "category_id": "161",
+            "category_name": "A - ženy"
+         }]
          }
          ```
      - **Odpoveď:**
@@ -138,7 +157,7 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
          [
            {
              "OS.ČÍSLO": "SKS1952",
-             "KATEGÓRIA": "W-16",
+             "ID_KATEGÓRIE": 99965,
              "ČIP": "2047994",
              "PRIEZVISKO": "Brňáková",
              "MENO": "Dana",
@@ -146,7 +165,7 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
            },
            {
              "OS.ČÍSLO": "SKS7852",
-             "KATEGÓRIA": "W-40",
+             "ID_KATEGÓRIE": 99954,
              "ČIP": "2049195",
              "PRIEZVISKO": "Brňáková",
              "MENO": "Helena",
@@ -154,7 +173,7 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
            },
            {
              "OS.ČÍSLO": "SKS7801",
-             "KATEGÓRIA": "M-40",
+             "ID_KATEGÓRIE": 99987,
              "ČIP": "2049912",
              "PRIEZVISKO": "Brňák",
              "MENO": "Martin",
@@ -169,35 +188,15 @@ Všetky funkcie, ktoré budeme potrebovať z PHP aplikácie, sú implementované
      - Požiadavka je spracovaná nasledovne:
        - Načítajú sa dáta z tela požiadavky.
        - Skontroluje sa, či obsahujú potrebné informácie o preteku a kategóriách.
-       - Dáta sa spracujú pomocou funkcie `PRETEKY::spracuj_pretek`.
+       - Dáta sa spracujú pomocou funkcie `ExportImport::spracuj_pretek`.
        - Výsledok sa vráti ako JSON odpoveď.
-     - Príklad kódu:
-       ```php
-       if ($_SERVER['REQUEST_METHOD'] == 'POST' && preg_match('/\/api\/competitions\/competition/', $_SERVER['REQUEST_URI'])) {
-           $data = json_decode(file_get_contents('php://input'), true);
-
-           if (empty($data['competition']) || empty($data['categories'])) {
-               echo json_encode(["status" => "error", "message" => "Missing data for race or categories."]);
-               exit;
-           }
-
-           $result = PRETEKY::spracuj_pretek($data['competition'], $data['categories']);
-           echo json_encode($result);
-           exit;
-       }
-       ```
 
    - **GET `/api/competitions/{id}/export`**
      - Požiadavka je spracovaná nasledovne:
        - Načítajú sa dáta z URL.
-       - Dáta sa exportujú pomocou funkcie `PRETEKY::exportujJSON`.
-     - Príklad kódu:
-       ```php
-       if ($_SERVER['REQUEST_METHOD'] == 'GET' && preg_match('/\/api\/competitions\/(\d+)\/export/', $_SERVER['REQUEST_URI'], $matches)) {
-           $id_pret = $matches[1];
-           PRETEKY::exportujJSON($id_pret);
-       }
-       ```
+       - Dáta sa exportujú pomocou funkcie `ExportImport::exportujJSON`.
+       - 
+- Kód môžete vidieť v  [api.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/api.php) .
 
 ## 4 Návrh "Procesora"
 Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
