@@ -1,21 +1,39 @@
+from GetFromIsOrienteering import Mod_get
+from PostToIsOrienteering import Mod_post
+
+
+
 class Procesor():
     def __init__(self):
-      
-       ... 
-    
+        self.mod_get = Mod_get() # here we need url endpoit and  api acces key from config file 
+        self.mod_post = Mod_post() # same here
 
-    def get_races_from_IsOrienteering_in_month(month : str):
+
+
+    def get_races_from_IsOrienteering_in_month(self, month : str):
         '''
         
         input:     January
         output:    datum, nazov preteku, deadline prihlasenia, miesto, kategorie 
 
         '''
-        return [
-            {"id": 1, "datum": f"2023-{month}-0{i+1}", "nazov": f"Race {i + 1}", "deadline": f"2023-{month}-1{i+1}",
-            "miesto": f"Location {i + 1}", "kategorie": f"Category {i % 3 + 1}"}
-            for i in range(5)
-        ]
+        races = self.mod_get.get_races_in_month(month)
+        output = [{"id": None, "datum": None, "nazov": None, "deadline": None,
+            "miesto": None, "kategorie": None}
+            for _ in range(len(races))]
+        for i in  range(len(races)):
+            id = races[i]["id"]
+            race = self.mod_get.get_race_details(id)
+
+            output[i]["id"] = id
+            output[i]["datum"] = races[i]["events"][0]["date"]
+            output[i]["nazov"] = races[i]["title_sk"]
+            output[i]["deadline"] = race["entry_dates"][0]["entries_to"]
+            output[i]["miesto"] = races[i]["place"]
+            output[i]["kategorie"] = race
+
+        
+        return output
     
     def import_race_to_Sandberg_Databaze(race_id : int):
         '''
