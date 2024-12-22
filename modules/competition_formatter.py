@@ -1,4 +1,4 @@
-from datetime import datetime
+from DateConverter import DateConverter
 
 
 class CompetitionFormatter:
@@ -6,6 +6,7 @@ class CompetitionFormatter:
         self.data = competition_data
         self.required_keys = ['id', 'title_sk', 'date_from', 'date_to', 'categories']
         self.validate_data()
+        self.date_converter = DateConverter()
 
     def validate_data(self):
         for key in self.required_keys:
@@ -17,8 +18,8 @@ class CompetitionFormatter:
             raise ValueError("Invalid data type for key: categories")
 
     def get_competition_info(self):
-        datum = self.date_converter(self.data['date_from'])
-        deadline = self.date_converter(self.data['deadline'])
+        datum = self.date_converter.date_converter(self.data['date_from'])
+        deadline = self.date_converter.date_converter(self.data['deadline'])
         return {
             "id": self.data['id'],
             "nazov": self.data['title_sk'],
@@ -42,7 +43,3 @@ class CompetitionFormatter:
             "competition": self.get_competition_info(),
             "categories": self.get_categories()
         }
-
-    @staticmethod
-    def date_converter(date):
-        return datetime.strptime(date, '%Y-%m-%d %H:%M' if ' ' in date else '%Y-%m-%d').strftime('%Y-%m-%d %H:%M')
