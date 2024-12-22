@@ -15,6 +15,10 @@ class Procesor:
         self.mod_post = Mod_post(self.config.IS_API_ENDPOINT, self.config.IS_API_KEY)  # same here
         self.sandberg_handler = SandbergDatabaseHandler(self.config.SANDBERG_API_ENDPOINT)
         self.categories = {}  # dict of category_id : name
+        try:
+            for category in self.mod_get.get_categories_details(): self.categories[category["id"]]=category["name"]
+        except error.IsOrieteeringApiError as e:
+            raise e
         self.cache = {
             "competitions": {
                 1888: """
@@ -68,37 +72,41 @@ class Procesor:
         #     self.categories[category["id"]] = category["name"]
 
     def get_races_from_IsOrienteering_in_month(self, month: str):
-        '''
-        
-        input:     January
-        output:    datum, nazov preteku, deadline prihlasenia, miesto, kategorie 
 
-        '''
-        races = self.mod_get.get_races_in_month(month)
+
+        try:
+            races = self.mod_get.get_races_in_month(month)
+        except error.IsOrieteeringApiError as e:
+            return e
         output = [{"id": None, "datum": None, "nazov": None, "deadline": None,
-                   "miesto": None, "kategorie": None}
-                  for _ in range(len(races))]
-        for i in range(len(races)):
+            "miesto": None, "kategorie": None}
+            for _ in range(len(races))]
+        for i in  range(len(races)):
             id = races[i]["id"]
-            race = self.mod_get.get_race_details(id)
+            try:
+                race = self.mod_get.get_race_details(id)
+            except error.IsOrieteeringApiError as e:
+                return e
             ids_of_categories = [category["category_id"] for category in race["categories"]]
-            names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
-
+            names_of_categories = [ self.categories[category_id] for category_id in ids_of_categories]
             output[i]["id"] = id
             output[i]["datum"] = races[i]["events"][0]["date"]
             output[i]["nazov"] = races[i]["title_sk"]
             output[i]["deadline"] = race["entry_dates"][0]["entries_to"]
             output[i]["miesto"] = races[i]["place"]
+            output[i]["kategorie"] = ",".join(names_of_categories)
+
+        
+        return output
+    
+    def import_race_to_Sandberg_Databaze(race_id : int):
+        
             output[i]["kategorie"] = names_of_categories
 
         return output
 
     def import_race_to_Sandberg_Databaze(self, race_id: int):
-        """
-            input: nejake unikatne id preteku
-            input do sandbergu: vid race_data_json
-            output: success, error, uz bol v klubovej databaze
-        """
+        
         if race_id in self.cache["competitions"]:
             race_data = self.cache["competitions"][race_id]
             try:
@@ -115,7 +123,6 @@ class Procesor:
             Implementovat,
             input:     None
             output:    udaje o preteku (datum, nazov preteku, deadline prihlasenia, miesto, kategorie)
-
         """
         return [
             {"id": 1, "datum": f"2023-{i ** i % 12 + 1}-0{i + 1}", "nazov": f"Race {i + 1}",
@@ -221,7 +228,6 @@ race_data_json = """
     ]
 }
 """
-
 processor = Procesor()
 result = processor.import_race_to_Sandberg_Databaze(1888)
 print(result)

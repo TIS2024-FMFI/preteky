@@ -17,15 +17,19 @@ class Mod_get():
         return
     
     
-    def get_races_in_month(self, month = None):
+    def get_races_in_month(self, month):
         url = f'{self._api_endpoint}/competitions'
-        param = None
-        if month != None:
-            param = {"date_from" :{date_converter.return_date_with_first_day_of_month(month)} , "date_to" :{date_converter.return_date_with_last_day_of_month(month)}}
+        param = {"date_from" :{date_converter.return_date_with_first_day_of_month(month)} , "date_to" :{date_converter.return_date_with_last_day_of_month(month)}}
         response = requests.get(url, headers=self._get_header(), params=param)
         self._handle_response_code(response)
         return response.json()
-     
+    
+    def get_races_from_date(self, date):
+        url = f'{self._api_endpoint}/competitions'
+        param = {"date_from" : {}}
+        response = requests.get(url, headers=self._get_header(), params=param)
+        self._handle_response_code(response)
+        return response.json()
         
     def get_club_registrations(self, club_id):
         url = f'{self._api_endpoint}/clubs/{club_id}/registrations'
