@@ -1,6 +1,6 @@
 from GetFromIsOrienteering import Mod_get
 from PostToIsOrienteering import Mod_post
-
+import utilities.ErrorHandler as error
 
 
 class Procesor():
@@ -8,9 +8,11 @@ class Procesor():
         self.mod_get = Mod_get() # here we need url endpoit and  api acces key from config file 
         self.mod_post = Mod_post() # same here
         self.categories = {} # dict of category_id : name
-        for category in self.mod_get.get_categories_details(): self.categories[category["id"]]=category["name"]
-
-
+        try:
+            for category in self.mod_get.get_categories_details(): self.categories[category["id"]]=category["name"]
+        except error.IsOrieteeringApiError as e:
+            raise e
+        
     def get_races_from_IsOrienteering_in_month(self, month : str):
         '''
         
@@ -18,13 +20,19 @@ class Procesor():
         output:    datum, nazov preteku, deadline prihlasenia, miesto, kategorie 
 
         '''
-        races = self.mod_get.get_races_in_month(month)
+        try:
+            races = self.mod_get.get_races_in_month(month)
+        except error.IsOrieteeringApiError as e:
+            return e
         output = [{"id": None, "datum": None, "nazov": None, "deadline": None,
             "miesto": None, "kategorie": None}
             for _ in range(len(races))]
         for i in  range(len(races)):
             id = races[i]["id"]
-            race = self.mod_get.get_race_details(id)
+            try:
+                race = self.mod_get.get_race_details(id)
+            except error.IsOrieteeringApiError as e:
+                return e
             ids_of_categories = [category["category_id"] for category in race["categories"]]
             names_of_categories = [ self.categories[category_id] for category_id in ids_of_categories]
             
@@ -33,7 +41,7 @@ class Procesor():
             output[i]["nazov"] = races[i]["title_sk"]
             output[i]["deadline"] = race["entry_dates"][0]["entries_to"]
             output[i]["miesto"] = races[i]["place"]
-            output[i]["kategorie"] = names_of_categories
+            output[i]["kategorie"] = ",".join(names_of_categories)
 
         
         return output
@@ -54,6 +62,8 @@ class Procesor():
             output:    udaje o preteku (datum, nazov preteku, deadline prihlasenia, miesto, kategorie)
             
         '''
+        
+        
         return [
             {"id": 1,"datum": f"2023-{i**i%12+1}-0{i+1}", "nazov": f"Race {i + 1}", "deadline": f"2023-{i*i%12+1}-1{i+1}",
              "miesto": f"Location {i + 1}", "kategorie": f"Category {i % 3 + 1}"}
