@@ -1,4 +1,4 @@
-import utilities.date_converter as date_converter
+from DateConverter import DateConverter as date_converter
 import requests
 import utilities.ErrorHandler as ErrorHandler
 
@@ -24,9 +24,9 @@ class Mod_get():
         self._handle_response_code(response)
         return response.json()
     
-    def get_races_from_date(self, date):
+    def get_races_from_date(self):
         url = f'{self._api_endpoint}/competitions'
-        param = {"date_from" : {}}
+        param = {"date_from" : {date_converter.get_realtime_date()}}
         response = requests.get(url, headers=self._get_header(), params=param)
         self._handle_response_code(response)
         return response.json()
