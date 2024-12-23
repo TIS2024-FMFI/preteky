@@ -3,7 +3,7 @@ from PostToIsOrienteering import Mod_post
 from database_sandberg_handler import SandbergDatabaseHandler
 from config_file_reader import ConfigFileReader
 from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
-import utilities.ErrorHandler as error
+import modules.ErrorHandler as error
 from  DateConverter import DateConverter as dc
 from datetime import datetime
 
@@ -24,7 +24,7 @@ class Procesor:
             raise e
         
         self.races = {} # dict filled with dicts of races, see function fil_out_cache 
-        self.club_id = 81  # ulozene v configu
+        self.club_id = self.config.CLUB_ID  # ulozene v configu
                 
                     
             
@@ -150,32 +150,31 @@ class Procesor:
         """
         try:
             self.sandberg_handler.export_registered_runners(race_id)
-        except error.SandbergDatabaseError as e:
+        except error.SandbergDatabaseError as e: # test this
             return e
-        self.sandberg_handler.get_last_exported_data()
-
+        data = self.sandberg_handler.get_last_exported_data()
         
-
-        registration_form = {
-                "registration_id": "0", ##ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu
-                "first_name": None, 
-                "surname": None, 
-                "reg_number": None, ##registračné číslo
-                "sportident": None , ##sportident
-                "comment": None,
-                "categories": [
-                    {
-                    "competition_event_id": None, #//ID etapy pretekov
-                    "competition_category_id": None, #//ID kategórie pretekov
+        for runner in data:
+            registration_form = {
+                    "registration_id": "0", ##ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu
+                    "first_name": runner["MENO"], 
+                    "surname": runner["PRIEZVISKO"], 
+                    "reg_number": runner["OS.ČÍSLO"], ##registration number, temporlaly OS.Cislo
+                    "sportident": runner["ČIP"] , ##sportident, temporarly cislo cipu
+                    "comment": runner["POZNÁNKA"],
+                    "categories": [
+                        {
+                        "competition_event_id": self.races[race_id]["events"][0]["id"], #//ID etapy pretekov
+                        "competition_category_id": runner["ID_KATEGORIÉ"], #//ID kategórie pretekov
+                        }
+                    ],
+                    "services": []
                     }
-                ],
-                "services": []
-                }
 
-        try:
-            self.mod_post.register_runner(race_id, registration_form)
-        except error.IsOrieteeringApiError as e:
-            return e
+            try:
+                self.mod_post.register_runner(race_id, registration_form)
+            except error.IsOrieteeringApiError as e:
+                return e
         return True
 
     def convert_data(self, race_id: int, converter_class):
