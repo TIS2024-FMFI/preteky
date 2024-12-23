@@ -1,6 +1,6 @@
 from datetime import datetime
 import calendar
-
+from utilities.ErrorHandler import *
 
 class DateConverter:
 
@@ -76,8 +76,15 @@ class DateConverter:
             return datetime.strptime(date, fmt).strftime(fmt)
         except ValueError:
             raise ValueError("Not valid. Expecting format 'yyyy-mm-dd' or 'yyyy-mm-dd HH:MM'.")
-
-
+    
+    def get_realtime_date(self):
+        return datetime.now().strftime("%Y-%m-%d")
+    
+    def get_date_object_from_string(self, input_string : str):
+        try:
+            return datetime.strftime(input_string,"%Y-%m-%d")
+        except ValueError:
+            raise HandlerError("Wrong input string")
 if __name__ == '__main__':
     dc = DateConverter()
     print("Google Calendar format:", dc.convert_to_google_calendar_format('2024-05-05'))
@@ -85,3 +92,4 @@ if __name__ == '__main__':
     print("Prvý deň v mesiaci:", dc.return_date_with_first_day_of_month('5'))
     print("Správny formát dátumu:", dc.return_correct_format_of_date(2024, 5, 15))
     print("Konverzia dátumu:", dc.date_converter('2024-05-05 10:30'))
+    print(dc.get_realtime_date())
