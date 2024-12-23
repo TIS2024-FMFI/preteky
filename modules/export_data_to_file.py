@@ -139,12 +139,12 @@ class HTMLConverter(ExportDataToFile):
         for item in self.race_data:
             html_content += f"""
                 <tr>
-                    <td>{item['MENO']}</td>
-                    <td>{item['PRIEZVISKO']}</td>
-                    <td>{item['OS.ČÍSLO']}</td>
-                    <td>{item['ČIP']}</td>
-                    <td>{item['ID_KATÉGORIE']}</td>
-                    <td>{item['POZNÁMKA']}</td>
+                    <td>{item['first_name']}</td>
+                    <td>{item['surname']}</td>
+                    <td>{item['reg_number']}</td>
+                    <td>{item['sportident']}</td>
+                    <td>{item['categories']["competition_category_id"]}</td>
+                    <td>{item['comment']}</td>
                 </tr>
             """
         html_content += """
@@ -162,7 +162,7 @@ class CSVConverter(ExportDataToFile):
     def generate_content(self) -> str:
         csv_content = "MENO;PRIEZVISKO;OS.ČÍSLO;ČIP;ID_KATÉGORIE;POZNÁMKA\n"
         for item in self.race_data:
-            csv_content += f"{item['MENO']};{item['PRIEZVISKO']};{item['OS.ČÍSLO']};{item['ČIP']};{item['ID_KATÉGORIE']};{item['POZNÁMKA']}\n"
+            csv_content += f"{item['first_name']};{item['surname']};{item['reg_number']};{item['sportident']};{item['categories']["competition_category_id"]};{item['comment']}\n"
         return csv_content
 
     def get_file_extension(self) -> str:
@@ -173,7 +173,7 @@ class TXTConverter(ExportDataToFile):
     def generate_content(self) -> str:
         txt_content = ""
         for item in self.race_data:
-            txt_content += f"{item['MENO']} {item['PRIEZVISKO']} (OS.ČÍSLO: {item['OS.ČÍSLO']}, ČIP: {item['ČIP']})\n"
+            txt_content += f"{item['first_name']} {item['surname']} (OS.ČÍSLO: {item['reg_number']}, ČIP: {item['sportident']})\n"
         return txt_content
 
     def get_file_extension(self) -> str:

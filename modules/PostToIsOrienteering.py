@@ -1,5 +1,5 @@
 import requests
-import utilities.ErrorHandler as ErrorHandler
+import modules.ErrorHandler as ErrorHandler
 
 class Mod_post():
     def __init__(self, api_endpoint, api_key):
