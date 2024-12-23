@@ -7,8 +7,7 @@ import modules.ErrorHandler as error
 from  DateConverter import DateConverter as dc
 from datetime import datetime
 
-ERROR_RACE_ID_NOT_FOUND = "error: race_id not found in cache"
-
+ 
 
 class Procesor:
     def __init__(self):
@@ -25,7 +24,7 @@ class Procesor:
         
         self.races = {} # dict filled with dicts of races, see function fil_out_cache 
         self.club_id = self.config.CLUB_ID  # ulozene v configu
-                
+        self.runners = []        
                     
             
             
@@ -35,7 +34,7 @@ class Procesor:
         try:
             races = self.mod_get.get_races_in_month(month)
         except error.IsOrieteeringApiError as e:
-            return e
+            return f'{str(e)}'
         output = [{"id": None, "datum": None, "nazov": None, "deadline": None,
             "miesto": None, "kategorie": None}
             for _ in range(len(races))]
@@ -44,7 +43,7 @@ class Procesor:
             try:
                 race = self.mod_get.get_race_details(id)
             except error.IsOrieteeringApiError as e:
-                return e
+                return f'{str(e)}'
             try:
                 self.fill_out_cache(race)
             except error.HandlerError:
@@ -90,21 +89,21 @@ class Procesor:
 
     def import_race_to_Sandberg_Databaze(self, race_id: int):
         
-        if race_id in self.cache["competitions"]:
-            race_data = self.cache["competitions"][race_id]
+        if race_id in self.races.keys():
+            race_data = self.races[race_id]
             try:
                 self.sandberg_handler.process_race_data(race_data)
                 return "The race has been successfully added."
-            except Exception as e:
+            except error.SandbergDatabaseError as e:
                 return f"{str(e)}"
         else:
-            return ERROR_RACE_ID_NOT_FOUND
+            raise error.HandlerError("race_id not found in cache")
 
     def get_active_races(self):
         try:
             active_races = self.mod_get.get_races_from_date()
         except error.IsOrieteeringApiError as e:
-            return e
+            return f'{str(e)}'
         output = []
         output_dict = {"id": None, "datum": None, "nazov": None, "deadline": None,
             "miesto": None, "kategorie": None}
@@ -115,11 +114,11 @@ class Procesor:
             try:
                 race = self.mod_get.get_race_details(id)
             except error.IsOrieteeringApiError:
-                return e
+                return f'{str(e)}'
             try:
                 deadline_date = dc.get_date_object_from_string(race["entry_dates"][0]["entries_to"])
             except error.HandlerError as e:
-                return e
+                return f'{str(e)}'
             try: 
                 self.fill_out_cache(race)
             except error.HandlerError:
@@ -138,10 +137,7 @@ class Procesor:
 
         return output
 
-    def add_registered_runners_to_cache(self, race_id: int):
-        self.cache.setdefault("registered_runners", {})
-        if race_id not in self.cache["registered_runners"]:
-            self.cache["registered_runners"][race_id] = self.sandberg_handler.get_last_exported_data()
+    
 
     def sign_racers_to_IsOrienteering(self, race_id: int):
         """
@@ -151,9 +147,9 @@ class Procesor:
         try:
             self.sandberg_handler.export_registered_runners(race_id)
         except error.SandbergDatabaseError as e: # test this
-            return e
+            return f'{str(e)}'
         data = self.sandberg_handler.get_last_exported_data()
-        
+
         for runner in data:
             registration_form = {
                     "registration_id": "0", ##ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu
@@ -170,27 +166,28 @@ class Procesor:
                     ],
                     "services": []
                     }
-
+            self.runners.append(registration_form)
             try:
                 self.mod_post.register_runner(race_id, registration_form)
             except error.IsOrieteeringApiError as e:
-                return e
+                return f'{str(e)}'
         return True
 
-    def convert_data(self, race_id: int, converter_class):
-        if race_id in self.cache["registered_runners"]:
-            runners = self.cache["registered_runners"][race_id]
+    def convert_data(self, converter_class):
+        if self.runners != [] :
+            runners = self.runners
             return converter_class(runners)
-        return ERROR_RACE_ID_NOT_FOUND
+        else:
+            raise error.HandlerError("race_id not found in cache")
 
-    def convert_html(self, race_id: int):
-        return self.convert_data(race_id, HTMLConverter)
+    def convert_html(self):
+        return self.convert_data(HTMLConverter)
 
-    def convert_csv(self, race_id: int):
-        return self.convert_data(race_id, CSVConverter)
+    def convert_csv(self):
+        return self.convert_data(CSVConverter)
 
-    def convert_txt(self, race_id: int):
-        return self.convert_data(race_id, TXTConverter)
+    def convert_txt(self):
+        return self.convert_data(TXTConverter)
 
     def add_to_google_calendar(self, race: dict):
         ...
@@ -207,7 +204,7 @@ class Procesor:
         try:
             runners = self.mod_get.get_club_registrations(self.club_id)
         except error.IsOrieteeringApiError as e:
-            return e
+            return f'{str(e)}'
         for runner in runners:
             output.append({runner["runner"]["id"]: {"first_name": runner["runner"]["first_name"],  "second_name" : runner["runner"]["second_name"],}})
         return output
@@ -218,7 +215,7 @@ class Procesor:
         try:
             results = self.mod_get.get_runner_results(runner_id, date_from, date_to)
         except error.IsOrieteeringApiError as e:
-            return e
+            return f'{str(e)}'
         return results
 
 
