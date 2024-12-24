@@ -6,17 +6,18 @@ from datetime import timedelta
 
 class GraphCreator:
 
-    ###   dorobit input dat a nech sa zmestia nazvy
-    def __init__(self):
+    ###   ak sa nezmestia data tak dorobit legendu a do grafov priradit iba
+    def __init__(self, data):
         self.table = None
         self.attendance_graph = None
         self.placement_graph = None
         self.times_graph = None
+        self.data = data #[{month, year : participations}, {race : time_after_first}, {race : [date, placement]}, name, club, start_date, end_date]  +  mozno nejaku path z configuraku nwm
         
     def create_attendance_graph(self):
         fig1, ax1 = plt.subplots()
-        mesiace = ["Január", "Február", "Marec", "April", "Máj", "Jún"]
-        participation = [1, 0, 3, 1, 2, 2]
+        mesiace = self.data[0].keys()
+        participation = self.data[0].values()
         ax1.bar(mesiace, participation, color='hotpink')
         ax1.set_yticks(range(7))
         ax1.set_yticklabels(range(0,7))
@@ -24,12 +25,7 @@ class GraphCreator:
         return fig1
 
     def create_times_graph(self):
-        time_differences = [
-            timedelta(minutes=4),
-            timedelta(minutes=10, seconds=23),
-            timedelta(minutes=1, seconds=45),
-            timedelta(hours=1, minutes=5, seconds=30)  # Example with hours
-        ]
+        time_differences = self.data[1].values()
 
         time_in_seconds = [td.total_seconds() for td in time_differences]
 
@@ -49,7 +45,7 @@ class GraphCreator:
         formatted_yticks = [f"{t // 3600:02}:{(t // 60) % 60:02}:{t % 60:02}" for t in yticks]
 
         fig2, ax2 = plt.subplots()
-        races = ["Race 1", "Race 2", "Race 3", "Race 4"]
+        races = self.data[1].keys()
         ax2.plot(races, time_in_seconds, color='green', marker='o', label="Time loss (seconds)")
 
 
@@ -68,18 +64,13 @@ class GraphCreator:
     def create_placement_graph(self):
         fig, ax = plt.subplots()
 
-        race_data = [
-            ("Race A\n\n\n\n", datetime(2023, 1, 10), 3),
-            ("Race B", datetime(2023, 3, 5), 1),
-            ("Race C", datetime(2023, 6, 20), 5),
-            ("Race D", datetime(2023, 9, 15), 4)
-        ]
+        
         
         race_data.sort(key=lambda x: x[1])
         
-        race_names = [item[0] for item in race_data]
-        dates = [item[1] for item in race_data]
-        placements = [item[2] for item in race_data]
+        race_names = self.data[2].keys()
+        dates = [item[0] for item in self.data[2].values()]
+        placements = [item[1] for item in self.data[2].values()]
 
         y_labels = ["4/4","3/4", "1/2", "1/4", 3, 2, 1][::-1]
         y_positions = list(range(len(y_labels)))
@@ -105,9 +96,9 @@ class GraphCreator:
         ax.axis("off")
 
         summary_data = [
-            ["Meno", "Alexander Fekete"],
-            ["Klub", "Pretekársky klub Rimavská sobota"],
-            ["Časový interval", "1.1.2000 -> 2.2.2002"]
+            ["Meno", self.data[3]],
+            ["Klub", self.data[4]],
+            ["Časový interval", f"{self.data[5]} -> {self.data[6]}"]
         ]
 
         table = ax.table(cellText=summary_data, cellLoc="center", loc="center")
@@ -130,9 +121,10 @@ class GraphCreator:
                 plt.close(fig)
 
 
-#i = GraphCreator()
+i = GraphCreator([{month, year : participations}, {race : time_after_first}, {race : [date, placement]}, name, club, start_date, end_date])
 #print(1)
-#i.create()
+i.create()
 #print(2)
 #i.save()
 #print(3)
+
