@@ -1,6 +1,6 @@
 import requests
-from classes.correct_cleaner.ErrorHandler import SandbergDatabaseError
-from classes.correct_cleaner.response_handler_export import ResponseHandler
+from ErrorHandler import SandbergDatabaseError
+from response_handler_export import ResponseHandler
 
 SUCCESS_CODE = 200
 GENERIC_ERROR_CODE = 500
