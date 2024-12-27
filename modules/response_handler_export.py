@@ -1,4 +1,4 @@
-from classes.correct_cleaner.ErrorHandler import SandbergDatabaseError
+from ErrorHandler import SandbergDatabaseError
 
 
 class ResponseHandler:

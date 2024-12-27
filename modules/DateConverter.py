@@ -1,9 +1,9 @@
 from datetime import datetime
 import calendar
-from modules.ErrorHandler import *
+from ErrorHandler import *
+
 
 class DateConverter:
-
     NUMBER_OF_MONTHS_IN_YEAR = 12
 
     def convert_to_google_calendar_format(self, date: str):
@@ -73,18 +73,20 @@ class DateConverter:
         """
         try:
             fmt = '%Y-%m-%d %H:%M' if ' ' in date else '%Y-%m-%d'
-            return datetime.strptime(date, fmt).strftime(fmt)
+            return datetime.strptime(date, fmt).strftime("%Y-%m-%d %H:%M")
         except ValueError:
             raise ValueError("Not valid. Expecting format 'yyyy-mm-dd' or 'yyyy-mm-dd HH:MM'.")
-    
+
     def get_realtime_date(self):
         return datetime.now().strftime("%Y-%m-%d")
-    
-    def get_date_object_from_string(self, input_string : str):
+
+    def get_date_object_from_string(self, input_string: str):
         try:
-            return datetime.strftime(input_string,"%Y-%m-%d")
+            return datetime.strftime(input_string, "%Y-%m-%d")
         except ValueError:
             raise HandlerError("Wrong input string")
+
+
 if __name__ == '__main__':
     dc = DateConverter()
     print("Google Calendar format:", dc.convert_to_google_calendar_format('2024-05-05'))

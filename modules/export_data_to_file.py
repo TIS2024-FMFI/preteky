@@ -24,10 +24,13 @@ class ExportDataToFile(ABC):
         """
         pass
 
-    def save_to_file(self):
+    def save_to_file(self, output_dir: str = None):
         """
         Save the content to a file with the appropriate name and extension
         """
+        if output_dir is not None:
+            self.output_dir = output_dir
+
         if not self.output_dir:
             raise ValueError("Output directory is not set")
 
@@ -125,7 +128,7 @@ class HTMLConverter(ExportDataToFile):
                     </script>
                 </head>
                 <body>
-                    <h1>ÚDAJE O PRETEKOCH</h1>
+                    <h1>ÚDAJE O PRIHLÁSENÝCH PRETEKÁROCH</h1>
                     <table id="raceTable">
                         <tr>
                             <th onclick="filterTable(0)">MENO</th>
@@ -143,7 +146,7 @@ class HTMLConverter(ExportDataToFile):
                     <td>{item['surname']}</td>
                     <td>{item['reg_number']}</td>
                     <td>{item['sportident']}</td>
-                    <td>{item['categories']["competition_category_id"]}</td>
+                    <td>{item['categories'][0]['competition_category_id']}</td>
                     <td>{item['comment']}</td>
                 </tr>
             """
@@ -162,7 +165,7 @@ class CSVConverter(ExportDataToFile):
     def generate_content(self) -> str:
         csv_content = "MENO;PRIEZVISKO;OS.ČÍSLO;ČIP;ID_KATÉGORIE;POZNÁMKA\n"
         for item in self.race_data:
-            csv_content += f"{item['first_name']};{item['surname']};{item['reg_number']};{item['sportident']};{item['categories']["competition_category_id"]};{item['comment']}\n"
+            csv_content += f"{item['first_name']};{item['surname']};{item['reg_number']};{item['sportident']};{item['categories'][0]['competition_category_id']};{item['comment']}\n"
         return csv_content
 
     def get_file_extension(self) -> str:
@@ -173,10 +176,8 @@ class TXTConverter(ExportDataToFile):
     def generate_content(self) -> str:
         txt_content = ""
         for item in self.race_data:
-            txt_content += f"{item['first_name']} {item['surname']} (OS.ČÍSLO: {item['reg_number']}, ČIP: {item['sportident']})\n"
+            txt_content += f"{item['first_name']} {item['surname']} (OS.ČÍSLO: {item['reg_number']}, ČIP: {item['sportident']}, I)\n"
         return txt_content
 
     def get_file_extension(self) -> str:
         return ".txt"
-
-
