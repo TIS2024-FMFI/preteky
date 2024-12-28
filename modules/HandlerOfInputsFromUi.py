@@ -203,8 +203,7 @@ class Procesor:
         except error.IsOrieteeringApiError as e:
             return f'{str(e)}'
         for runner in runners:
-            output.append({runner["runner"]["id"]: {"first_name": runner["runner"]["first_name"],
-                                                    "second_name": runner["runner"]["second_name"], }})
+            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"], "PRIEZVISKO": runner["runner"]["second_name"]})
         return output
 
     def get_runner_results(self, runner_id, date_from, date_to):
