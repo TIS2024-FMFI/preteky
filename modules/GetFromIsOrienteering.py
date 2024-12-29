@@ -1,4 +1,4 @@
-from DateConverter import DateConverter as date_converter
+from DateConverter import DateConverter 
 import requests
 import ErrorHandler as ErrorHandler
 
@@ -7,6 +7,7 @@ class Mod_get():
     def __init__(self, api_endpoint: str, api_key: str):
         self._api_endpoint = api_endpoint
         self._api_key = api_key
+        self.dc = DateConverter()
 
     def _get_header(self):
         return {
@@ -21,15 +22,15 @@ class Mod_get():
 
     def get_races_in_month(self, month):
         url = f'{self._api_endpoint}/competitions'
-        param = {"date_from": {date_converter.return_date_with_first_day_of_month(month)},
-                 "date_to": {date_converter.return_date_with_last_day_of_month(month)}}
+        param = {"date_from": {self.dc.return_date_with_first_day_of_month(month=month)},
+                 "date_to": {self.dc.return_date_with_last_day_of_month(month=month)}}
         response = requests.get(url, headers=self._get_header(), params=param)
         self._handle_response_code(response)
         return response.json()
 
     def get_races_from_date(self):
         url = f'{self._api_endpoint}/competitions'
-        param = {"date_from": {date_converter.get_realtime_date()}}
+        param = {"date_from": {self.dc.get_realtime_date()}}
         response = requests.get(url, headers=self._get_header(), params=param)
         self._handle_response_code(response)
         return response.json()
