@@ -4,20 +4,22 @@ from database_sandberg_handler import SandbergDatabaseHandler
 from config_file_reader import ConfigFileReader
 from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
 import ErrorHandler as error
-from DateConverter import DateConverter as dc
+import DateConverter
 from datetime import datetime
 
 
 class Procesor:
     def __init__(self):
         self.config = ConfigFileReader()
+        self.dc = DateConverter.DateConverter()
         self.mod_get = Mod_get(self.config.IS_API_ENDPOINT,
                                self.config.IS_API_KEY)  # here we need url endpoit and  api acces key from config file
         self.mod_post = Mod_post(self.config.IS_API_ENDPOINT, self.config.IS_API_KEY)  # same here
         self.sandberg_handler = SandbergDatabaseHandler(self.config.SANDBERG_API_ENDPOINT)
         self.categories = {}  # dict of category_id : name
         try:
-            for category in self.mod_get.get_categories_details(): self.categories[category["id"]] = category["name"]
+            for category in self.mod_get.get_categories_details():
+                self.categories[category["id"]] = category["name"]
         except error.IsOrieteeringApiError as e:
             raise e
 
@@ -111,7 +113,13 @@ class Procesor:
             except error.IsOrieteeringApiError as e:
                 return f'{str(e)}'
             try:
-                deadline_date = dc.get_date_object_from_string(race["entry_dates"][0]["entries_to"])
+                entry_dates = race["entry_dates"]
+                if isinstance(entry_dates, list) and len(entry_dates) > 0:
+                    deadline_date = self.dc.get_date_object_from_string(entry_dates[0]["entries_to"])
+                elif isinstance(entry_dates, dict):
+                    deadline_date = self.dc.get_date_object_from_string(entry_dates["entries_to"])
+                else:
+                    raise error.HandlerError("Invalid entry_dates format")
             except error.HandlerError as e:
                 return f'{str(e)}'
             try:
@@ -120,16 +128,31 @@ class Procesor:
                 pass
 
             if deadline_date > datetime.now():
-                ids_of_categories = [category["category_id"] for category in race["categories"]]
-                names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
-                output_dict["id"] = id
-                output_dict["datum"] = race["events"][0]["date"]
-                output_dict["nazov"] = race["title_sk"]
-                output_dict["deadline"] = race["entry_dates"][0]["entries_to"]
-                output_dict["miesto"] = race["place"]
+                if "categories" in race and isinstance(race["categories"], list):
+                    ids_of_categories = [category["category_id"] for category in race["categories"]]
+                    names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
+                else:
+                    ids_of_categories = []
+                    names_of_categories = []
+
+                output_dict["id"] = int(id)
+
+                if "events" in race and isinstance(race["events"], list) and len(race["events"]) > 0:
+                    output_dict["datum"] = race["events"][0]["date"]
+                else:
+                    output_dict["datum"] = None
+
+                output_dict["nazov"] = race.get("title_sk", None)
+
+                if "entry_dates" in race and isinstance(race["entry_dates"], list) and len(race["entry_dates"]) > 0:
+                    output_dict["deadline"] = race["entry_dates"][0].get("entries_to", None)
+                else:
+                    output_dict["deadline"] = None
+
+                output_dict["miesto"] = race.get("place", None)
                 output_dict["kategorie"] = ",".join(names_of_categories)
                 output.append(output_dict)
-
+        print("Debug výstup aktívnych závodov:", output)
         return output
 
     def sign_racers_to_IsOrienteering(self, race_id: int):

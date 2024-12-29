@@ -1,5 +1,5 @@
 import unittest
-import modules.ErrorHandler as e
+import ErrorHandler as e
 
 
 message = "Test message"

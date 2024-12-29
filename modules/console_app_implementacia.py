@@ -1,20 +1,19 @@
 import os
-import time
 import tty
 import termios
 import sys
-#import msvcrt  # Windows-only library for capturing keypresses
+# import msvcrt  # Windows-only library for capturing keypresses
 from datetime import datetime
+import config_file_reader as config
+import HandlerOfInputsFromUi as handler
 
 
-
-
-            
-        ####vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
-         #komunikacia s ostanymi 
+# vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
+# komunikacia s ostanymi
 
 class Cache:
     def __init__(self):
+        self.config = config.ConfigFileReader()
         self.data = {"isOrienteering": {}, "sandberg": {}, "save_path": ""}
 
     def add_races_orienteering(self, races, date):
@@ -28,12 +27,12 @@ class Cache:
 
     def get_races_sandberg(self):
         return self.data.get("sandberg")
-    
-    def import_path(self):   ### stiahne z databazy nejakej / konfiguracneho suboru
-        self.data["save_path"] = "C:\\Nie\\kde\\v\\pici"
 
-    def save_path(self):     ### nastavi novu path v ulozisku
-        pass
+    def import_path(self):  ### stiahne z databazy nejakej / konfiguracneho suboru
+        self.data["save_path"] = self.config.HOME_DIR
+
+    def save_path(self, path):  ### nastavi novu path v ulozisku
+        self.data["save_path"] = path
 
     def get_path(self):
         if self.data["save_path"] == "":
@@ -42,14 +41,16 @@ class Cache:
 
     def set_path(self, path):
         ### nastavit novu path na miesto kde je stara ulozena
-        self.save_path()
-        self.data["save_path"] = path
+        self.save_path(path)
+
+    def save_path_to_config(self):
+        self.config.set_home_dir(self.data["save_path"])
 
 
 class Log:
     def __init__(self):
         self.log_records = []
-        
+
     def add_record(self, record):
         self.log_records.insert(0, record)
 
@@ -58,26 +59,22 @@ class Log:
         for entry in self.log_records:
             print(entry)
 
-        
-
 
 class ConsoleApp:
 
     def __init__(self):
         self.log = Log()
         self.cache = Cache()
-        self.window_general(["Import preteku", "Prihlásenie pretekarov", "Export do súboru", "Štatistiky pretekara"], "MENU", "MENU")
+        self.handler = handler.Procesor()
+        self.window_general(["Import preteku", "Prihlásenie pretekarov", "Export do súboru", "Štatistiky pretekara"],
+                            "MENU", "MENU")
 
     def run_interface(self, interface_name, *param):
         if interface_name == "races_from_orienteering":
-            #mena pretekov na dany mesiac
+            # mena pretekov na dany mesiac
             cache_contains = self.cache.get_races_orienteering(param[0])
             if not cache_contains:
-                races = [
-                        {"DÁTUM": f"2023-a-0{i+1}", "NÁZOV": f"Race {i + 1}", "DEADLINE": f"2023-b-1{i+1}",
-                        "MIESTO": f"Location {i + 1}", "KATEGÓRIA": f"Category {i % 3 + 1}"}
-                        for i in range(5)
-                    ]
+                races = self.handler.get_active_races()
                 self.cache.add_races_orienteering(races, param[0])
             else:
                 races = cache_contains
@@ -86,17 +83,11 @@ class ConsoleApp:
         elif interface_name == "races_from_sandberg":
             cache_contains = self.cache.get_races_sandberg()
             if not cache_contains:
-                races = [
-                        {"DÁTUM": f"2023-a-0{i+1}", "NÁZOV": f"Race {i + 1}", "DEADLINE": f"2023-b-1{i+1}",
-                        "MIESTO": f"Location {i + 1}", "KATEGÓRIA": f"Category {i % 3 + 1}"}
-                        for i in range(5)
-                    ]
+                races = self.handler.get_active_races()
                 self.cache.add_races_sandberg(races)
             else:
                 races = cache_contains
             return races
-
-        
 
         elif interface_name == "html":
             return "Dojebalo sa to"
@@ -109,14 +100,13 @@ class ConsoleApp:
             ### import pretekov
         elif interface_name == "racers":
             if param[0] == "Bez filtra":
-                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}",'KLUB': "abcdef"} for i in range(5)]
+                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}", 'KLUB': "abcdef"} for i in range(5)]
             if param[0] == "Meno":
-                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}",'KLUB': "abcdef"} for i in range(5)]
+                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}", 'KLUB': "abcdef"} for i in range(5)]
             if param[0] == "ID":
-                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}",'KLUB': "abcdef"} for i in range(5)]
+                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}", 'KLUB': "abcdef"} for i in range(5)]
         elif interface_name == "import_stat":
             return "SUCCESS"
-
 
     def get_key(self):
         """Reads a single keypress."""
@@ -128,14 +118,15 @@ class ConsoleApp:
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
         return ch
-    
+
     def clear_screen(self):
         os.system('cls' if os.name == 'nt' else 'clear')
 
     def display_menu(self, options, current_idx, title):
         self.clear_screen()
         if "ZVOĽTE PRETEK" in title:
-            print("(press 'q' to quit, UP and DOWN to navigate, ENTER to select option, 'b' for back, 's' to sort items)")
+            print(
+                "(press 'q' to quit, UP and DOWN to navigate, ENTER to select option, 'b' for back, 's' to sort items)")
         else:
             print("(press 'q' to quit, UP and DOWN to navigate, ENTER to select option, 'b' for back)")
         print(f"--- {title} ---")
@@ -144,9 +135,8 @@ class ConsoleApp:
                 print(f"> {option}")
             else:
                 print(f"  {option}")
-                
-        self.log.display()
 
+        self.log.display()
 
     def quit(self):
         main_options = ["Nie", "Áno"]
@@ -155,11 +145,11 @@ class ConsoleApp:
         while True:
             self.display_menu(main_options, current_idx, "Chcete naozaj odísť?")
             key = self.get_key()
-            if key == '\033': # Arrow keys
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(main_options) - 1: # Down
+                elif next2 == 'B' and current_idx < len(main_options) - 1:  # Down
                     current_idx += 1
             elif key == '\r':  # Enter
                 if main_options[current_idx] == "Áno":
@@ -177,43 +167,42 @@ class ConsoleApp:
             races = self.run_interface("races_from_sandberg")
         while True:
             races = sorted(races, key=lambda x: x[sort_key])
-            races_display = [f"{p['DÁTUM']} | {p['NÁZOV']} | {p['DEADLINE']} | {p['MIESTO']} | {p['KATEGÓRIA']}" for p in races]
-            
+            races_display = [f"{p['DÁTUM']} | {p['NÁZOV']} | {p['DEADLINE']} | {p['MIESTO']} | {p['KATEGÓRIA']}" for p
+                             in races]
+
             self.display_menu(races_display, current_idx, f"ZVOĽTE PRETEK (zoradené podľa {sort_key})")
             key = self.get_key()
-            if key == '\033': # Arrow keys
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(races) - 1: # Down
+                elif next2 == 'B' and current_idx < len(races) - 1:  # Down
                     current_idx += 1
             elif key == 'b':
                 break
             elif key == '\r':  # Enter
                 if path[1] == "Prihlásenie pretekárov":
-                    result = self.run_interface(aaa)
+                    result = self.run_interface("races_from_sandberg")
                 elif path[1] == "Export do súboru":
                     self.log.add_record(f"Zvolený pretek {races[current_idx]}")
                     self.window_general(["html", "csv", "txt"], "ZVOĽTE FORMÁT", *path, races[current_idx])
-                    
+
             elif key.lower() == 'q':  # Quit
                 self.quit()
 
             elif key == 's':
                 sort_keys = ["DÁTUM", "NÁZOV", "DEADLINE", "MIESTO", "KATEGÓRIA"]
                 sort_key = sort_keys[(sort_keys.index(sort_key) + 1) % len(sort_keys)]
-        
-       
-    
+
     def months_menu(self, *path):
         # Get the current month and year
         now = datetime.now()
         current_month = now.month
         current_year = now.year
-        
+
         year_offset = 0  # To keep track of the year offset for navigation
         current_idx = 0
-        
+
         while True:
             # Create a list of months for the current year plus the offset
             months = []
@@ -230,11 +219,11 @@ class ConsoleApp:
 
             self.display_menu(months, current_idx, "ZVOĽTE MESIAC")
             key = self.get_key()
-            if key == '\033': # Arrow keys
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(months) - 1: # Down
+                elif next2 == 'B' and current_idx < len(months) - 1:  # Down
                     current_idx += 1
             elif key == 'b':
                 break
@@ -246,31 +235,31 @@ class ConsoleApp:
                     year_offset += 1  # Go to the next year
                     current_idx = 0  # Reset selection to the top
                 else:
-                    m,y = months[current_idx].split(', ')
+                    m, y = months[current_idx].split(', ')
                     self.log.add_record(f"Zvolený mesiac {months[current_idx]}")
                     self.race_window(*path, months[current_idx])
-    ##                print(f"Selected {months[current_idx]} from {called_from}")
-##                    self.log.add_record( f"Selected {months[current_idx]} from {called_from}")
-##                    time.sleep(1)  # Simulate action
-##                    if "Import preteku" == called_from:
-##                        zoznam_pretekov_isOr(called_from, months[current_idx])
+            ##                print(f"Selected {months[current_idx]} from {called_from}")
+            ##                    self.log.add_record( f"Selected {months[current_idx]} from {called_from}")
+            ##                    time.sleep(1)  # Simulate action
+            ##                    if "Import preteku" == called_from:
+            ##                        zoznam_pretekov_isOr(called_from, months[current_idx])
             elif key.lower() == 'q':  # Quit
                 self.quit()
-
 
     def path_window(self, *path):
         default_path = self.cache.get_path()
         options = ["Pokračovať", "Zmeniť predvolenú path"]
         current_idx = 0
-        
+
         while True:
             self.display_menu(options, current_idx, f"Prevolená path je: {default_path}. Chcete pokračovať?")
             key = self.get_key()
-            if key == '\033': # Arrow keys
+
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(options) - 1: # Down
+                elif next2 == 'B' and current_idx < len(options) - 1:  # Down
                     current_idx += 1
             elif key == 'b':
                 break
@@ -280,23 +269,47 @@ class ConsoleApp:
                     self.clear_screen()
                     print("Zadajte novú path: ")
                     new_path = input().strip()
+
                     if os.path.isdir(new_path):  # Check if the path is valid
-                        default_path = new_path
-                        self.log.add_record("Path zmenená úspešne")
-                        self.cache.set_path(new_path)
+                        self.clear_screen()
+                        save_choice = self.ask_save_to_config()
+                        if save_choice == 'y':  # User wants to save the path to config
+                            self.cache.set_path(new_path)
+                            self.log.add_record(f"Path zmenená úspešne a uložená do konfigurácie.")
+                        else:
+                            self.cache.set_path(new_path)
+                            self.cache.save_path_to_config()
+                            self.log.add_record("Path zmenená úspešne, ale neuložená do konfigurácie.")
                     else:
                         self.log.add_record("Zvolená path nie je valídna")
-
-                        
                 else:
                     if path[-1] in ["html", "csv", "txt"]:
-                        result = self.run_interface(path[-1])
+                        self.run_interface(path[-1])
                     else:
                         self.time_interval(*path)
-
+                break
             elif key.lower() == 'q':  # Quit
                 self.quit()
 
+    def ask_save_to_config(self):
+        """ Ask the user if they want to save the new path to the config file. """
+        options = ["Áno", "Nie"]
+        current_idx = 0
+
+        while True:
+            self.display_menu(options, current_idx, "Chcete uložiť túto cestu ako predvolenú v konfigurácii?")
+            key = self.get_key()
+
+            if key == '\033':  # Arrow keys
+                next1, next2 = self.get_key(), self.get_key()
+                if next2 == 'A' and current_idx > 0:  # Up
+                    current_idx -= 1
+                elif next2 == 'B' and current_idx < len(options) - 1:  # Down
+                    current_idx += 1
+            elif key == '\r':  # Enter
+                return 'y' if options[current_idx] == "Áno" else 'n'
+            elif key.lower() == 'b':  # Back
+                break
 
     def window_general(self, options, title, *path):
         current_idx = 0
@@ -304,11 +317,11 @@ class ConsoleApp:
         while True:
             self.display_menu(options, current_idx, title)
             key = self.get_key()
-            if key == '\033': # Arrow keys
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(options) - 1: # Down
+                elif next2 == 'B' and current_idx < len(options) - 1:  # Down
                     current_idx += 1
             elif key == 'b':
                 break
@@ -318,7 +331,8 @@ class ConsoleApp:
                     if options[current_idx] == "Import preteku":
                         self.months_menu(*path, "Import preteku")
                     elif options[current_idx] == "Štatistiky pretekara":
-                        self.window_general(["Meno", "ID", "Bez filtra"], "Chcete zvoliť filtre?", *path, options[current_idx])
+                        self.window_general(["Meno", "ID", "Bez filtra"], "Chcete zvoliť filtre?", *path,
+                                            options[current_idx])
                     else:
                         self.race_window(*path, options[current_idx])
 
@@ -346,21 +360,20 @@ class ConsoleApp:
         while True:
             racers = sorted(racers, key=lambda x: x[sort_key])
             racers_display = [f"{p['MENO']} | {p['DÁTUM NARODENIA']} | {p['KLUB']}" for p in racers]
-            
+
             self.display_menu(racers_display, current_idx, f"ZVOĽTE PRETEKÁRA (zoradené podľa {sort_key})")
             key = self.get_key()
-            if key == '\033': # Arrow keys
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(racers) - 1: # Down
+                elif next2 == 'B' and current_idx < len(racers) - 1:  # Down
                     current_idx += 1
             elif key == 'b':
                 break
             elif key == '\r':  # Enter
                 self.log.add_record(f"Zvolený pretekár {racers[current_idx]}")
                 self.path_window(*path, racers[current_idx])
-                
 
             elif key.lower() == 'q':  # Quit
                 self.quit()
@@ -368,7 +381,6 @@ class ConsoleApp:
             elif key == 's':
                 sort_keys = ["MENO", "DÁTUM NARODENIA", "KLUB"]
                 sort_key = sort_keys[(sort_keys.index(sort_key) + 1) % len(sort_keys)]
-        
 
     def time_interval(self, *path):
         options = ["Nastavte začiatok intervalu", "Nastavte koniec intervalu", "Import štatistiky"]
@@ -381,7 +393,7 @@ class ConsoleApp:
             print(f"--- ZVOĽTE INTERVAL ŠTATISTIKY ---")
             print(f"Začiatok intervalu (dátum): {start_date if start_date else 'Nenastavený'}")
             print(f"Koniec intervalu (dátum): {end_date if end_date else 'Nenastavený'}")
-            
+
             # Display options and handle navigation
             for i, option in enumerate(options):
                 if i == current_idx:
@@ -391,11 +403,11 @@ class ConsoleApp:
             self.log.display()
 
             key = self.get_key()
-            if key == '\033': # Arrow keys
+            if key == '\033':  # Arrow keys
                 next1, next2 = self.get_key(), self.get_key()
-                if next2 == 'A' and current_idx > 0: # Up
+                if next2 == 'A' and current_idx > 0:  # Up
                     current_idx -= 1
-                elif next2 == 'B' and current_idx < len(options) - 1: # Down
+                elif next2 == 'B' and current_idx < len(options) - 1:  # Down
                     current_idx += 1
             elif key == 'b':
                 break
@@ -412,7 +424,7 @@ class ConsoleApp:
                             self.log.add_record(f"Začiatok intervalu bol nastavený na {start_date.date()}")
                     except ValueError:
                         self.log.add_record("Formát dátumu nie je valídny")
-                        
+
                 elif options[current_idx] == "Nastavte koniec intervalu":
                     self.clear_screen()
                     print("Zadajte dátum konca intervalu (YYYY-MM-DD): ")
@@ -425,25 +437,15 @@ class ConsoleApp:
                             self.log.add_record(f"Koniec intervalu bol nastavený na {end_date.date()}")
                     except ValueError:
                         self.log.add_record("Formát dátumu nie je valídny")
-                        
+
                 elif options[current_idx] == "Import štatistiky":
                     if start_date and end_date:
                         self.run_interface("import_stat")
                     else:
                         self.log.add_record("Pred pokračovaním správne nastavte začiatok aj koniec intervalu")
-                        
-            
+
             elif key.lower() == 'q':  # Quit
                 self.quit()
-
-
-
-
-
-
-
-
-
 
 
 a = ConsoleApp()

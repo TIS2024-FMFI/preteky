@@ -1,4 +1,4 @@
-import modules.ErrorHandler as e
+import ErrorHandler as e
 from GetFromIsOrienteering import Mod_get
 import PostToIsOrienteering as post
 import unittest
@@ -12,6 +12,7 @@ CLUB_ID = 81
 RUNNER_ID = None
 CATEGORY_ONE = None
 CATEGORY_TWO = None
+
 
 class ModGetTest(unittest.TestCase):
     def test_bad_endpoint_get(self):
@@ -62,13 +63,12 @@ class ModGetTest(unittest.TestCase):
         details = g.get_race_details(RACE_ID)
         self.assertIsNotNone(details)
         self.assertEqual(len(details["categories"]), 6)
-        CATEGORY_ONE, CATEGORY_TWO = details["categories"][:2] 
-        self.assertIsNotNone(CATEGORY_ONE)   
+        CATEGORY_ONE, CATEGORY_TWO = details["categories"][:2]
+        self.assertIsNotNone(CATEGORY_ONE)
         self.assertIsNotNone(CATEGORY_TWO)
         self.assertEqual(CATEGORY_ONE["category_id"], '160')
         self.assertEqual(CATEGORY_TWO["category_id"], '161')
 
-        
 
 if __name__ == '__main__':
     unittest.main()
