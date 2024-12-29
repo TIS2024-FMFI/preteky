@@ -3,15 +3,12 @@ import time
 import tty
 import termios
 import sys
-#import msvcrt  # Windows-only library for capturing keypresses
 from datetime import datetime
+from difflib import SequenceMatcher
 
-
-
-
-            
         ####vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
-         #komunikacia s ostanymi 
+        ###komunikacia s ostanymi 
+
 
 class Cache:
     def __init__(self):
@@ -30,7 +27,7 @@ class Cache:
         return self.data.get("sandberg")
     
     def import_path(self):   ### stiahne z databazy nejakej / konfiguracneho suboru
-        self.data["save_path"] = "C:\\Nie\\kde\\v\\pici"
+        self.data["save_path"] = self.handler.config.
 
     def save_path(self):     ### nastavi novu path v ulozisku  (v nasom pripade asi config subore)
         pass
@@ -71,68 +68,104 @@ class ConsoleApp:
         # pri implementacii cache treba z config file zobrat path
 
     def run_interface(self, interface_name, *param):
-        if interface_name == "races_from_orienteering":
-            cache_contains = self.cache.get_races_orienteering(param[0])
-            if not cache_contains:
-                # # races = [
-                # #         {"DÁTUM": f"2023-a-0{i+1}", "NÁZOV": f"Race {i + 1}", "DEADLINE": f"2023-b-1{i+1}",
-                # #         "MIESTO": f"Location {i + 1}", "ID": f"Category {i % 3 + 1}"}
-                # #         for i in range(5)
-                # #     ]
-                try:
-                    races = self.handler.get_races_from_is_orienteering(param[0])
-                except Exception(e):
-                    self.log.add_record(e)
+        try:
+            if interface_name == "races_from_orienteering":
+                cache_contains = self.cache.get_races_orienteering(param[0])
+                if not cache_contains:
+                    # # races = [
+                    # #         {"DÁTUM": f"2023-a-0{i+1}", "NÁZOV": f"Race {i + 1}", "DEADLINE": f"2023-b-1{i+1}",
+                    # #         "MIESTO": f"Location {i + 1}", "ID": f"Category {i % 3 + 1}"}
+                    # #         for i in range(5)
+                    # #     ]
+                    races = self.handler.get_races_from_IsOrienteering_in_month(param[0])  ### ocheckovat format ci sedi
+            
+                        
+                    self.cache.add_races_orienteering(races, param[0])
+                else:
+                    races = cache_contains
+                return races
+
+            elif interface_name == "races_from_sandberg":
+                cache_contains = self.cache.get_races_sandberg()
+                if not cache_contains:
+                    # races = [
+                    #         {"DÁTUM": f"2023-a-0{i+1}", "NÁZOV": f"Race {i + 1}", "DEADLINE": f"2023-b-1{i+1}",
+                    #         "MIESTO": f"Location {i + 1}", "ID": f"Category {i % 3 + 1}"}
+                    #         for i in range(5)
+                    #     ]
+                    races = self.handler.get_active_races()
+                    self.cache.add_races_sandberg(races)
+                else:
+                    races = cache_contains
+                return races
+
+            elif interface_name == "Register_racers":
+                self.handler.sign_racers_to_IsOrienteering(param[0])
+            
+
+            elif interface_name == "html":
+                self.handler.convert_html(param[0])
+
+            elif interface_name == "csv":
+                self.handler.convert_csv(param[0])
+                
+
+            elif interface_name == "txt":
+                self.handler.convert_txt(param[0])
+                
+            elif interface_name == "racers":
+                runners = self.handler.get_runners_from_club()
+                if param[0] == "Bez filtra":
+                    return runners
+                if param[0] == "Meno":
+                    def is_similar(a, b):
+                        return SequenceMatcher(None, a, b).ratio() >= threshold
+
+                    results = []
+                    name_parts = search_name.split()
+                    if len(name_parts) == 2:
+                        first, last = name_parts
+                    else:
+                        first, last = name_parts[0], ""
+                    for runner in runners:
+                        full_name = f"{runner['MENO']} {runner['PRIEZVISKO']}"
+                        reversed_name = f"{runner['PRIEZVISKO']} {runner['MENO']}"
+
+
+                        if (
+                            is_similar(full_name.lower(), search_name.lower())
+                            or is_similar(reversed_name.lower(), search_name.lower())
+                            or is_similar(runner["MENO"].lower(), search_name.lower())
+                            or is_similar(runner["PRIEZVISKO"].lower(), search_name.lower())
+                        ):
+                            if runner not in results:
+                                results.append(runner)
+
+                    if results == []:
+                        raise "NOT FOUND"
+                    return results
+                
+                if param[0] == "ID":
+                    for i in runners:
+                        if i["ID"] == param[1]:
+                            return [i]
+                    raise "NOT FOUND" 
                     
-                self.cache.add_races_orienteering_in_month(races, param[0])
-            else:
-                races = cache_contains
-            return races
 
-        elif interface_name == "races_from_sandberg":
-            cache_contains = self.cache.get_races_sandberg()
-            if not cache_contains:
-                # races = [
-                #         {"DÁTUM": f"2023-a-0{i+1}", "NÁZOV": f"Race {i + 1}", "DEADLINE": f"2023-b-1{i+1}",
-                #         "MIESTO": f"Location {i + 1}", "ID": f"Category {i % 3 + 1}"}
-                #         for i in range(5)
-                #     ]
-                races = self.handler.get_active_races()
-                self.cache.add_races_sandberg(races)
-            else:
-                races = cache_contains
-            return races
+            elif interface_name == "import_stat":
+                self.handler.get_runner_results(param[2], param[0], param[1])
+                return "SUCCESS"
 
-        elif interface_name == "Register_racers":
-            self.handler.sign_racers_to_IsOrienteering(param[0])
-        
+            elif interface_name == "Import preteku":
+                self.handler.import_race_into_sandberg_database(param[0])
+                self.window_general(["Nie", "Áno"], "Chcete zaznačiť pretek do Google Calendar?", "GCal", param[0]):
 
-        elif interface_name == "html":
-            self.handler.convert_html(param[0])
+            elif interface_name == "GoogleCalendar":
+                self.handler.add_to_google_calendar(self.races[param[0]])
 
-        elif interface_name == "csv":
-            self.handler.convert_csv(param[0])
-            
-
-        elif interface_name == "txt":
-            self.handler.convert_txt(param[0])
-            
-        elif interface_name == "racers":
-
-            ###  funkcia co ziska racerov
-            if param[0] == "Bez filtra":
-                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}",'KLUB': "abcdef"} for i in range(5)]
-            if param[0] == "Meno":
-                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}",'KLUB': "abcdef"} for i in range(5)]
-            if param[0] == "ID":
-                return [{'MENO': f"meno{i}", 'DÁTUM NARODENIA': f"1-1-200{i}",'KLUB': "abcdef"} for i in range(5)]
-
-        elif interface_name == "import_stat":
-            self.handler.get_runner_results(param[2], param[0], param[1])
-            return "SUCCESS"
-
-        elif interface_name == "Import preteku":
-            self.handler.import_race_into_sandberg_database(param[0])
+        except Exception as e:
+            self.log.add_record(f'{str(e)}')
+                
 
 
     def get_key(self):
@@ -342,6 +375,13 @@ class ConsoleApp:
                     else:
                         self.racers(*path, options[current_idx], self.input_window(options[current_idx]))
 
+                elif path[0] == "GCal":
+                    if options[current_idx] == 'Áno':
+                        self.run_interface("GoogleCalendar", ID)
+                    elif options[current_idx] == 'Nie':
+                        break
+
+
             elif key.lower() == 'q':
                 self.quit()
 
@@ -352,11 +392,11 @@ class ConsoleApp:
 
     def racers(self, *path):
         current_idx = 0
-        sort_key = "MENO"
+        sort_key = "ID"
         racers = self.run_interface("racers", path[-2], path[-1])
         while True:
             racers = sorted(racers, key=lambda x: x[sort_key])
-            racers_display = [f"{p['MENO']} | {p['DÁTUM NARODENIA']} | {p['KLUB']}" for p in racers]
+            racers_display = [f"{p['ID']} | {p['MENO']} | {p['PRIEZVISKO']}" for p in racers]
             
             self.display_menu(racers_display, current_idx, f"ZVOĽTE PRETEKÁRA (zoradené podľa {sort_key})")
             key = self.get_key()
@@ -377,7 +417,7 @@ class ConsoleApp:
                 self.quit()
 
             elif key == 's':
-                sort_keys = ["MENO", "DÁTUM NARODENIA", "KLUB"]
+                sort_keys = ["ID", "MENO", "PRIEZVISKO"]
                 sort_key = sort_keys[(sort_keys.index(sort_key) + 1) % len(sort_keys)]
         
     def double_check(self, interface, title, *param):
@@ -411,6 +451,8 @@ class ConsoleApp:
             elif key.lower() == 'q':
                 self.quit()
 
+
+    
                 
         
     def time_interval(self, *path):
