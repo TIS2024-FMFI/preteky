@@ -217,6 +217,22 @@ class Procesor:
             return f'{str(e)}'
         return results
 
+    def get_race_results(self, race_id):
+        if race_id in self.races.keys():
+            event_id = self.races[race_id]["events"]["id"]
+        else:
+            try:
+                tmp_race = self.mod_get.get_race_details(race_id)
+            except error.IsOrieteeringApiError as e:
+                return f'{str(e)}'
+            event_id = tmp_race["events"][0]["id"]
+        try:
+            results = self.mod_get.get_race_results(race_id, event_id)
+        except error.IsOrieteeringApiError as e:
+            return f'{str(e)}'
+        time_of_first_runner = {"minutes" : results[0]["time_min"], "seconds" : results[0]["time_sec"]}
+        return {"time_of_first_runner" : time_of_first_runner, "number_of_competitors" : len(results)}
+
 
 # kedze toto je ako dict a nie ako json string (co bolo povodne), tak sa pomenil database_sandberg_handler.py
 race_data_json = {
