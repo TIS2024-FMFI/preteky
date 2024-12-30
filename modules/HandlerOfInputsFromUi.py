@@ -4,7 +4,7 @@ from database_sandberg_handler import SandbergDatabaseHandler
 from config_file_reader import ConfigFileReader
 from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
 import ErrorHandler as error
-from DateConverter import DateConverter as dc
+from  DateConverter import DateConverter
 from datetime import datetime
 
 
@@ -15,7 +15,9 @@ class Procesor:
                                self.config.IS_API_KEY)  # here we need url endpoit and  api acces key from config file
         self.mod_post = Mod_post(self.config.IS_API_ENDPOINT, self.config.IS_API_KEY)  # same here
         self.sandberg_handler = SandbergDatabaseHandler(self.config.SANDBERG_API_ENDPOINT)
+        self
         self.categories = {}  # dict of category_id : name
+        self.dc = DateConverter()
         try:
             for category in self.mod_get.get_categories_details(): self.categories[category["id"]] = category["name"]
         except error.IsOrieteeringApiError as e:
@@ -30,7 +32,7 @@ class Procesor:
             races = self.mod_get.get_races_in_month(month)
         except error.IsOrieteeringApiError as e:
             return f'{str(e)}'
-        output = [{"id": None, "datum": None, "nazov": None, "deadline": None,
+        output = [{"id": None, "dátum": None, "názov": None, "deadline": None,
                    "miesto": None, "kategorie": None}
                   for _ in range(len(races))]
         for i in range(len(races)):
@@ -46,9 +48,9 @@ class Procesor:
             ids_of_categories = [category["category_id"] for category in race["categories"]]
             names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
             output[i]["id"] = id
-            output[i]["datum"] = races[i]["events"][0]["date"]
-            output[i]["nazov"] = races[i]["title_sk"]
-            output[i]["deadline"] = race["entry_dates"][0]["entries_to"]
+            output[i]["dátum"] = races[i]["date_to"]
+            output[i]["názov"] = races[i]["title_sk"]
+            output[i]["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"]
             output[i]["miesto"] = races[i]["place"]
             output[i]["kategorie"] = ",".join(names_of_categories)
 
@@ -62,8 +64,8 @@ class Procesor:
                 "date_from": input_race["date_from"],
                 "date_to": input_race["date_to"],
                 "cancelled": input_race["cancelled"],
-                "deadline": input_race["entry_dates"][0]["entries_to"],
-                "events": {"id": input_race["events"][0]["id"]},
+                "deadline": input_race["date_to"] if input_race["entry_dates"] == [] else input_race["entry_dates"][0]["entries_to"],
+                "events": {"id": None if input_race["events"] == [] else input_race["events"][0]["id"]},
                 "categories": []
             }
 
@@ -82,7 +84,7 @@ class Procesor:
 
     #     return output
 
-    def import_race_to_Sandberg_Databaze(self, race_id: int):
+    def import_race_to_Sandberg_Database(self, race_id: int):
 
         if race_id in self.races.keys():
             race_data = self.races[race_id]
@@ -111,7 +113,7 @@ class Procesor:
             except error.IsOrieteeringApiError as e:
                 return f'{str(e)}'
             try:
-                deadline_date = dc.get_date_object_from_string(race["entry_dates"][0]["entries_to"])
+                deadline_date = self.dc.get_date_object_from_string(race["date_to"] if race["entry_dates"] == [] else  race["entry_dates"][0]["entries_to"])
             except error.HandlerError as e:
                 return f'{str(e)}'
             try:
@@ -123,9 +125,9 @@ class Procesor:
                 ids_of_categories = [category["category_id"] for category in race["categories"]]
                 names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
                 output_dict["id"] = id
-                output_dict["datum"] = race["events"][0]["date"]
-                output_dict["nazov"] = race["title_sk"]
-                output_dict["deadline"] = race["entry_dates"][0]["entries_to"]
+                output_dict["dátum"] = race["events"][0]["date"]
+                output_dict["názov"] = race["title_sk"]
+                output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else  race["entry_dates"][0]["entries_to"]
                 output_dict["miesto"] = race["place"]
                 output_dict["kategorie"] = ",".join(names_of_categories)
                 output.append(output_dict)
@@ -203,7 +205,7 @@ class Procesor:
         except error.IsOrieteeringApiError as e:
             return f'{str(e)}'
         for runner in runners:
-            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"], "PRIEZVISKO": runner["runner"]["second_name"]})
+            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"], "PRIEZVISKO": runner["runner"]["surname"]})
         return output
 
     def get_runner_results(self, runner_id, date_from, date_to):
@@ -262,12 +264,13 @@ race_data_json = {
 }
 
 processor = Procesor()
-processor.races[1888] = race_data_json
-result = processor.import_race_to_Sandberg_Databaze(1888)
-print(result)
-result1 = processor.sign_racers_to_IsOrienteering(1888)
-print(result1)
-result2 = processor.convert_html("C:\\Users\\miria")
-print(result2)
+processor.get_races_from_IsOrienteering_in_month("December")
+# processor.races[1888] = race_data_json
+# result = processor.import_race_to_Sandberg_Databaze(1888)
+# print(result)
+# result1 = processor.sign_racers_to_IsOrienteering(1888)
+# print(result1)
+# result2 = processor.convert_html("C:\\Users\\miria")
+# print(result2)
 # result3 = processor.convert_csv(1888)
 # result4 = processor.convert_txt(1888)
