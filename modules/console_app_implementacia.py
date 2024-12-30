@@ -9,6 +9,8 @@ from HandlerOfInputsFromUi import Procesor
 import config_file_reader as config
 from DateConverter import DateConverter
 
+        ####vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
+        ###komunikacia s ostanymi 
 
 
 class Cache:
@@ -68,7 +70,7 @@ class ConsoleApp:
         self.log = Log()
         self.cache = Cache()
         self.date_converter = DateConverter()
-        self.window_general(["Import preteku", "Prihlásenie pretekarov", "Export do súboru", "Štatistiky pretekara"], "MENU", "MENU")
+        self.window_general(["Import preteku", "Prihlásenie pretekárov", "Export do súboru", "Štatistiky pretekara"], "MENU", "MENU")
         # pri implementacii cache treba z config file zobrat path
 
     def run_interface(self, interface_name, *param):
@@ -251,12 +253,12 @@ class ConsoleApp:
                 break
             elif key == '\r':
                 if path[1] == "Prihlásenie pretekárov":
-                    self.run_interface("Register_racers", races_display["ID"], )###lepsie bude ak sa jednotlivy racers na pretek zapamataju v nejakej cache pre handler
+                    self.double_check("Register_racers", f"Chcete prihlásiť pretekárov na {races[current_idx]['názov']}", races[current_idx]["id"])###lepsie bude ak sa jednotlivy racers na pretek zapamataju v nejakej cache pre handler
                 elif path[1] == "Export do súboru":
                     self.log.add_record(f"Zvolený pretek {races[current_idx]['NÁZOV'.lower()]}")
                     self.window_general(["html", "csv", "txt"], "ZVOĽTE FORMÁT", *path, races[current_idx])
                 elif path[1] == "Import preteku":
-                    self.double_check("Import preteku", f"Chcete importovať pretek {path[-1]['MENO'.lower()]}", path[-1]["ID".lower()]) #### tu je chyba
+                    self.double_check("Import preteku", f"Chcete importovať pretek {races[current_idx]['názov']}", races[current_idx]["id"]) #### tu je chyba
                     
                     
             elif key.lower() == 'q':
