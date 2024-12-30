@@ -5,6 +5,9 @@ import termios
 import sys
 from datetime import datetime
 from difflib import SequenceMatcher
+from HandlerOfInputsFromUi import Procesor
+import config_file_reader as config
+from DateConverter import DateConverter
 
         ####vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
         ###komunikacia s ostanymi 
@@ -12,6 +15,7 @@ from difflib import SequenceMatcher
 
 class Cache:
     def __init__(self):
+        self.config = config.ConfigFileReader()
         self.data = {"isOrienteering": {}, "sandberg": {}, "save_path": ""}
 
     def add_races_orienteering(self, races, date):
@@ -25,12 +29,12 @@ class Cache:
 
     def get_races_sandberg(self):
         return self.data.get("sandberg")
-    
-    def import_path(self):   ### stiahne z databazy nejakej / konfiguracneho suboru
-        self.data["save_path"] = self.handler.config.
 
-    def save_path(self):     ### nastavi novu path v ulozisku  (v nasom pripade asi config subore)
-        pass
+    def import_path(self):  ### stiahne z databazy nejakej / konfiguracneho suboru
+        self.data["save_path"] = self.config.HOME_DIR
+
+    def save_path(self, path):  ### nastavi novu path v ulozisku
+        self.data["save_path"] = path
 
     def get_path(self):
         if self.data["save_path"] == "":
@@ -39,9 +43,10 @@ class Cache:
 
     def set_path(self, path):
         ### nastavit novu path na miesto kde je stara ulozena
-        self.save_path()
-        self.data["save_path"] = path
+        self.save_path(path)
 
+    def save_path_to_config(self):
+        self.config.set_home_dir(self.data["save_path"])
 
 class Log:
     def __init__(self):
@@ -64,6 +69,7 @@ class ConsoleApp:
         self.handler = Procesor()
         self.log = Log()
         self.cache = Cache()
+        self.date_converter = DateConverter()
         self.window_general(["Import preteku", "Prihlásenie pretekarov", "Export do súboru", "Štatistiky pretekara"], "MENU", "MENU")
         # pri implementacii cache treba z config file zobrat path
 
@@ -77,8 +83,9 @@ class ConsoleApp:
                     # #         "MIESTO": f"Location {i + 1}", "ID": f"Category {i % 3 + 1}"}
                     # #         for i in range(5)
                     # #     ]
-                    races = self.handler.get_races_from_IsOrienteering_in_month(param[0])  ### ocheckovat format ci sedi
-            
+                    month = param[0].split(",")[0]
+                    races = self.handler.get_races_from_IsOrienteering_in_month(month)  ### ocheckovat format ci sedi
+                    
                         
                     self.cache.add_races_orienteering(races, param[0])
                 else:
@@ -119,10 +126,10 @@ class ConsoleApp:
                     return runners
                 if param[0] == "Meno":
                     def is_similar(a, b):
-                        return SequenceMatcher(None, a, b).ratio() >= threshold
+                        return SequenceMatcher(None, a, b).ratio() >= 80
 
                     results = []
-                    name_parts = search_name.split()
+                    name_parts = param[1].split()
                     if len(name_parts) == 2:
                         first, last = name_parts
                     else:
@@ -133,10 +140,10 @@ class ConsoleApp:
 
 
                         if (
-                            is_similar(full_name.lower(), search_name.lower())
-                            or is_similar(reversed_name.lower(), search_name.lower())
-                            or is_similar(runner["MENO"].lower(), search_name.lower())
-                            or is_similar(runner["PRIEZVISKO"].lower(), search_name.lower())
+                            is_similar(full_name.lower(), param[1].lower())
+                            or is_similar(reversed_name.lower(), param[1].lower())
+                            or is_similar(runner["MENO"].lower(), param[1].lower())
+                            or is_similar(runner["PRIEZVISKO"].lower(), param[1].lower())
                         ):
                             if runner not in results:
                                 results.append(runner)
@@ -157,8 +164,8 @@ class ConsoleApp:
                 return "SUCCESS"
 
             elif interface_name == "Import preteku":
-                self.handler.import_race_into_sandberg_database(param[0])
-                self.window_general(["Nie", "Áno"], "Chcete zaznačiť pretek do Google Calendar?", "GCal", param[0]):
+                self.handler.import_race_to_Sandberg_Database(param[0])
+                self.window_general(["Nie", "Áno"], "Chcete zaznačiť pretek do Google Calendar?", "GCal", param[0])
 
             elif interface_name == "GoogleCalendar":
                 self.handler.add_to_google_calendar(self.races[param[0]])
@@ -226,8 +233,11 @@ class ConsoleApp:
         else:
             races = self.run_interface("races_from_sandberg")
         while True:
-            races = sorted(races, key=lambda x: x[sort_key])
-            races_display = [f"{p['DÁTUM']} | {p['NÁZOV']} | {p['DEADLINE']} | {p['MIESTO']} | {p['ID']}" for p in races]
+            if sort_key == "DÁTUM" or sort_key == "DEADLINE" :
+                races = sorted(races, key=lambda x: self.date_converter.get_date_object_from_string(x[sort_key.lower()]))
+            else:
+                races = sorted(races, key=lambda x: x[sort_key])
+            races_display = [f"{p['DÁTUM'.lower()]} | {p['NÁZOV'.lower()]} | {p['DEADLINE'.lower()]} | {p['MIESTO'.lower()]} | {p['ID'.lower()]}" for p in races]
             
             self.display_menu(races_display, current_idx, f"ZVOĽTE PRETEK (zoradené podľa {sort_key})")
             key = self.get_key()
@@ -246,7 +256,7 @@ class ConsoleApp:
                     self.log.add_record(f"Zvolený pretek {races[current_idx]}")
                     self.window_general(["html", "csv", "txt"], "ZVOĽTE FORMÁT", *path, races[current_idx])
                 elif path[1] == "Import preteku":
-                    self.double_check("Import preteku", f"Chcete importovať pretek {path[-1]['MENO']}", path[-1]["ID"])
+                    self.double_check("Import preteku", f"Chcete importovať pretek {path[-1]['MENO'.lower()]}", path[-1]["ID".lower()]) #### tu je chyba
                     
                     
             elif key.lower() == 'q':
@@ -377,7 +387,7 @@ class ConsoleApp:
 
                 elif path[0] == "GCal":
                     if options[current_idx] == 'Áno':
-                        self.run_interface("GoogleCalendar", ID)
+                        self.run_interface("GoogleCalendar", path[1])
                     elif options[current_idx] == 'Nie':
                         break
 
