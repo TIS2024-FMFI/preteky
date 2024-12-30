@@ -1,11 +1,14 @@
+import ErrorHandler as error
+
+from DateConverter import DateConverter
+from datetime import datetime
+
 from GetFromIsOrienteering import Mod_get
 from PostToIsOrienteering import Mod_post
 from database_sandberg_handler import SandbergDatabaseHandler
 from config_file_reader import ConfigFileReader
 from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
-import ErrorHandler as error
-from  DateConverter import DateConverter
-from datetime import datetime
+from GoogleCalendarService import GoogleCalendarService
 
 
 class Procesor:
@@ -26,6 +29,8 @@ class Procesor:
         self.races = {}  # dict filled with dicts of races, see function fil_out_cache
         self.club_id = self.config.CLUB_ID  # ulozene v configu
         self.runners = []
+        self.google_calendar_service = GoogleCalendarService()
+
 
     def get_races_from_IsOrienteering_in_month(self, month: str):
         try:
@@ -50,7 +55,8 @@ class Procesor:
             output[i]["id"] = id
             output[i]["dátum"] = races[i]["date_to"]
             output[i]["názov"] = races[i]["title_sk"]
-            output[i]["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"]
+            output[i]["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
+                "entries_to"]
             output[i]["miesto"] = races[i]["place"]
             output[i]["kategorie"] = ",".join(names_of_categories)
 
@@ -64,7 +70,8 @@ class Procesor:
                 "date_from": input_race["date_from"],
                 "date_to": input_race["date_to"],
                 "cancelled": input_race["cancelled"],
-                "deadline": input_race["date_to"] if input_race["entry_dates"] == [] else input_race["entry_dates"][0]["entries_to"],
+                "deadline": input_race["date_to"] if input_race["entry_dates"] == [] else input_race["entry_dates"][0][
+                    "entries_to"],
                 "events": {"id": None if input_race["events"] == [] else input_race["events"][0]["id"]},
                 "categories": []
             }
@@ -113,7 +120,8 @@ class Procesor:
             except error.IsOrieteeringApiError as e:
                 return f'{str(e)}'
             try:
-                deadline_date = self.dc.get_date_object_from_string(race["date_to"] if race["entry_dates"] == [] else  race["entry_dates"][0]["entries_to"])
+                deadline_date = self.dc.get_date_object_from_string(
+                    race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"])
             except error.HandlerError as e:
                 return f'{str(e)}'
             try:
@@ -127,7 +135,8 @@ class Procesor:
                 output_dict["id"] = id
                 output_dict["dátum"] = race["events"][0]["date"]
                 output_dict["názov"] = race["title_sk"]
-                output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else  race["entry_dates"][0]["entries_to"]
+                output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
+                    "entries_to"]
                 output_dict["miesto"] = race["place"]
                 output_dict["kategorie"] = ",".join(names_of_categories)
                 output.append(output_dict)
@@ -189,14 +198,36 @@ class Procesor:
         return self.convert_data(TXTConverter, output_dir)
 
     def add_to_google_calendar(self, race: dict):
-        ...
-        "po pridani preteku do databazy sa rovno prida aj do kalendara, bude mozne vybrat ze pouzivatel nechce pouzit tuto funkcinalitu"
+
+        try:
+            event_id = self.google_calendar_service.add_to_google_calendar(
+                summary=race["title_sk"],
+                location=race.get("place", "Nešpecifikované"),
+                description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
+                start_date=race["date_from"],
+                end_date=race["date_to"]
+            )
+            print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
+            return event_id
+        except Exception as e:
+            print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
+            raise error.HandlerError("Nepodarilo sa pridať udalosť do kalendára")
 
     def update_google_event(self, event_id: str, new_data: str):
-        pass
+        try:
+            self.google_calendar_service.update_event(event_id, new_data)
+            print(f"Udalosť s ID {event_id} bola aktualizovaná v Google Kalendári.")
+        except Exception as e:
+            print(f"Chyba pri aktualizovaní udalosti v Google Kalendári: {str(e)}")
+            raise error.HandlerError("Nepodarilo sa aktualizovať udalosť v kalendári")
 
     def delete_from_google_calendar(self, event_id: str):
-        pass
+        try:
+            self.google_calendar_service.delete_event(event_id)
+            print(f"Udalosť s ID {event_id} bola zmazaná z Google Kalendára.")
+        except Exception as e:
+            print(f"Chyba pri mazaní udalosti z Google Kalendára: {str(e)}")
+            raise error.HandlerError("Nepodarilo sa zmazať udalosť z kalendára")
 
     def get_runners_from_club(self):
         output = []
@@ -205,7 +236,8 @@ class Procesor:
         except error.IsOrieteeringApiError as e:
             return f'{str(e)}'
         for runner in runners:
-            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"], "PRIEZVISKO": runner["runner"]["surname"]})
+            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"],
+                           "PRIEZVISKO": runner["runner"]["surname"]})
         return output
 
     def get_runner_results(self, runner_id, date_from, date_to):

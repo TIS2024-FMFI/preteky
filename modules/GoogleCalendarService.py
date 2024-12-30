@@ -100,23 +100,4 @@ class GoogleCalendarService:
 
 
 if __name__ == '__main__':
-    # Proklad pouzitia
     calendar_service = GoogleCalendarService()
-
-    # Pridanie udalosti
-    # event_id = calendar_service.add_to_google_calendar(
-    #     summary='Príklad udalosti',
-    #     location='Bratislava',
-    #     description='Popis novej udalosti pre Google Kalendár',
-    #     start_date='2024-12-18',
-    #     end_date='2024-12-19'
-    # )
-
-    # Aktualizacia udalosti
-    # calendar_service.update_event('hgh2isjaebmrkfsh0ge130nkf4', {'summary': 'Aktualizovaný názov udalosti'})
-
-    # Zrusenie udalosti
-    # calendar_service.delete_event('hgh2isjaebmrkfsh0ge130nkf4')
-
-    # Zoznam nadchadzajucich udalosti
-    # calendar_service.list_events()
