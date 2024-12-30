@@ -9,8 +9,6 @@ from HandlerOfInputsFromUi import Procesor
 import config_file_reader as config
 from DateConverter import DateConverter
 
-        ####vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
-        ###komunikacia s ostanymi 
 
 
 class Cache:
@@ -126,7 +124,7 @@ class ConsoleApp:
                     return runners
                 if param[0] == "Meno":
                     def is_similar(a, b):
-                        return SequenceMatcher(None, a, b).ratio() >= 80
+                        return SequenceMatcher(None, a, b).ratio() >= 0.75
 
                     results = []
                     name_parts = param[1].split()
@@ -147,16 +145,16 @@ class ConsoleApp:
                         ):
                             if runner not in results:
                                 results.append(runner)
-
                     if results == []:
-                        raise "NOT FOUND"
+                        self.log.add_record("Bežec nebol nájdený. Pre opakovanie vyhľadávania stlačte 'b'")
                     return results
                 
                 if param[0] == "ID":
                     for i in runners:
                         if i["ID"] == param[1]:
                             return [i]
-                    raise "NOT FOUND" 
+                    self.log.add_record("Bežec nebol nájdený. Pre opakovanie vyhľadávania stlačte 'b'")
+                    return []
                     
 
             elif interface_name == "import_stat":
@@ -169,6 +167,8 @@ class ConsoleApp:
 
             elif interface_name == "GoogleCalendar":
                 self.handler.add_to_google_calendar(self.races[param[0]])
+
+            self.log.add_record("Akcia zbehla úspešne")
 
         except Exception as e:
             self.log.add_record(f'{str(e)}')
@@ -236,7 +236,7 @@ class ConsoleApp:
             if sort_key == "DÁTUM" or sort_key == "DEADLINE" :
                 races = sorted(races, key=lambda x: self.date_converter.get_date_object_from_string(x[sort_key.lower()]))
             else:
-                races = sorted(races, key=lambda x: x[sort_key])
+                races = sorted(races, key=lambda x: x[sort_key.lower()])
             races_display = [f"{p['DÁTUM'.lower()]} | {p['NÁZOV'.lower()]} | {p['DEADLINE'.lower()]} | {p['MIESTO'.lower()]} | {p['ID'.lower()]}" for p in races]
             
             self.display_menu(races_display, current_idx, f"ZVOĽTE PRETEK (zoradené podľa {sort_key})")
@@ -253,7 +253,7 @@ class ConsoleApp:
                 if path[1] == "Prihlásenie pretekárov":
                     self.run_interface("Register_racers", races_display["ID"], )###lepsie bude ak sa jednotlivy racers na pretek zapamataju v nejakej cache pre handler
                 elif path[1] == "Export do súboru":
-                    self.log.add_record(f"Zvolený pretek {races[current_idx]}")
+                    self.log.add_record(f"Zvolený pretek {races[current_idx]['NÁZOV'.lower()]}")
                     self.window_general(["html", "csv", "txt"], "ZVOĽTE FORMÁT", *path, races[current_idx])
                 elif path[1] == "Import preteku":
                     self.double_check("Import preteku", f"Chcete importovať pretek {path[-1]['MENO'.lower()]}", path[-1]["ID".lower()]) #### tu je chyba
@@ -344,7 +344,7 @@ class ConsoleApp:
                         
                 else:
                     if path[-1] in ["html", "csv", "txt"]:
-                        self.double_check(path[-1], f"Želáte si exportovať pretek {path[-2]['MENO']} do {path[-1]}", path[-2]['ID'])
+                        self.double_check(path[-1], f"Želáte si exportovať pretek {path[-2]['názov']} do {path[-1]}", path[-2]['id'])
                     else:
                         self.time_interval(*path)
 
@@ -522,8 +522,9 @@ class ConsoleApp:
                         
                 elif options[current_idx] == "Import štatistiky":
                     if start_date and end_date:
-                        self.double_check("import_stat", f"Chcete importovať štatistiku pretekára {path[-1]['MENO']}?", start_date, end_date, path[-1]['ID'])
-                        self.log.add_record(path)
+                        self.double_check("import_stat", f"Chcete importovať štatistiku pretekára {path[-1]['MENO']} {path[-1]['PRIEZVISKO']}?", start_date, end_date, path[-1]['ID'])
+                        #self.log.add_record(path)
+                        
                     else:
                         self.log.add_record("Pred pokračovaním správne nastavte začiatok aj koniec intervalu")
                         
