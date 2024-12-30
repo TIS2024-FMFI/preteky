@@ -4,7 +4,8 @@ from ErrorHandler import *
 
 
 class DateConverter:
-    NUMBER_OF_MONTHS_IN_YEAR = 12
+    def __init__(self):
+        self.NUMBER_OF_MONTHS_IN_YEAR = 12
 
     def convert_to_google_calendar_format(self, date: str):
         """
@@ -82,7 +83,7 @@ class DateConverter:
 
     def get_date_object_from_string(self, input_string: str):
         try:
-            return datetime.strftime(input_string, "%Y-%m-%d")
+            return datetime.strptime(input_string, "%Y-%m-%d")
         except ValueError:
             raise HandlerError("Wrong input string")
 
