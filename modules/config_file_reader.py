@@ -20,6 +20,7 @@ class ConfigFileReader:
         self.config_file_path = config_file_path
         self.output = output
         self.GOOGLE_EMAILS = []
+        self._load_config()  # Load existing config if available
         self._save_config()  # Always create or overwrite the file on initialization
 
     def _create_example_config(self):
@@ -47,4 +48,4 @@ class ConfigFileReader:
         self._save_config()
 
 # Example usage
-configuration = ConfigFileReader()
+
