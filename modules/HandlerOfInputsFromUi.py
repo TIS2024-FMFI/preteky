@@ -69,7 +69,7 @@ class Procesor:
                 "categories": []
             }
 
-            for category in race["categories"]:
+            for category in input_race["categories"]:
                 tmp_category = {"id": category["id"], "category_id": category["category_id"],
                                 "category_name": self.categories[category["category_id"]]}
                 race["categories"].append(tmp_category)
