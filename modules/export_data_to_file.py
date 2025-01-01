@@ -24,12 +24,11 @@ class ExportDataToFile(ABC):
         """
         pass
 
-    def save_to_file(self, output_dir: str = None):
+    def save_to_file(self):
         """
         Save the content to a file with the appropriate name and extension
         """
-        if output_dir is not None:
-            self.output_dir = output_dir
+        self.output_dir = self.config.HOME_DIR
 
         if not self.output_dir:
             raise ValueError("Output directory is not set")
