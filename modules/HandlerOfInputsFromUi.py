@@ -6,6 +6,8 @@ from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
 import ErrorHandler as error
 from  DateConverter import DateConverter
 from datetime import datetime
+from GoogleCalendarService import GoogleCalendarService
+
 
 
 class Procesor:
@@ -17,14 +19,16 @@ class Procesor:
         self.sandberg_handler = SandbergDatabaseHandler(self.config.SANDBERG_API_ENDPOINT)
         self.categories = {}  # dict of category_id : name
         self.dc = DateConverter()
-        # try:
-        #     for category in self.mod_get.get_categories_details(): self.categories[category["id"]] = category["name"]
-        # except error.IsOrieteeringApiError as e:
-        #     raise e
+        try:
+            for category in self.mod_get.get_categories_details(): self.categories[category["id"]] = category["name"]
+        except error.IsOrieteeringApiError as e:
+            raise e
 
         self.races = {}  # dict filled with dicts of races, see function fil_out_cache
         self.club_id = self.config.CLUB_ID  # ulozene v configu
         self.runners = []
+        self.google_calendar_service = GoogleCalendarService()
+
 
     def get_races_from_IsOrienteering_in_month(self, month: str):
         try:
@@ -184,9 +188,32 @@ class Procesor:
     def convert_txt(self, race_id=None):
         return self.convert_data(TXTConverter, race_id)
 
-    def add_to_google_calendar(self, race: dict):
-        ...
-        "po pridani preteku do databazy sa rovno prida aj do kalendara, bude mozne vybrat ze pouzivatel nechce pouzit tuto funkcinalitu"
+    def add_to_google_calendar(self, race_id):
+        race = self.races[race_id]
+        try:
+            event_id = self.google_calendar_service.add_to_google_calendar(
+                summary=race["title_sk"],
+                location=race.get("place", "Nešpecifikované"),
+                description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
+                start_date=race["date_from"],
+                end_date=race["date_to"]
+            )
+            print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
+
+            if self.dc.get_date_object_from_string(race["deadline"]) != self.dc.get_date_object_from_string(race["date_to"]):
+                self.google_calendar_service.add_deadline_event(
+                    summary=f"Deadline: {race['title_sk']}",
+                    location=race.get("place", "Nešpecifikované"),
+                    description=f"Deadline pre registráciu na pretek: {race['title_sk']} | ID: {race['id']}",
+                    deadline_date=race["deadline"]
+                )
+                print(f"Deadline pre pretek {race['title_sk']} bol pridaný do Google Kalendára.")
+
+            return event_id
+
+        except Exception as e:
+            print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
+            raise error.HandlerError("Nepodarilo sa pridať udalosť do kalendára")
 
     def update_google_event(self, event_id: str, new_data: str):
         pass
@@ -275,14 +302,14 @@ race_data_json = {
     ]
 }
 
-processor = Procesor()
-# processor.get_races_from_IsOrienteering_in_month("December")
-processor.races[1887] = race_data_json
-# result = processor.import_race_to_Sandberg_Databaze(1888)
-# print(result)
-# result1 = processor.sign_racers_to_IsOrienteering(1888)
-# print(result1)
-result2 = processor.convert_html(1887)
-print(result2)
-# result3 = processor.convert_csv(1888)
-# result4 = processor.convert_txt(1888)
+# processor = Procesor()
+# # processor.get_races_from_IsOrienteering_in_month("December")
+# processor.races[1887] = race_data_json
+# # result = processor.import_race_to_Sandberg_Databaze(1888)
+# # print(result)
+# # result1 = processor.sign_racers_to_IsOrienteering(1888)
+# # print(result1)
+# result2 = processor.convert_html(1887)
+# print(result2)
+# # result3 = processor.convert_csv(1888)
+# # result4 = processor.convert_txt(1888)
