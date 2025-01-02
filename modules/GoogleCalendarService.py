@@ -29,18 +29,20 @@ class GoogleCalendarService:
                 token.write(creds.to_json())
         return build('calendar', 'v3', credentials=creds)
 
-    def add_to_google_calendar(self, summary, location, description, start_date,
-                               end_date, time_zone='Europe/Bratislava'):
+    @staticmethod
+    def _create_event_body(summary, location, description, start_date, end_date, time_zone, color_id):
         """
-        Add event to Google calendar
+        Create the body for a Google Calendar event.
         :param summary: Name of the event
         :param location: Place of the event
         :param description: Event description
-        :param start_date: Start of the event (YYYY-MM-DD)
-        :param end_date: End of the event (YYYY-MM-DD)
+        :param start_date: Start date of the event (YYYY-MM-DD)
+        :param end_date: End date of the event (YYYY-MM-DD)
         :param time_zone: Time zone
+        :param color_id: Color ID for the event
+        :return: Dictionary representing the event body
         """
-        event = {
+        return {
             'summary': summary,
             'location': location,
             'description': description,
@@ -53,7 +55,39 @@ class GoogleCalendarService:
                     {'method': 'popup', 'minutes': 10},
                 ],
             },
+            'colorId': str(color_id)
         }
+
+    def add_deadline_event(self, summary, location, description, deadline_date, time_zone='Europe/Bratislava',
+                           color_id=11):
+        """
+        Add a deadline event to Google Calendar.
+        :param summary: Name of the event
+        :param location: Place of the event
+        :param description: Event description
+        :param deadline_date: Deadline date (YYYY-MM-DD)
+        :param time_zone: Time zone
+        :param color_id: Color ID for the event (default is red)
+        """
+        event = self._create_event_body(summary, location, description,
+                                        deadline_date, deadline_date, time_zone, color_id)
+        created_event = self.service.events().insert(calendarId='primary', body=event).execute()
+        print(f"Deadline udalosť bola vytvorená: {created_event.get('htmlLink')}")
+        return created_event['id']
+
+    def add_to_google_calendar(self, summary, location, description, start_date,
+                               end_date, time_zone='Europe/Bratislava', color_id=1):
+        """
+        Add an event to Google Calendar.
+        :param summary: Name of the event
+        :param location: Place of the event
+        :param description: Event description
+        :param start_date: Start of the event (YYYY-MM-DD)
+        :param end_date: End of the event (YYYY-MM-DD)
+        :param time_zone: Time zone
+        :param color_id: Color ID for the event
+        """
+        event = self._create_event_body(summary, location, description, start_date, end_date, time_zone, color_id)
         created_event = self.service.events().insert(calendarId='primary', body=event).execute()
         print(f"Udalosť bola vytvorená: {created_event.get('htmlLink')}")
         return created_event['id']
@@ -100,23 +134,4 @@ class GoogleCalendarService:
 
 
 if __name__ == '__main__':
-    # Proklad pouzitia
     calendar_service = GoogleCalendarService()
-
-    # Pridanie udalosti
-    # event_id = calendar_service.add_to_google_calendar(
-    #     summary='Príklad udalosti',
-    #     location='Bratislava',
-    #     description='Popis novej udalosti pre Google Kalendár',
-    #     start_date='2024-12-18',
-    #     end_date='2024-12-19'
-    # )
-
-    # Aktualizacia udalosti
-    # calendar_service.update_event('hgh2isjaebmrkfsh0ge130nkf4', {'summary': 'Aktualizovaný názov udalosti'})
-
-    # Zrusenie udalosti
-    # calendar_service.delete_event('hgh2isjaebmrkfsh0ge130nkf4')
-
-    # Zoznam nadchadzajucich udalosti
-    # calendar_service.list_events()

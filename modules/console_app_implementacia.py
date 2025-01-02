@@ -165,7 +165,7 @@ class ConsoleApp:
                 self.window_general(["Nie", "Áno"], "Chcete zaznačiť pretek do Google Calendar?", "GCal", param[0])
 
             elif interface_name == "GoogleCalendar":
-                self.handler.add_to_google_calendar(self.races[param[0]])
+                self.handler.add_to_google_calendar(param[0])
 
             self.log.add_record("Akcia zbehla úspešne")
 
@@ -389,6 +389,7 @@ class ConsoleApp:
                 elif path[0] == "GCal":
                     if options[current_idx] == 'Áno':
                         self.run_interface("GoogleCalendar", path[1])
+                        break
                     elif options[current_idx] == 'Nie':
                         break
 
