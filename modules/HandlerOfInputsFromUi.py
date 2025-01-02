@@ -197,9 +197,16 @@ class Procesor:
     def convert_txt(self, output_dir=None):
         return self.convert_data(TXTConverter, output_dir)
 
-    def add_to_google_calendar(self, race: dict):
-
+    def add_to_google_calendar(self, race_id: str):
+        """
+        Add race event and its deadline (if available) to Google Calendar.
+        :param race_id: ID of the race
+        :return: Event ID of the main race event
+        """
         try:
+            race = self.races[race_id]
+
+            # Add main race event
             event_id = self.google_calendar_service.add_to_google_calendar(
                 summary=race["title_sk"],
                 location=race.get("place", "Nešpecifikované"),
@@ -208,7 +215,19 @@ class Procesor:
                 end_date=race["date_to"]
             )
             print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
+
+            # Add deadline event if available
+            if "deadline" in race and race["deadline"]:
+                self.google_calendar_service.add_deadline_event(
+                    summary=f"Deadline: {race['title_sk']}",
+                    location=race.get("place", "Nešpecifikované"),
+                    description=f"Deadline pre registráciu na pretek: {race['title_sk']} | ID: {race['id']}",
+                    deadline_date=race["deadline"]
+                )
+                print(f"Deadline pre pretek {race['title_sk']} bol pridaný do Google Kalendára.")
+
             return event_id
+
         except Exception as e:
             print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
             raise error.HandlerError("Nepodarilo sa pridať udalosť do kalendára")

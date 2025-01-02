@@ -29,8 +29,38 @@ class GoogleCalendarService:
                 token.write(creds.to_json())
         return build('calendar', 'v3', credentials=creds)
 
+    def add_deadline_event(self, summary, location, description, deadline_date, time_zone='Europe/Bratislava',
+                           color_id=11):
+        """
+        Add a deadline event to Google calendar
+        :param summary: Name of the event
+        :param location: Place of the event
+        :param description: Event description
+        :param deadline_date: Deadline date (YYYY-MM-DD)
+        :param time_zone: Time zone
+        :param color_id: Color id of the Google event (default is red)
+        """
+        event = {
+            'summary': summary,
+            'location': location,
+            'description': description,
+            'start': {'date': deadline_date, 'timeZone': time_zone},
+            'end': {'date': deadline_date, 'timeZone': time_zone},
+            'reminders': {
+                'useDefault': False,
+                'overrides': [
+                    {'method': 'email', 'minutes': 24 * 60},
+                    {'method': 'popup', 'minutes': 10},
+                ],
+            },
+            'colorId': str(color_id)  # Default to red
+        }
+        created_event = self.service.events().insert(calendarId='primary', body=event).execute()
+        print(f"Deadline udalosť bola vytvorená: {created_event.get('htmlLink')}")
+        return created_event['id']
+
     def add_to_google_calendar(self, summary, location, description, start_date,
-                               end_date, time_zone='Europe/Bratislava'):
+                               end_date, time_zone='Europe/Bratislava', color_id=1):
         """
         Add event to Google calendar
         :param summary: Name of the event
@@ -39,6 +69,7 @@ class GoogleCalendarService:
         :param start_date: Start of the event (YYYY-MM-DD)
         :param end_date: End of the event (YYYY-MM-DD)
         :param time_zone: Time zone
+        :param color_id: Color id of the Google event
         """
         event = {
             'summary': summary,
@@ -53,6 +84,7 @@ class GoogleCalendarService:
                     {'method': 'popup', 'minutes': 10},
                 ],
             },
+            'colorId': str(color_id)
         }
         created_event = self.service.events().insert(calendarId='primary', body=event).execute()
         print(f"Udalosť bola vytvorená: {created_event.get('htmlLink')}")
