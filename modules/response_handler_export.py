@@ -1,4 +1,4 @@
-from ErrorHandler import SandbergDatabaseError
+from preteky.modules.ErrorHandler import SandbergDatabaseError
 
 
 class ResponseHandler:

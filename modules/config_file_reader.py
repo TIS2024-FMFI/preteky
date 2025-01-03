@@ -6,6 +6,7 @@ from pathlib import Path
 
 DEFAULT_CONFIG_FILE_PATH = Path("config.toml")
 
+
 @dataclass(init=False)
 class ConfigFileReader:
     IS_API_KEY: str = field(repr=False, default="")
@@ -20,8 +21,8 @@ class ConfigFileReader:
         self.config_file_path = config_file_path
         self.output = output
         self.GOOGLE_EMAILS = []
-        self._load_config()  # Load existing config if available
-        self._save_config()  # Always create or overwrite the file on initialization
+        self._load_config()
+        self._save_config()
 
     def _create_example_config(self):
         self._save_config()
@@ -37,7 +38,7 @@ class ConfigFileReader:
                 for fld in fields(self):
                     if fld.name in config_dict:
                         setattr(self, fld.name, config_dict[fld.name])
-        self._save_config()  # Always ensure the file is updated with the latest structure
+        self._save_config()
 
     def _save_config(self):
         with open(self.config_file_path, "wb") as f:
@@ -46,6 +47,3 @@ class ConfigFileReader:
     def set_home_dir(self, path: str):
         self.HOME_DIR = path
         self._save_config()
-
-# Example usage
-

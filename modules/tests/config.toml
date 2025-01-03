@@ -1,0 +1,7 @@
+IS_API_KEY = "your_api_key"
+IS_API_ENDPOINT = "https://is.orienteering.sk/api"
+SANDBERG_API_ENDPOINT = "https://senzor.robotika.sk/sks/api.php/api"
+GOOGLE_CREDENTIALS_PATH = ""
+GOOGLE_EMAILS = []
+CLUB_ID = 46
+HOME_DIR = "C:\\mock_dir"
