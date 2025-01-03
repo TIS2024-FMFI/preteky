@@ -1,6 +1,6 @@
 from datetime import datetime
 import calendar
-from ErrorHandler import *
+from preteky.modules.ErrorHandler import *
 
 
 class DateConverter:
