@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import os
-from config_file_reader import ConfigFileReader
+from preteky.modules.config_file_reader import ConfigFileReader
 
 
 class ExportDataToFile(ABC):
