@@ -1,0 +1,6 @@
+pip~=24.3.1
+wheel~=0.44.0
+setuptools~=70.0.0
+tomli~=2.0.2
+requests~=2.32.3
+matplotlib~=3.7.5
