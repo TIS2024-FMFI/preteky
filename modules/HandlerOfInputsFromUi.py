@@ -235,26 +235,43 @@ class Procesor:
         "date format YYYY-MM-DD"
         "ziska vysledky bezca v zadanom intervaly"
         try:
-            results = self.mod_get.get_runner_results(runner_id, date_from, date_to)
+            runner_results = self.mod_get.get_runner_results(runner_id, date_from, date_to)
         except error.IsOrieteeringApiError as e:
             raise e
-        return results
+        try:
+            races = self.mod_get.get_races_from_to(date_from, date_to)
+        except error.IsOrieteeringApiError as e:
+            raise e
+        
+        atendence = {}
+        times_after_first = {}
+        date_placement = {}
+        for result in runner_results:
+            for race in races:
+                if race["events"] != [] and race["events"][0]["id"] == result["event_id"]:
+                    date = self.dc.get_date_object_from_string(race['date_to'])
+                    
+                    first_runner_time, number_of_competitors = self.get_race_results(race['id'], race["events"][0]["id"])
+                    hours = int(result["time_min"]) // 60
+                    minutes = int(result["time_min"]) % 60
+                    runner_time = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{result["time_sec"]}')
+                    atendence[date.month, date.year] = True
+                    times_after_first[race["title_sk"]] = runner_time - first_runner_time
+                    date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
 
-    def get_race_results(self, race_id):
-        if race_id in self.races.keys():
-            event_id = self.races[race_id]["events"]["id"]
-        else:
-            try:
-                tmp_race = self.mod_get.get_race_details(race_id)
-            except error.IsOrieteeringApiError as e:
-                raise e
-            event_id = tmp_race["events"][0]["id"]
+        runner_name = f'{runner_results[0]['first_name']} {runner_results[0]['surname']}'
+        output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB",date_from, date_to]
+        return output
+
+    def get_race_results(self, race_id, event_id):
         try:
             results = self.mod_get.get_race_results(race_id, event_id)
         except error.IsOrieteeringApiError as e:
             raise e
-        time_of_first_runner = {"minutes" : results[0]["time_min"], "seconds" : results[0]["time_sec"]}
-        return {"time_of_first_runner" : time_of_first_runner, "number_of_competitors" : len(results)}
+        hours = int(results[0]["time_min"]) // 60
+        minutes = int(results[0]["time_min"]) % 60
+        time_of_first_runner = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{results[0]["time_sec"]}')
+        return time_of_first_runner, len(results)
 
 
 # kedze toto je ako dict a nie ako json string (co bolo povodne), tak sa pomenil database_sandberg_handler.py
