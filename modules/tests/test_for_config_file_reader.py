@@ -3,7 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 import tomli
 import tomli_w
-from config_file_reader import ConfigFileReader
+from preteky.modules.config_file_reader import ConfigFileReader
 
 TEST_CONFIG_FILE_PATH = Path("test_config.toml")
 
@@ -35,7 +35,6 @@ class TestConfigFileReader(unittest.TestCase):
         sample_config = {
             "IS_API_KEY": "test_api_key",
             "IS_API_ENDPOINT": "https://api.test.com",
-            "SANDBERG_API_KEY": "test_sandberg_key",
             "SANDBERG_API_ENDPOINT": "https://sandberg.test.com",
             "GOOGLE_CREDENTIALS_PATH": "/path/to/credentials",
             "GOOGLE_EMAILS": ["test@example.com"],
@@ -51,7 +50,6 @@ class TestConfigFileReader(unittest.TestCase):
 
         self.assertEqual(config_reader.IS_API_KEY, "test_api_key")
         self.assertEqual(config_reader.IS_API_ENDPOINT, "https://api.test.com")
-        self.assertEqual(config_reader.SANDBERG_API_KEY, "test_sandberg_key")
         self.assertEqual(config_reader.SANDBERG_API_ENDPOINT, "https://sandberg.test.com")
         self.assertEqual(config_reader.GOOGLE_CREDENTIALS_PATH, "/path/to/credentials")
         self.assertEqual(config_reader.GOOGLE_EMAILS, ["test@example.com"])

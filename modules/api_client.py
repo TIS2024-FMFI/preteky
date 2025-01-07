@@ -1,6 +1,6 @@
 import requests
-from ErrorHandler import SandbergDatabaseError
-from response_handler_export import ResponseHandler
+from preteky.modules.ErrorHandler import SandbergDatabaseError
+from preteky.modules.response_handler_export import ResponseHandler
 
 SUCCESS_CODE = 200
 GENERIC_ERROR_CODE = 500
@@ -19,7 +19,7 @@ class BaseAPI:
             response = requests.get(url)
             response.raise_for_status()
             return response
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             raise SandbergDatabaseError(f"GET request failed for {url}", GENERIC_ERROR_CODE)
 
     @staticmethod
@@ -29,7 +29,7 @@ class BaseAPI:
             response = requests.post(url, json=data, headers=headers)
             response.raise_for_status()
             return response
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException:
             raise SandbergDatabaseError(f"POST request failed for {url}", GENERIC_ERROR_CODE)
 
 
