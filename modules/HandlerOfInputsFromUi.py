@@ -206,26 +206,16 @@ class Procesor:
         try:
             race = self.races[race_id]
 
-            # Add main race event
-            event_id = self.google_calendar_service.add_to_google_calendar(
-                summary=race["title_sk"],
+            # Pridanie udalosti s deadline
+            event_id = self.google_calendar_service.add_event_with_deadline(
+                main_event_summary=race["title_sk"],
                 location=race.get("place", "Nešpecifikované"),
                 description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
                 start_date=race["date_from"],
-                end_date=race["date_to"]
+                end_date=race["date_to"],
+                deadline_date=race["deadline"]
             )
             print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
-
-            # Add deadline event if available
-            if "deadline" in race and race["deadline"]:
-                self.google_calendar_service.add_deadline_event(
-                    summary=f"Deadline: {race['title_sk']}",
-                    location=race.get("place", "Nešpecifikované"),
-                    description=f"Deadline pre registráciu na pretek: {race['title_sk']} | ID: {race['id']}",
-                    deadline_date=race["deadline"]
-                )
-                print(f"Deadline pre pretek {race['title_sk']} bol pridaný do Google Kalendára.")
-
             return event_id
 
         except Exception as e:
@@ -242,8 +232,9 @@ class Procesor:
 
     def delete_from_google_calendar(self, event_id: str):
         try:
-            self.google_calendar_service.delete_event(event_id)
-            print(f"Udalosť s ID {event_id} bola zmazaná z Google Kalendára.")
+            self.google_calendar_service.delete_event_with_deadline(event_id)
+            print(
+                f"Udalosť s ID {event_id} bola zmazaná z Google Kalendára spolu s deadline udalosťou (ak existovala).")
         except Exception as e:
             print(f"Chyba pri mazaní udalosti z Google Kalendára: {str(e)}")
             raise error.HandlerError("Nepodarilo sa zmazať udalosť z kalendára")
