@@ -1,5 +1,5 @@
-from preteky.modules.api_client import APIClient
-from preteky.modules.competition_formatter import CompetitionFormatter
+from api_client import APIClient
+from competition_formatter import CompetitionFormatter
 
 
 class SandbergDatabaseHandler:

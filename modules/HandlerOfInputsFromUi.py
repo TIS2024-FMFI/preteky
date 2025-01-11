@@ -4,13 +4,12 @@ from database_sandberg_handler import SandbergDatabaseHandler
 from config_file_reader import ConfigFileReader
 from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
 import ErrorHandler as error
-from  DateConverter import DateConverter
+from DateConverter import DateConverter
 from datetime import datetime
 from GoogleCalendarService import GoogleCalendarService
 
 
-
-class Procesor:
+class HandlerOfInputsFromUi:
     def __init__(self):
         self.config = ConfigFileReader()
         self.mod_get = Mod_get(self.config.IS_API_ENDPOINT,
@@ -28,7 +27,6 @@ class Procesor:
         self.club_id = self.config.CLUB_ID  # ulozene v configu
         self.runners = []
         self.google_calendar_service = GoogleCalendarService()
-
 
     def get_races_from_IsOrienteering_in_month(self, month: str):
         try:
@@ -95,7 +93,7 @@ class Procesor:
                 self.sandberg_handler.process_race_data(race_data)
                 return "The race has been successfully added."
             except error.SandbergDatabaseError as e:
-                return f"{str(e)}"
+                raise e
         else:
             raise error.HandlerError("race_id not found in cache")
 
@@ -259,7 +257,7 @@ class Procesor:
                     times_after_first[race["title_sk"]] = runner_time - first_runner_time
                     date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
 
-        runner_name = f'{runner_results[0]['first_name']} {runner_results[0]['surname']}'
+        runner_name = f'{runner_results[0]["first_name"]} {runner_results[0]["surname"]}'
         output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB",date_from, date_to]
         return output
 

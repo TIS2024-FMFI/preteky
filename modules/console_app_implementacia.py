@@ -5,7 +5,7 @@ import termios
 import sys
 from datetime import datetime
 from difflib import SequenceMatcher
-from HandlerOfInputsFromUi import Procesor
+from HandlerOfInputsFromUi import HandlerOfInputsFromUi
 import config_file_reader as config
 from DateConverter import DateConverter
 
@@ -67,7 +67,7 @@ class Log:
 class ConsoleApp:
 
     def __init__(self):
-        self.handler = Procesor()
+        self.handler = HandlerOfInputsFromUi()
         self.log = Log()
         self.cache = Cache()
         self.date_converter = DateConverter()

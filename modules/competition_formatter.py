@@ -1,4 +1,4 @@
-from preteky.modules.DateConverter import DateConverter
+from DateConverter import DateConverter
 
 
 class CompetitionFormatter:

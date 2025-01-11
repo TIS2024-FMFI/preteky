@@ -1,6 +1,6 @@
 import requests
-from preteky.modules.ErrorHandler import SandbergDatabaseError
-from preteky.modules.response_handler_export import ResponseHandler
+from ErrorHandler import SandbergDatabaseError
+from response_handler_export import ResponseHandler
 
 SUCCESS_CODE = 200
 GENERIC_ERROR_CODE = 500

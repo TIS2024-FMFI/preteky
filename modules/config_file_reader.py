@@ -4,7 +4,7 @@ import tomli
 import tomli_w
 from pathlib import Path
 
-DEFAULT_CONFIG_FILE_PATH = Path("config.toml")
+DEFAULT_CONFIG_FILE_PATH = Path("../config.toml")
 
 
 @dataclass(init=False)
