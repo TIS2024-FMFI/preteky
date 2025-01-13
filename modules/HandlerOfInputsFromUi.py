@@ -195,50 +195,39 @@ class HandlerOfInputsFromUi:
     def convert_txt(self, race_id=None):
         return self.convert_data(TXTConverter, race_id)
 
-    def add_to_google_calendar(self, race_id):
-        race = self.races[race_id]
-        try:
-            event_id = self.google_calendar_service.add_to_google_calendar(
-                summary=race["title_sk"],
-                location=race.get("place", "Nešpecifikované"),
-                description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
-                start_date=race["date_from"],
-                end_date=race["date_to"]
-            )
-            print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
-
-            if self.dc.get_date_object_from_string(race["deadline"]) != self.dc.get_date_object_from_string(race["date_to"]):
-                self.google_calendar_service.add_deadline_event(
-                    summary=f"Deadline: {race['title_sk']}",
-                    location=race.get("place", "Nešpecifikované"),
-                    description=f"Deadline pre registráciu na pretek: {race['title_sk']} | ID: {race['id']}",
-                    deadline_date=race["deadline"]
-                )
-                print(f"Deadline pre pretek {race['title_sk']} bol pridaný do Google Kalendára.")
-
-            return event_id
-
     def add_to_google_calendar(self, race_id: str):
         """
-        Add race event and its deadline (if available) to Google Calendar.
+        Add race event to Google Calendar. If a deadline exists, it adds both the main event and the deadline.
         :param race_id: ID of the race
         :return: Event ID of the main race event
         """
         try:
             race = self.races[race_id]
 
-            # Pridanie udalosti s deadline
-            event_id = self.google_calendar_service.add_event_with_deadline(
-                main_event_summary=race["title_sk"],
-                location=race.get("place", "Nešpecifikované"),
-                description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
-                start_date=race["date_from"],
-                end_date=race["date_to"],
-                deadline_date=race["deadline"]
-            )
+            if "deadline" in race and race["deadline"] and \
+                    self.dc.get_date_object_from_string(race["deadline"]) != self.dc.get_date_object_from_string(
+                race["date_to"]):
+
+                event_id = self.google_calendar_service.add_event_with_deadline(
+                    main_event_summary=race["title_sk"],
+                    location=race.get("place", "Nešpecifikované"),
+                    description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
+                    start_date=race["date_from"],
+                    end_date=race["date_to"],
+                    deadline_date=race["deadline"]
+                )
+            else:
+
+                event_id = self.google_calendar_service.add_main_event(
+                    summary=race["title_sk"],
+                    location=race.get("place", "Nešpecifikované"),
+                    description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
+                    start_date=race["date_from"],
+                    end_date=race["date_to"]
+                )
+
             print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
             return event_id
-
 
         except Exception as e:
             print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
@@ -283,7 +272,7 @@ class HandlerOfInputsFromUi:
             races = self.mod_get.get_races_from_to(date_from, date_to)
         except error.IsOrieteeringApiError as e:
             raise e
-        
+
         atendence = {}
         times_after_first = {}
         date_placement = {}
@@ -291,8 +280,9 @@ class HandlerOfInputsFromUi:
             for race in races:
                 if race["events"] != [] and race["events"][0]["id"] == result["event_id"]:
                     date = self.dc.get_date_object_from_string(race['date_to'])
-                    
-                    first_runner_time, number_of_competitors = self.get_race_results(race['id'], race["events"][0]["id"])
+
+                    first_runner_time, number_of_competitors = self.get_race_results(race['id'],
+                                                                                     race["events"][0]["id"])
                     hours = int(result["time_min"]) // 60
                     minutes = int(result["time_min"]) % 60
                     runner_time = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{result["time_sec"]}')
@@ -301,7 +291,7 @@ class HandlerOfInputsFromUi:
                     date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
 
         runner_name = f'{runner_results[0]["first_name"]} {runner_results[0]["surname"]}'
-        output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB",date_from, date_to]
+        output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB", date_from, date_to]
         return output
 
     def get_race_results(self, race_id, event_id):
