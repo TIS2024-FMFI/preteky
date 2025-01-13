@@ -76,8 +76,8 @@ class GoogleCalendarService:
         print(f"Deadline udalosť bola vytvorená: {created_event.get('htmlLink')}")
         return created_event['id']
 
-    def add_to_google_calendar(self, summary, location, description, start_date,
-                               end_date, time_zone='Europe/Bratislava', color_id=1):
+    def add_main_event(self, summary, location, description, start_date,
+                       end_date, time_zone='Europe/Bratislava', color_id=1):
         """
         Add an event to Google Calendar.
         :param summary: Name of the event
@@ -95,7 +95,7 @@ class GoogleCalendarService:
 
     def add_event_with_deadline(self, main_event_summary, location, description, start_date,
                                 end_date, deadline_date, time_zone='Europe/Bratislava'):
-        main_event_id = self.add_to_google_calendar(main_event_summary, location, description, start_date, end_date)
+        main_event_id = self.add_main_event(main_event_summary, location, description, start_date, end_date)
 
         deadline_event_id = self.add_deadline_event(
             summary=f"Deadline: {main_event_summary}",
