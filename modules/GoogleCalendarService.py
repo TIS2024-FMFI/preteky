@@ -14,6 +14,7 @@ class GoogleCalendarService:
 
     def __init__(self):
         self.service = self.authenticate()
+        self.event_links = {}
 
     def authenticate(self):
         creds = None
@@ -91,6 +92,30 @@ class GoogleCalendarService:
         created_event = self.service.events().insert(calendarId='primary', body=event).execute()
         print(f"Udalosť bola vytvorená: {created_event.get('htmlLink')}")
         return created_event['id']
+
+    def add_event_with_deadline(self, main_event_summary, location, description, start_date,
+                                end_date, deadline_date, time_zone='Europe/Bratislava'):
+        main_event_id = self.add_to_google_calendar(main_event_summary, location, description, start_date, end_date)
+
+        deadline_event_id = self.add_deadline_event(
+            summary=f"Deadline: {main_event_summary}",
+            location=location,
+            description=f"Deadline pre registráciu: {main_event_summary}",
+            deadline_date=deadline_date,
+            time_zone=time_zone
+        )
+
+        self.event_links[main_event_id] = deadline_event_id
+        return main_event_id
+
+    def delete_event_with_deadline(self, event_id):
+        self.delete_event(event_id)
+        print(f"Hlavný event s ID {event_id} bol zmazaný.")
+
+        if event_id in self.event_links:
+            deadline_event_id = self.event_links.pop(event_id)
+            self.delete_event(deadline_event_id)
+            print(f"Deadline event s ID {deadline_event_id} bol zmazaný.")
 
     def update_event(self, event_id, updated_data):
         """

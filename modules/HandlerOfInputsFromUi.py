@@ -1,3 +1,8 @@
+import ErrorHandler as error
+
+from DateConverter import DateConverter
+from datetime import datetime
+
 from GetFromIsOrienteering import Mod_get
 from PostToIsOrienteering import Mod_post
 from database_sandberg_handler import SandbergDatabaseHandler
@@ -51,7 +56,8 @@ class HandlerOfInputsFromUi:
             output[i]["id"] = id
             output[i]["dátum"] = races[i]["date_to"]
             output[i]["názov"] = races[i]["title_sk"]
-            output[i]["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"]
+            output[i]["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
+                "entries_to"]
             output[i]["miesto"] = races[i]["place"]
             output[i]["kategorie"] = ",".join(names_of_categories)
 
@@ -65,7 +71,8 @@ class HandlerOfInputsFromUi:
                 "date_from": input_race["date_from"],
                 "date_to": input_race["date_to"],
                 "cancelled": input_race["cancelled"],
-                "deadline": input_race["date_to"] if input_race["entry_dates"] == [] else input_race["entry_dates"][0]["entries_to"],
+                "deadline": input_race["date_to"] if input_race["entry_dates"] == [] else input_race["entry_dates"][0][
+                    "entries_to"],
                 "events": {"id": None if input_race["events"] == [] else input_race["events"][0]["id"]},
                 "categories": []
             }
@@ -114,7 +121,8 @@ class HandlerOfInputsFromUi:
             except error.IsOrieteeringApiError as e:
                 raise e
             try:
-                deadline_date = self.dc.get_date_object_from_string(race["date_to"] if race["entry_dates"] == [] else  race["entry_dates"][0]["entries_to"])
+                deadline_date = self.dc.get_date_object_from_string(
+                    race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"])
             except error.HandlerError as e:
                 raise e
             try:
@@ -128,7 +136,8 @@ class HandlerOfInputsFromUi:
                 output_dict["id"] = id
                 output_dict["dátum"] = race["events"][0]["date"]
                 output_dict["názov"] = race["title_sk"]
-                output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else  race["entry_dates"][0]["entries_to"]
+                output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
+                    "entries_to"]
                 output_dict["miesto"] = race["place"]
                 output_dict["kategorie"] = ",".join(names_of_categories)
                 output.append(output_dict)
@@ -209,15 +218,48 @@ class HandlerOfInputsFromUi:
 
             return event_id
 
+    def add_to_google_calendar(self, race_id: str):
+        """
+        Add race event and its deadline (if available) to Google Calendar.
+        :param race_id: ID of the race
+        :return: Event ID of the main race event
+        """
+        try:
+            race = self.races[race_id]
+
+            # Pridanie udalosti s deadline
+            event_id = self.google_calendar_service.add_event_with_deadline(
+                main_event_summary=race["title_sk"],
+                location=race.get("place", "Nešpecifikované"),
+                description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
+                start_date=race["date_from"],
+                end_date=race["date_to"],
+                deadline_date=race["deadline"]
+            )
+            print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
+            return event_id
+
+
         except Exception as e:
             print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
             raise error.HandlerError("Nepodarilo sa pridať udalosť do kalendára")
 
     def update_google_event(self, event_id: str, new_data: str):
-        pass
+        try:
+            self.google_calendar_service.update_event(event_id, new_data)
+            print(f"Udalosť s ID {event_id} bola aktualizovaná v Google Kalendári.")
+        except Exception as e:
+            print(f"Chyba pri aktualizovaní udalosti v Google Kalendári: {str(e)}")
+            raise error.HandlerError("Nepodarilo sa aktualizovať udalosť v kalendári")
 
     def delete_from_google_calendar(self, event_id: str):
-        pass
+        try:
+            self.google_calendar_service.delete_event_with_deadline(event_id)
+            print(
+                f"Udalosť s ID {event_id} bola zmazaná z Google Kalendára spolu s deadline udalosťou (ak existovala).")
+        except Exception as e:
+            print(f"Chyba pri mazaní udalosti z Google Kalendára: {str(e)}")
+            raise error.HandlerError("Nepodarilo sa zmazať udalosť z kalendára")
 
     def get_runners_from_club(self):
         output = []
@@ -226,7 +268,8 @@ class HandlerOfInputsFromUi:
         except error.IsOrieteeringApiError as e:
             raise e
         for runner in runners:
-            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"], "PRIEZVISKO": runner["runner"]["surname"]})
+            output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"],
+                           "PRIEZVISKO": runner["runner"]["surname"]})
         return output
 
     def get_runner_results(self, runner_id, date_from, date_to):
