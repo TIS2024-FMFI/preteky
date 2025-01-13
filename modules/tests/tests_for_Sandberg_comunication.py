@@ -1,12 +1,12 @@
 import unittest
 from unittest.mock import patch, MagicMock
-from api_client import BaseAPI, APIClient
+from preteky.modules.api_client import BaseAPI, APIClient
 import requests
 
-from classes.correct_cleaner.ErrorHandler import SandbergDatabaseError
-from classes.correct_cleaner.competition_formatter import CompetitionFormatter
-from classes.correct_cleaner.database_sandberg_handler import SandbergDatabaseHandler
-from classes.correct_cleaner.response_handler_export import ResponseHandler
+from preteky.modules.ErrorHandler import SandbergDatabaseError
+from preteky.modules.competition_formatter import CompetitionFormatter
+from preteky.modules.database_sandberg_handler import SandbergDatabaseHandler
+from preteky.modules.response_handler_export import ResponseHandler
 
 
 class TestBaseAPI(unittest.TestCase):
@@ -19,7 +19,7 @@ class TestBaseAPI(unittest.TestCase):
         expected_url = "https://senzor.robotika.sk/sks/api.php/api/competitions/1/export"
         self.assertEqual(self.api._build_url(endpoint), expected_url)
 
-    @patch('api_client.requests.get')
+    @patch('preteky.modules.api_client.requests.get')
     def test_send_get_request(self, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -28,7 +28,7 @@ class TestBaseAPI(unittest.TestCase):
         response = self.api._send_get_request("https://senzor.robotika.sk/sks/api.php/api/competitions/1/export")
         self.assertEqual(response.status_code, 200)
 
-    @patch('api_client.requests.get')
+    @patch('preteky.modules.api_client.requests.get')
     def test_send_get_request_failure(self, mock_get):
         mock_get.side_effect = requests.exceptions.RequestException("Request failed")
 
@@ -37,7 +37,7 @@ class TestBaseAPI(unittest.TestCase):
         expected_message = "SandbergDatabaseError: 500 GET request failed for https://senzor.robotika.sk/sks/api.php/api/competitions/1/export"
         self.assertEqual(str(context.exception), expected_message)
 
-    @patch('api_client.requests.post')
+    @patch('preteky.modules.api_client.requests.post')
     def test_send_post_request(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -47,7 +47,7 @@ class TestBaseAPI(unittest.TestCase):
                                                {"key": "value"})
         self.assertEqual(response.status_code, 200)
 
-    @patch('api_client.requests.post')
+    @patch('preteky.modules.api_client.requests.post')
     def test_send_post_request_failure(self, mock_post):
         mock_post.side_effect = requests.exceptions.RequestException("Request failed")
 
@@ -64,9 +64,8 @@ class TestAPIClient(unittest.TestCase):
     def setUp(self):
         self.client = APIClient("https://senzor.robotika.sk/sks/api.php/api")
 
-    @patch('api_client.APIClient._send_post_request')
+    @patch('preteky.modules.api_client.APIClient._send_post_request')
     def test_process_race_success(self, mock_post):
-        # Vytvorenie mock odpovede
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"status": "success", "message": "Race added successfully"}
@@ -76,7 +75,7 @@ class TestAPIClient(unittest.TestCase):
         response = self.client.process_race(race_data)
         self.assertEqual(response, "Race added successfully")
 
-    @patch('api_client.APIClient._send_post_request')
+    @patch('preteky.modules.api_client.APIClient._send_post_request')
     def test_process_race_failure(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 400
@@ -89,7 +88,7 @@ class TestAPIClient(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "SandbergDatabaseError: 400 Unexpected response type: <class 'unittest.mock.MagicMock'>")
 
-    @patch('api_client.APIClient._send_post_request')
+    @patch('preteky.modules.api_client.APIClient._send_post_request')
     def test_process_race_invalid_json(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -102,7 +101,7 @@ class TestAPIClient(unittest.TestCase):
             self.client.process_race(race_data)
         self.assertEqual(str(context.exception), "SandbergDatabaseError: 200 Invalid JSON response.")
 
-    @patch('api_client.APIClient._send_post_request')
+    @patch('preteky.modules.api_client.APIClient._send_post_request')
     def test_process_race_non_success_status(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -115,7 +114,7 @@ class TestAPIClient(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "SandbergDatabaseError: 200 Request failed with message Failed to add race.")
 
-    @patch('api_client.APIClient._send_post_request')
+    @patch('preteky.modules.api_client.APIClient._send_post_request')
     def test_process_race_empty_response(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -128,7 +127,7 @@ class TestAPIClient(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "SandbergDatabaseError: 200 Unexpected response type: <class 'unittest.mock.MagicMock'>")
 
-    @patch('api_client.APIClient._send_post_request')
+    @patch('preteky.modules.api_client.APIClient._send_post_request')
     def test_process_race_internal_server_error(self, mock_post):
         mock_response = MagicMock()
         mock_response.status_code = 500
@@ -141,7 +140,7 @@ class TestAPIClient(unittest.TestCase):
         self.assertEqual(str(context.exception),
                          "SandbergDatabaseError: 500 Unexpected response type: <class 'unittest.mock.MagicMock'>")
 
-    @patch('api_client.APIClient._send_get_request')
+    @patch('preteky.modules.api_client.APIClient._send_get_request')
     def test_export_registered_runners_success(self, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -151,7 +150,7 @@ class TestAPIClient(unittest.TestCase):
         response = self.client.export_registered_runners(1)
         self.assertEqual(response['status'], "success")
 
-    @patch('api_client.APIClient._send_get_request')
+    @patch('preteky.modules.api_client.APIClient._send_get_request')
     def test_export_registered_runners_invalid_json(self, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -162,7 +161,7 @@ class TestAPIClient(unittest.TestCase):
             self.client.export_registered_runners(1)
         self.assertEqual(str(context.exception), "SandbergDatabaseError: 200 Invalid JSON response.")
 
-    @patch('api_client.APIClient._send_get_request')
+    @patch('preteky.modules.api_client.APIClient._send_get_request')
     def test_export_registered_runners_unexpected_response_type(self, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 200
@@ -173,7 +172,7 @@ class TestAPIClient(unittest.TestCase):
             self.client.export_registered_runners(1)
         self.assertEqual(str(context.exception), "SandbergDatabaseError: 200 Unexpected response type: <class 'str'>")
 
-    @patch('api_client.APIClient._send_get_request')
+    @patch('preteky.modules.api_client.APIClient._send_get_request')
     def test_export_registered_runners_error_status(self, mock_get):
         mock_response = MagicMock()
         mock_response.status_code = 500
@@ -238,7 +237,7 @@ class TestCompetitionFormatter(unittest.TestCase):
         self.formatter = CompetitionFormatter(self.data)
 
     def test_validate_data(self):
-        self.formatter.validate_data()  # Should not raise an exception
+        self.formatter.validate_data()
 
     def test_get_competition_info(self):
         info = self.formatter.get_competition_info()
@@ -338,8 +337,8 @@ class TestSandbergDatabaseHandler(unittest.TestCase):
         self.base_url = "https://senzor.robotika.sk/sks/api.php/api"
         self.handler = SandbergDatabaseHandler(self.base_url)
 
-    @patch('api_client.APIClient.export_registered_runners')
-    @patch('classes.correct_cleaner.response_handler_export.ResponseHandler.handle_response')
+    @patch('preteky.modules.api_client.APIClient.export_registered_runners')
+    @patch('preteky.modules.response_handler_export.ResponseHandler.handle_response')
     def test_export_registered_runners_success(self, mock_handle_response, mock_export):
         mock_response = {
             "status": "success",
@@ -355,8 +354,8 @@ class TestSandbergDatabaseHandler(unittest.TestCase):
         self.assertIsNotNone(last_data)
         self.assertEqual(last_data, {"status": "success", "data": []})
 
-    @patch('api_client.APIClient.export_registered_runners')
-    @patch('classes.correct_cleaner.response_handler_export.ResponseHandler.handle_response')
+    @patch('preteky.modules.api_client.APIClient.export_registered_runners')
+    @patch('preteky.modules.response_handler_export.ResponseHandler.handle_response')
     def test_export_registered_runners_no_data(self, mock_handle_response, mock_export):
         mock_export.return_value = None
         mock_handle_response.return_value = None
@@ -364,7 +363,7 @@ class TestSandbergDatabaseHandler(unittest.TestCase):
         self.handler.export_registered_runners(1888)
         self.assertIsNone(self.handler.get_last_exported_data())
 
-    @patch('api_client.APIClient.export_registered_runners')
+    @patch('preteky.modules.api_client.APIClient.export_registered_runners')
     def test_export_registered_runners_exception(self, mock_export):
         mock_export.side_effect = SandbergDatabaseError("API error")
 
@@ -372,10 +371,9 @@ class TestSandbergDatabaseHandler(unittest.TestCase):
             self.handler.export_registered_runners(1888)
         self.assertEqual(self.handler.get_last_exported_data(), None)
 
-    @patch('api_client.APIClient.process_race')
+    @patch('preteky.modules.api_client.APIClient.process_race')
     def test_process_race_data_success(self, mock_process):
-        race_data_json = """
-        {
+        race_data_json = {
             "id": "1888",
             "title_sk": "STRED O LIGA  - 2. kolo",
             "date_from": "2024-12-04",
@@ -418,15 +416,9 @@ class TestSandbergDatabaseHandler(unittest.TestCase):
                 }
             ]
         }
-        """
+
         self.handler.process_race_data(race_data_json)
         mock_process.assert_called_once()
-
-    def test_process_race_data_invalid_json(self):
-        invalid_json = "{invalid_json}"
-        with self.assertRaises(SandbergDatabaseError):
-            self.handler.process_race_data(invalid_json)
-        self.assertIsNone(self.handler.get_last_exported_data())
 
 
 if __name__ == '__main__':

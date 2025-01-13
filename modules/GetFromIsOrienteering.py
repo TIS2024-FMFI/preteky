@@ -35,6 +35,13 @@ class Mod_get():
         self._handle_response_code(response)
         return response.json()
 
+    def get_races_from_to(self, date_from, date_to):
+        url = f'{self._api_endpoint}/competitions'
+        param = {"date_from": {date_from}, "date_to" : {date_to}}
+        response = requests.get(url, headers=self._get_header(), params=param)
+        self._handle_response_code(response)
+        return response.json()
+
     def get_club_registrations(self, club_id):
         url = f'{self._api_endpoint}/clubs/{club_id}/registrations'
         response = requests.get(url, headers=self._get_header())

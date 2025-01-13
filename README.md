@@ -1,9 +1,8 @@
 # preteky
-Projekt na Tvorbu informačných systémov 2024 - aplikácia pre prácu so systémom SZOS a webovou aplikáciou ŠK Sandberg
-# Inštalácia
-## Inštalačný návod pre nahranie súborov
 
-Tento návod popisuje, ako nahrávať súbory na server z GitHubu pomocou príkazového riadku.
+Projekt na Tvorbu informačných systémov 2024 - aplikácia pre prácu so systémom SZOS a webovou aplikáciou ŠK Sandberg.
+
+# Inštalácia
 
 ## Krok 1: Klonovanie repozitára
 
@@ -15,23 +14,78 @@ Tento návod popisuje, ako nahrávať súbory na server z GitHubu pomocou príka
    ```
 3. Prejdite do priečinka vášho repozitára:
    ```bash
-   cd preteky/API/sandberg_api
+   cd preteky
    ```
+
+## Voliteľé kroky: Nahranie súborov na server a inicializícia databázy
+
 ## Krok 2: Nahranie súborov na server
-1. Použite príkaz scp na nahranie súborov na server:
+
+1. Prejdite do priečinka s súbormi, ktoré chcete nahrať na server:
+
    ```bash
-   scp api.php export_import.php username@senzor.robotika.sk:/var/www/sks/
+   cd /API/sandberg_api
    ```
-   Za username napíšte svoje prihlasovacie meno.
-   
-2. Po zadaní tohto príkazu budete požiadaní o heslo. Zadajte ho a počkajte na dokončenie nahrávania.
+
+2. Použite príkaz scp na nahranie súborov na server:
+
+   ```bash
+   scp api.php export_import.php database_initialization.php username@senzor.robotika.sk:/var/www/sks/
+   ```
+
+Za username napíšte svoje prihlasovacie meno.
+Po zadaní tohto príkazu budete požiadaní o heslo. Zadajte ho a počkajte na dokončenie nahrávania.
+
 ## Krok 3: Overenie
+
 1. Pre pripojenie na server použite príkaz:
+
    ```bash
    ssh username@senzor.robotika.sk
    ```
-2. Prejdite do priečinka s nahranými súbormi:
+   Za username napíšte svoje prihlasovacie meno.
+   Po zadaní tohto príkazu budete požiadaní o heslo.
+
+2. Prejdite do adresára /var/www/sks/:
+
    ```bash
    cd /var/www/sks/
+   ```
+
+3. Skontrolujte, či sú tam nahrané súbory:
+   
+   ```bash
    ls
    ```
+
+## Krok 4: Inicializácia databázy
+
+1. Prejdite do adresára /var/www/sks/:
+
+   ```bash
+   cd /var/www/sks/
+   ```
+
+2. Spustite skript database_initialization.php:
+
+   ```bash
+   php database_initialization.php
+   ```
+
+## Krok 5: Spustenie skriptu
+
+1. Uistite sa, že máte skript setup_and_run.sh v koreňovom adresári repozitára.
+2. Urobte skript spustiteľným, ak ešte ste to neurobili:
+
+   ```bash
+   chmod +x setup_and_run.sh
+   ```
+
+3. Spustite skript:
+   ```bash
+    ./setup_and_run.sh
+    ```
+
+Skript automaticky vytvorí virtuálne prostredie, nainštaluje potrebné knižnice a spustí konzolovú aplikáciu.
+
+

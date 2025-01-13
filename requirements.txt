@@ -1,0 +1,11 @@
+pip~=24.3.1
+wheel~=0.44.0
+setuptools~=70.0.0
+tomli~=2.0.2
+tomli_w~=1.0.0
+requests~=2.32.3
+matplotlib~=3.7.5
+google-auth~=2.20.0
+google-auth-oauthlib~=1.0.0
+google-auth-httplib2~=0.1.0
+google-api-python-client~=2.92.0

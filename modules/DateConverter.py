@@ -87,6 +87,11 @@ class DateConverter:
         except ValueError:
             raise HandlerError("Wrong input string")
 
+    def get_time_object_from_string(self, input_string: str):
+        try:
+            return datetime.strptime(input_string, "%H-%M-%S")
+        except ValueError:
+            raise HandlerError("Wrong input string")
 
 if __name__ == '__main__':
     dc = DateConverter()

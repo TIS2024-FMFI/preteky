@@ -8,17 +8,19 @@ from PostToIsOrienteering import Mod_post
 from database_sandberg_handler import SandbergDatabaseHandler
 from config_file_reader import ConfigFileReader
 from export_data_to_file import TXTConverter, CSVConverter, HTMLConverter
+import ErrorHandler as error
+from DateConverter import DateConverter
+from datetime import datetime
 from GoogleCalendarService import GoogleCalendarService
 
 
-class Procesor:
+class HandlerOfInputsFromUi:
     def __init__(self):
         self.config = ConfigFileReader()
         self.mod_get = Mod_get(self.config.IS_API_ENDPOINT,
                                self.config.IS_API_KEY)  # here we need url endpoit and  api acces key from config file
         self.mod_post = Mod_post(self.config.IS_API_ENDPOINT, self.config.IS_API_KEY)  # same here
         self.sandberg_handler = SandbergDatabaseHandler(self.config.SANDBERG_API_ENDPOINT)
-        self
         self.categories = {}  # dict of category_id : name
         self.dc = DateConverter()
         try:
@@ -31,12 +33,11 @@ class Procesor:
         self.runners = []
         self.google_calendar_service = GoogleCalendarService()
 
-
     def get_races_from_IsOrienteering_in_month(self, month: str):
         try:
             races = self.mod_get.get_races_in_month(month)
         except error.IsOrieteeringApiError as e:
-            return f'{str(e)}'
+            raise e
         output = [{"id": None, "dátum": None, "názov": None, "deadline": None,
                    "miesto": None, "kategorie": None}
                   for _ in range(len(races))]
@@ -45,7 +46,7 @@ class Procesor:
             try:
                 race = self.mod_get.get_race_details(id)
             except error.IsOrieteeringApiError as e:
-                return f'{str(e)}'
+                raise e
             try:
                 self.fill_out_cache(race)
             except error.HandlerError:
@@ -76,7 +77,7 @@ class Procesor:
                 "categories": []
             }
 
-            for category in race["categories"]:
+            for category in input_race["categories"]:
                 tmp_category = {"id": category["id"], "category_id": category["category_id"],
                                 "category_name": self.categories[category["category_id"]]}
                 race["categories"].append(tmp_category)
@@ -99,7 +100,7 @@ class Procesor:
                 self.sandberg_handler.process_race_data(race_data)
                 return "The race has been successfully added."
             except error.SandbergDatabaseError as e:
-                return f"{str(e)}"
+                raise e
         else:
             raise error.HandlerError("race_id not found in cache")
 
@@ -107,7 +108,7 @@ class Procesor:
         try:
             active_races = self.mod_get.get_races_from_date()
         except error.IsOrieteeringApiError as e:
-            return f'{str(e)}'
+            raise e
         output = []
         output_dict = {"id": None, "datum": None, "nazov": None, "deadline": None,
                        "miesto": None, "kategorie": None}
@@ -118,12 +119,12 @@ class Procesor:
             try:
                 race = self.mod_get.get_race_details(id)
             except error.IsOrieteeringApiError as e:
-                return f'{str(e)}'
+                raise e
             try:
                 deadline_date = self.dc.get_date_object_from_string(
                     race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"])
             except error.HandlerError as e:
-                return f'{str(e)}'
+                raise e
             try:
                 self.fill_out_cache(race)
             except error.HandlerError:
@@ -143,59 +144,79 @@ class Procesor:
 
         return output
 
-    def sign_racers_to_IsOrienteering(self, race_id: int):
-        """
-            input: potrebne parametre preteku
-            output: success, error + API response
-        """
+    def fill_runners(self, race_id: int):
         try:
             self.sandberg_handler.export_registered_runners(race_id)
-        except error.SandbergDatabaseError as e:  # test this
-            return f'{str(e)}'
+        except error.SandbergDatabaseError as e:
+            raise e
         data = self.sandberg_handler.get_last_exported_data()
 
         for runner in data:
             registration_form = {
-                "registration_id": "0",  ##ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu
+                "registration_id": "0",  # ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu
                 "first_name": runner["MENO"],
                 "surname": runner["PRIEZVISKO"],
-                "reg_number": runner["OS.ČÍSLO"],  ##registration number, temporlaly OS.Cislo
-                "sportident": runner["ČIP"],  ##sportident, temporarly cislo cipu
+                "reg_number": runner["OS.ČÍSLO"],  # registration number, temporlaly OS.Cislo
+                "sportident": runner["ČIP"],  # sportident, temporarly cislo cipu
                 "comment": runner["POZNÁMKA"],
                 "categories": [
                     {
                         "competition_event_id": self.races[race_id]["events"][0]["id"] if isinstance(
                             self.races[race_id]["events"], list) else self.races[race_id]["events"]["id"],
-                        # //ID etapy pretekov
-                        "competition_category_id": runner["ID_KATÉGORIE"],  # //ID kategórie pretekov
+                        # ID etapy pretekov
+                        "competition_category_id": runner["ID_KATÉGORIE"],  # ID kategórie pretekov
                     }
                 ],
                 "services": []
             }
             self.runners.append(registration_form)
-            # try:
-            #     self.mod_post.register_runner(race_id, registration_form)
-            # except error.IsOrieteeringApiError as e:
-            #     return f'{str(e)}'
+
+    def sign_runners_to_IsOrienteering(self, race_id: int):
+        self.fill_runners(race_id)
+        for runner in self.runners:
+            try:
+                self.mod_post.register_runner(race_id, runner)
+            except error.IsOrieteeringApiError as e:
+                raise e
         return self.runners
 
-    def convert_data(self, converter_class, output_dir=None):
-        if self.runners:
-            runners = self.runners
-            convert_class = converter_class(runners)
-            convert_class.save_to_file(output_dir)
-            return converter_class(runners)
-        else:
-            raise error.HandlerError("race_id not found in cache")
+    def convert_data(self, converter_class, race_id=None):
+        self.fill_runners(race_id)
+        convert_class = converter_class(self.runners)
+        convert_class.save_to_file()
+        return converter_class(self.runners)
 
-    def convert_html(self, output_dir=None):
-        return self.convert_data(HTMLConverter, output_dir)
+    def convert_html(self, race_id=None):
+        return self.convert_data(HTMLConverter, race_id)
 
-    def convert_csv(self, output_dir=None):
-        return self.convert_data(CSVConverter, output_dir)
+    def convert_csv(self, race_id=None):
+        return self.convert_data(CSVConverter, race_id)
 
-    def convert_txt(self, output_dir=None):
-        return self.convert_data(TXTConverter, output_dir)
+    def convert_txt(self, race_id=None):
+        return self.convert_data(TXTConverter, race_id)
+
+    def add_to_google_calendar(self, race_id):
+        race = self.races[race_id]
+        try:
+            event_id = self.google_calendar_service.add_to_google_calendar(
+                summary=race["title_sk"],
+                location=race.get("place", "Nešpecifikované"),
+                description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
+                start_date=race["date_from"],
+                end_date=race["date_to"]
+            )
+            print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
+
+            if self.dc.get_date_object_from_string(race["deadline"]) != self.dc.get_date_object_from_string(race["date_to"]):
+                self.google_calendar_service.add_deadline_event(
+                    summary=f"Deadline: {race['title_sk']}",
+                    location=race.get("place", "Nešpecifikované"),
+                    description=f"Deadline pre registráciu na pretek: {race['title_sk']} | ID: {race['id']}",
+                    deadline_date=race["deadline"]
+                )
+                print(f"Deadline pre pretek {race['title_sk']} bol pridaný do Google Kalendára.")
+
+            return event_id
 
     def add_to_google_calendar(self, race_id: str):
         """
@@ -217,6 +238,7 @@ class Procesor:
             )
             print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
             return event_id
+
 
         except Exception as e:
             print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
@@ -244,7 +266,7 @@ class Procesor:
         try:
             runners = self.mod_get.get_club_registrations(self.club_id)
         except error.IsOrieteeringApiError as e:
-            return f'{str(e)}'
+            raise e
         for runner in runners:
             output.append({"ID": runner["runner"]["id"], "MENO": runner["runner"]["first_name"],
                            "PRIEZVISKO": runner["runner"]["surname"]})
@@ -254,10 +276,43 @@ class Procesor:
         "date format YYYY-MM-DD"
         "ziska vysledky bezca v zadanom intervaly"
         try:
-            results = self.mod_get.get_runner_results(runner_id, date_from, date_to)
+            runner_results = self.mod_get.get_runner_results(runner_id, date_from, date_to)
         except error.IsOrieteeringApiError as e:
-            return f'{str(e)}'
-        return results
+            raise e
+        try:
+            races = self.mod_get.get_races_from_to(date_from, date_to)
+        except error.IsOrieteeringApiError as e:
+            raise e
+        
+        atendence = {}
+        times_after_first = {}
+        date_placement = {}
+        for result in runner_results:
+            for race in races:
+                if race["events"] != [] and race["events"][0]["id"] == result["event_id"]:
+                    date = self.dc.get_date_object_from_string(race['date_to'])
+                    
+                    first_runner_time, number_of_competitors = self.get_race_results(race['id'], race["events"][0]["id"])
+                    hours = int(result["time_min"]) // 60
+                    minutes = int(result["time_min"]) % 60
+                    runner_time = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{result["time_sec"]}')
+                    atendence[date.month, date.year] = True
+                    times_after_first[race["title_sk"]] = runner_time - first_runner_time
+                    date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
+
+        runner_name = f'{runner_results[0]["first_name"]} {runner_results[0]["surname"]}'
+        output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB",date_from, date_to]
+        return output
+
+    def get_race_results(self, race_id, event_id):
+        try:
+            results = self.mod_get.get_race_results(race_id, event_id)
+        except error.IsOrieteeringApiError as e:
+            raise e
+        hours = int(results[0]["time_min"]) // 60
+        minutes = int(results[0]["time_min"]) % 60
+        time_of_first_runner = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{results[0]["time_sec"]}')
+        return time_of_first_runner, len(results)
 
 
 # kedze toto je ako dict a nie ako json string (co bolo povodne), tak sa pomenil database_sandberg_handler.py
@@ -305,14 +360,14 @@ race_data_json = {
     ]
 }
 
-processor = Procesor()
-processor.get_races_from_IsOrienteering_in_month("December")
-# processor.races[1888] = race_data_json
-# result = processor.import_race_to_Sandberg_Databaze(1888)
-# print(result)
-# result1 = processor.sign_racers_to_IsOrienteering(1888)
-# print(result1)
-# result2 = processor.convert_html("C:\\Users\\miria")
+# processor = Procesor()
+# # processor.get_races_from_IsOrienteering_in_month("December")
+# processor.races[1887] = race_data_json
+# # result = processor.import_race_to_Sandberg_Databaze(1888)
+# # print(result)
+# # result1 = processor.sign_racers_to_IsOrienteering(1888)
+# # print(result1)
+# result2 = processor.convert_html(1887)
 # print(result2)
-# result3 = processor.convert_csv(1888)
-# result4 = processor.convert_txt(1888)
+# # result3 = processor.convert_csv(1888)
+# # result4 = processor.convert_txt(1888)
