@@ -1,93 +1,75 @@
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_pdf import PdfPages
 from datetime import datetime
-import matplotlib.dates as mdates
-from datetime import timedelta
 
 class GraphCreator:
 
-    ###   ak sa nezmestia data tak dorobit legendu a do grafov priradit iba
     def __init__(self, data):
         self.table = None
-        self.attendance_graph = None
-        self.placement_graph = None
-        self.times_graph = None
-        self.data = data #[{month, year : participations}, {race : time_after_first}, {race : [date, placement]}, name, club, start_date, end_date]  +  mozno nejaku path z configuraku nwm
-        
+        self.data = data
+        self.figures = []  # Store all figures for saving later
+
     def create_attendance_graph(self):
-        fig1, ax1 = plt.subplots()
-        mesiace = self.data[0].keys()
-        participation = self.data[0].values()
-        ax1.bar(mesiace, participation, color='hotpink')
-        ax1.set_yticks(range(7))
-        ax1.set_yticklabels(range(0,7))
-        ax1.set_title("Účasť na pretekoch")
-        return fig1
+        participation_data = list(self.data[0].items())
+        chunks = [participation_data[i:i + 7] for i in range(0, len(participation_data), 7)]
+        for idx, chunk in enumerate(chunks):
+            fig, ax = plt.subplots()
+            mesiace, participation = zip(*chunk)
+            ax.bar(mesiace, participation, color='hotpink')
+            ax.set_yticks(range(7))
+            ax.set_yticklabels(range(0, 7))
+            ax.set_title(f"Účasť na pretekoch (Strana {idx + 1})")
+            self.figures.append(fig)
 
     def create_times_graph(self):
-        time_differences = self.data[1].values()
+        races_times = list(self.data[1].items())
+        chunks = [races_times[i:i + 7] for i in range(0, len(races_times), 7)]
+        for idx, chunk in enumerate(chunks):
+            fig, ax = plt.subplots(figsize=(10, 6))  # Adjust figure size for better readability
+            races, time_differences = zip(*chunk)
+            time_in_seconds = [
+                sum(int(x) * 60 ** i for i, x in enumerate(td.split(":")[::-1])) for td in time_differences
+            ]
+            yticks = range(0, max(time_in_seconds) + 600, 600)
+            formatted_yticks = [f"{t // 3600:02}:{(t // 60) % 60:02}:{t % 60:02}" for t in yticks]
 
-        time_in_seconds = [td.total_seconds() for td in time_differences]
+            ax.plot(races, time_in_seconds, color='green', marker='o')
+            ax.set_yticks(yticks)
+            ax.set_yticklabels(formatted_yticks)
+            ax.set_title(f"Časová strata oproti 1. miestu (Strana {idx + 1})")
+            #ax.set_xlabel("Race")
+            #ax.set_ylabel("Časová strata (HH:MM:SS)")
 
-        min_seconds = int(min(time_in_seconds))
-        max_seconds = int(max(time_in_seconds))
+            # Adjust x-axis labels for longer names
+            ax.set_xticks(range(len(races)))
+            ax.set_xticklabels(races, rotation=30, ha="right", fontsize=8, wrap=True)
 
-        time_range = max_seconds - min_seconds
-        if time_range <= 3600:
-            interval = 60
-        elif time_range <= 7200:
-            interval = 300 
-        else:
-            interval = 600
-
-        yticks = range(0, max_seconds + interval, interval)
-
-        formatted_yticks = [f"{t // 3600:02}:{(t // 60) % 60:02}:{t % 60:02}" for t in yticks]
-
-        fig2, ax2 = plt.subplots()
-        races = self.data[1].keys()
-        ax2.plot(races, time_in_seconds, color='green', marker='o', label="Time loss (seconds)")
-
-
-        for y in time_in_seconds:
-            ax2.hlines(y, xmin=-0.5, xmax=len(races) - 1 + 0.5, colors='gray', linestyles='dashed', alpha=0.5)
-
-        ax2.set_yticks(yticks)
-        ax2.set_yticklabels(formatted_yticks)
-
-        ax2.set_title("Časová strata oproti 1. miestu")
-        ax2.set_xlabel("Race")
-        ax2.set_ylabel("Časová strata (HH:MM:SS)")
-        return fig2
-
+            plt.tight_layout()  # Automatically adjust layout to fit elements
+            self.figures.append(fig)
 
     def create_placement_graph(self):
-        fig, ax = plt.subplots()
+        placement_data = list(self.data[2].items())
+        chunks = [placement_data[i:i + 7] for i in range(0, len(placement_data), 7)]
+        for idx, chunk in enumerate(chunks):
+            fig, ax = plt.subplots(figsize=(10, 6))  # Adjust figure size for better readability
+            race_names, data = zip(*chunk)
+            dates, placements = zip(*data)
 
-        
-        
-        race_data.sort(key=lambda x: x[1])
-        
-        race_names = self.data[2].keys()
-        dates = [item[0] for item in self.data[2].values()]
-        placements = [item[1] for item in self.data[2].values()]
+            y_labels = ["4/4", "3/4", "1/2", "1/4", 3, 2, 1][::-1]
+            y_positions = list(range(len(y_labels)))
 
-        y_labels = ["4/4","3/4", "1/2", "1/4", 3, 2, 1][::-1]
-        y_positions = list(range(len(y_labels)))
-        
-        ax.plot(dates, placements, marker='o', color='blue', linestyle='-')
-        ax.set_title("Umiestnenie v pretekoch")
+            ax.plot(dates, placements, marker='o', color='blue', linestyle='-')
+            ax.set_title(f"Umiestnenie v pretekoch (Strana {idx + 1})")
+            ax.set_yticks(y_positions)
+            ax.set_yticklabels(y_labels)
+            ax.invert_yaxis()
 
-        ax.set_yticks(y_positions)
-        ax.set_yticklabels(y_labels)
-        ax.invert_yaxis()
+            # Adjust x-axis labels for longer names
+            ax.set_xticks(range(len(dates)))
+            ax.set_xticklabels(race_names, rotation=30, ha="right", fontsize=8, wrap=True)
 
-        ax.set_xticks(dates)
-        print(race_names)
-        ax.set_xticklabels(race_names, rotation=0)
-
-        return fig
-
+            plt.tight_layout()  # Automatically adjust layout to fit elements
+            self.figures.append(fig)
 
 
     def create_table(self):
@@ -102,29 +84,56 @@ class GraphCreator:
         ]
 
         table = ax.table(cellText=summary_data, cellLoc="center", loc="center")
-        table.scale(1, 2) 
+        table.scale(1, 2)
         table.auto_set_font_size(True)
         table.set_fontsize(12)
 
-        return fig
+        self.figures.append(fig)
 
     def create(self):
-        self.table = self.create_table()
-        self.placement_graph = self.create_placement_graph()
-        self.times_graph = self.create_times_graph()
-        self.attendance_graph = self.create_attendance_graph()
-    
+        self.create_table()
+        self.create_attendance_graph()
+        self.create_times_graph()
+        self.create_placement_graph()
+
     def save(self):
         with PdfPages("athlete_statistics.pdf") as pdf:
-            for fig in [self.table, self.placement_graph, self.times_graph, self.attendance_graph]:
-                pdf.savefig(fig) 
+            for fig in self.figures:
+                pdf.savefig(fig)
                 plt.close(fig)
 
 
-i = GraphCreator([{month, year : participations}, {race : time_after_first}, {race : [date, placement]}, name, club, start_date, end_date])
-#print(1)
-i.create()
-#print(2)
-#i.save()
-#print(3)
+# Sample Data
+data = [
+    {  # Participation data
+        "2020-01": 4, "2020-02": 3, "2020-03": 0, "2020-04": 3, "2020-05": 1,
+        "2020-06": 0, "2020-07": 5, "2020-08": 4, "2020-09": 5, "2020-10": 1,
+        "2021-01": 4, "2021-02": 2, "2021-03": 0,
+        "2021-04": 3, "2021-05": 4, "2021-06": 5, "2021-07": 2, "2021-08": 5,
+        "2021-09": 4, "2021-10": 5, "2022-11": 1, "2023-02": 3, "2023-03": 4,
+        "2023-04": 1, "2023-05": 4, "2023-06": 3, "2023-07": 4, "2023-08": 0,
+        "2023-09": 2, "2023-10": 3, "2023-11": 3, "2023-12": 2
+    },
+    {  # Time differences data
+        "Pretek kyselinarov v hontianskych nemcoch": "04:18:11", "Cezpolny beh olazskych zvaracov": "00:08:43", "Stofersky maraton po sites of lucanka": "00:30:25",
+        "Race_4": "02:34:55", "Race_5": "04:22:33", "Race_6": "04:22:01",
+        "Race_7": "03:13:46", "Race_8": "01:36:02", "Race_9": "02:15:06",
+        "Race_10": "03:52:10"
+    },
+    {  # Placement data
+        "Pretek kyselinarov v hontianskych nemcoch": ["2023-07-15", 36], "Race_2": ["2020-03-16", 77],
+        "Race_3": ["2022-12-05", 58], "Race_4": ["2022-05-22", 96],
+        "Race_5": ["2020-04-22", 48], "Race_6": ["2023-02-26", 15],
+        "Race_7": ["2022-07-01", 51], "Race_8": ["2020-07-21", 25],
+        "Race_9": ["2022-12-07", 3], "Race_10": ["2022-10-27", 1]
+    },
+    "John Doe",
+    "Speedsters Club",
+    "2020-01-01",
+    "2023-12-31"
+]
 
+# Usage
+i = GraphCreator(data)
+i.create()
+i.save()
