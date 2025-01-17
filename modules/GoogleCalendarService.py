@@ -6,7 +6,7 @@ from google.oauth2.service_account import Credentials
 class GoogleCalendarService:
 
     SCOPES = ['https://www.googleapis.com/auth/calendar']
-    SERVICE_ACCOUNT_FILE = 'service_account.json'
+    SERVICE_ACCOUNT_FILE = 'modules/service_account.json'
 
     def __init__(self):
         self.service = self.authenticate()
