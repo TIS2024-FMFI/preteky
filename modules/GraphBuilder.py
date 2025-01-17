@@ -28,7 +28,7 @@ class GraphCreator:
             fig, ax = plt.subplots(figsize=(10, 6))  # Adjust figure size for better readability
             races, time_differences = zip(*chunk)
             time_in_seconds = [
-                sum(int(x) * 60 ** i for i, x in enumerate(td.split(":")[::-1])) for td in time_differences
+                sum(int(x) * 60 ** i for i, x in enumerate(str(td).split(":")[::-1])) for td in time_differences
             ]
             yticks = range(0, max(time_in_seconds) + 600, 600)
             formatted_yticks = [f"{t // 3600:02}:{(t // 60) % 60:02}:{t % 60:02}" for t in yticks]
@@ -49,7 +49,7 @@ class GraphCreator:
 
     def create_placement_graph(self):
         # Sort all placement data by date before chunking
-        placement_data = sorted(self.data[2].items(), key=lambda x: datetime.strptime(x[1][0], "%Y-%m-%d"))
+        placement_data = sorted(self.data[2].items(), key=lambda x: x[1][0])
         
         # Divide sorted data into chunks
         chunks = [placement_data[i:i + 7] for i in range(0, len(placement_data), 7)]
@@ -67,7 +67,11 @@ class GraphCreator:
                 if placements[i] in {1, 2, 3}:
                     result.append(placements[i])
                 else:
-                    ratio = placements[i] / total[i]
+                    if placements[i] == None:
+                        placement = 0
+                    else:
+                        placement = int(placements[i])
+                    ratio = placement / total[i]
                     if 0 < ratio <= 0.25:
                         result.append("1/4")
                     elif 0.25 < ratio <= 0.5:
