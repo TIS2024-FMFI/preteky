@@ -195,7 +195,7 @@ class HandlerOfInputsFromUi:
     def convert_txt(self, race_id=None):
         return self.convert_data(TXTConverter, race_id)
 
-    def add_to_google_calendar(self, race_id: str, calendar_id: str):
+    def add_to_google_calendar(self, race_id: str, calendar_id=None):
         """
         Add race event to Google Calendar. If a deadline exists, it adds both the main event and the deadline.
         :param race_id: ID of the race
@@ -294,9 +294,8 @@ class HandlerOfInputsFromUi:
             for race in races:
                 if race["events"] != [] and race["events"][0]["id"] == result["event_id"]:
                     date = self.dc.get_date_object_from_string(race['date_to'])
-
                     first_runner_time, number_of_competitors = self.get_race_results(race['id'],
-                                                                                     race["events"][0]["id"])
+                            race["events"][0]["id"], result['competition_category_id'])
                     hours = int(result["time_min"]) // 60
                     minutes = int(result["time_min"]) % 60
                     runner_time = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{result["time_sec"]}')
@@ -304,22 +303,29 @@ class HandlerOfInputsFromUi:
                         atendence[f"{date.year}-{date.month}"] += 1
                     else:
                         atendence[f"{date.year}-{date.month}"] = 1
-                    times_after_first[race["title_sk"]] = runner_time - first_runner_time
+                    delta =  runner_time - first_runner_time
+                    times_after_first[race["title_sk"]] = delta
+
                     date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
 
         runner_name = f'{runner_results[0]["first_name"]} {runner_results[0]["surname"]}'
         output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB", date_from, date_to]
         return output
 
-    def get_race_results(self, race_id, event_id):
+    def get_race_results(self, race_id, event_id, competition_category_id):
         try:
-            results = self.mod_get.get_race_results(race_id, event_id)
+            tmp  = self.mod_get.get_race_results(race_id, event_id)
         except error.IsOrieteeringApiError as e:
             raise e
+        results = []
+        for item in tmp:
+            if item['competition_category_id'] == competition_category_id :
+                results.append(item)
+
         hours = int(results[0]["time_min"]) // 60
         minutes = int(results[0]["time_min"]) % 60
         time_of_first_runner = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{results[0]["time_sec"]}')
-        return time_of_first_runner, len(results)
+        return time_of_first_runner, len(results), 
 
 
 # kedze toto je ako dict a nie ako json string (co bolo povodne), tak sa pomenil database_sandberg_handler.py
@@ -367,7 +373,9 @@ race_data_json = {
     ]
 }
 
-# processor = Procesor()
+# processor = HandlerOfInputsFromUi()
+# processor.get_runner_results('2070', '2024-01-01', '2025-01-01')
+#processor.get_race_results('1835', '623')
 # # processor.get_races_from_IsOrienteering_in_month("December")
 # processor.races[1887] = race_data_json
 # # result = processor.import_race_to_Sandberg_Databaze(1888)
