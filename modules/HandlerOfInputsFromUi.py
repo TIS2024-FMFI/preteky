@@ -286,7 +286,10 @@ class HandlerOfInputsFromUi:
                     hours = int(result["time_min"]) // 60
                     minutes = int(result["time_min"]) % 60
                     runner_time = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{result["time_sec"]}')
-                    atendence[date.month, date.year] = True
+                    if f"{date.year}-{date.month}" in atendence:
+                        atendance[f"{date.year}-{date.month}"] += 1
+                    else:
+                        atendance[f"{date.year}-{date.month}"] = 1
                     times_after_first[race["title_sk"]] = runner_time - first_runner_time
                     date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
 
