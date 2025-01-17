@@ -8,7 +8,7 @@ from difflib import SequenceMatcher
 from HandlerOfInputsFromUi import HandlerOfInputsFromUi
 import config_file_reader as config
 from DateConverter import DateConverter
-
+from GraphBuilder import GraphCreator
 
 ####vrati bud zoznam ak to ma zobrazit alebo vrati none ak je finalny
 ###komunikacia s ostanymi
@@ -108,7 +108,7 @@ class ConsoleApp:
                 return races
 
             elif interface_name == "Register_racers":
-                self.handler.sign_racers_to_IsOrienteering(param[0])
+                self.handler.sign_runners_to_IsOrienteering(param[0])
 
             elif interface_name == "html":
                 self.handler.convert_html(param[0])
