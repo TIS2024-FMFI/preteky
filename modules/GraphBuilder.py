@@ -48,28 +48,56 @@ class GraphCreator:
             self.figures.append(fig)
 
     def create_placement_graph(self):
-        placement_data = list(self.data[2].items())
+        # Sort all placement data by date before chunking
+        placement_data = sorted(self.data[2].items(), key=lambda x: datetime.strptime(x[1][0], "%Y-%m-%d"))
+        
+        # Divide sorted data into chunks
         chunks = [placement_data[i:i + 7] for i in range(0, len(placement_data), 7)]
+        
         for idx, chunk in enumerate(chunks):
-            fig, ax = plt.subplots(figsize=(10, 6))  # Adjust figure size for better readability
-            race_names, data = zip(*chunk)
-            dates, placements = zip(*data)
+            fig, ax = plt.subplots(figsize=(10, 6))
 
+            # Extract race names and data from chunk
+            race_names, data = zip(*chunk)
+            dates, placements, total = zip(*data)
+
+            # Calculate result
+            result = []
+            for i in range(len(placements)):
+                if placements[i] in {1, 2, 3}:
+                    result.append(placements[i])
+                else:
+                    ratio = placements[i] / total[i]
+                    if 0 < ratio <= 0.25:
+                        result.append("1/4")
+                    elif 0.25 < ratio <= 0.5:
+                        result.append("1/2")
+                    elif 0.5 < ratio <= 0.75:
+                        result.append("3/4")
+                    elif 0.75 < ratio <= 1.0:
+                        result.append("4/4")
+
+            # Map result to indices for plotting
+            mapping = {"4/4": 6, "3/4": 5, "1/2": 4, "1/4": 3, 3: 2, 2: 1, 1: 0}
+            result_indices = [mapping[val] for val in result]
+
+            # Plot
             y_labels = ["4/4", "3/4", "1/2", "1/4", 3, 2, 1][::-1]
             y_positions = list(range(len(y_labels)))
 
-            ax.plot(dates, placements, marker='o', color='blue', linestyle='-')
+            ax.plot(range(len(result_indices)), result_indices, marker='o', color='blue', linestyle='-')
             ax.set_title(f"Umiestnenie v pretekoch (Strana {idx + 1})")
             ax.set_yticks(y_positions)
             ax.set_yticklabels(y_labels)
             ax.invert_yaxis()
 
-            # Adjust x-axis labels for longer names
+            # Adjust x-axis labels
             ax.set_xticks(range(len(dates)))
-            ax.set_xticklabels(race_names, rotation=30, ha="right", fontsize=8, wrap=True)
+            ax.set_xticklabels(race_names, rotation=30, ha="right", fontsize=8)
 
             plt.tight_layout()  # Automatically adjust layout to fit elements
             self.figures.append(fig)
+
 
 
     def create_table(self):
@@ -121,11 +149,12 @@ data = [
         "Race_10": "03:52:10"
     },
     {  # Placement data
-        "Pretek kyselinarov v hontianskych nemcoch": ["2023-07-15", 36], "Race_2": ["2020-03-16", 77],
-        "Race_3": ["2022-12-05", 58], "Race_4": ["2022-05-22", 96],
-        "Race_5": ["2020-04-22", 48], "Race_6": ["2023-02-26", 15],
-        "Race_7": ["2022-07-01", 51], "Race_8": ["2020-07-21", 25],
-        "Race_9": ["2022-12-07", 3], "Race_10": ["2022-10-27", 1]
+        "Pretek kyselinarov v hontianskych nemcoch": ["2023-07-15", 36, 90],
+        "Race_2": ["2020-03-16", 77, 200],
+        "Race_3": ["2022-12-05", 58, 100], "Race_4": ["2022-05-22", 96, 100],
+        "Race_5": ["2020-04-22", 48, 50], "Race_6": ["2023-02-26", 15, 1000],
+        "Race_7": ["2022-07-01", 51, 68], "Race_8": ["2020-07-21", 25, 25],
+        "Race_9": ["2022-12-07", 3, 35], "Race_10": ["2022-10-27", 1, 4]
     },
     "John Doe",
     "Speedsters Club",
