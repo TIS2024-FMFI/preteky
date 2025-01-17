@@ -195,10 +195,11 @@ class HandlerOfInputsFromUi:
     def convert_txt(self, race_id=None):
         return self.convert_data(TXTConverter, race_id)
 
-    def add_to_google_calendar(self, race_id: str):
+    def add_to_google_calendar(self, race_id: str, calendar_id: str):
         """
         Add race event to Google Calendar. If a deadline exists, it adds both the main event and the deadline.
         :param race_id: ID of the race
+        :param calendar_id: ID of the calendar
         :return: Event ID of the main race event
         """
         try:
@@ -207,23 +208,25 @@ class HandlerOfInputsFromUi:
             if "deadline" in race and race["deadline"] and \
                     self.dc.get_date_object_from_string(race["deadline"]) != self.dc.get_date_object_from_string(
                 race["date_to"]):
-
+                # Add main event with deadline
                 event_id = self.google_calendar_service.add_event_with_deadline(
                     main_event_summary=race["title_sk"],
                     location=race.get("place", "Nešpecifikované"),
                     description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
                     start_date=race["date_from"],
                     end_date=race["date_to"],
-                    deadline_date=race["deadline"]
+                    deadline_date=race["deadline"],
+                    calendar_id=calendar_id
                 )
             else:
-
+                # Add only main event
                 event_id = self.google_calendar_service.add_main_event(
                     summary=race["title_sk"],
                     location=race.get("place", "Nešpecifikované"),
                     description=f"Pretek: {race['title_sk']} | ID: {race['id']}",
                     start_date=race["date_from"],
-                    end_date=race["date_to"]
+                    end_date=race["date_to"],
+                    calendar_id=calendar_id
                 )
 
             print(f"Udalosť pre pretek {race['title_sk']} bola pridaná do Google Kalendára.")
@@ -233,17 +236,28 @@ class HandlerOfInputsFromUi:
             print(f"Chyba pri pridávaní udalosti do Google Kalendára: {str(e)}")
             raise error.HandlerError("Nepodarilo sa pridať udalosť do kalendára")
 
-    def update_google_event(self, event_id: str, new_data: str):
+    def update_google_event(self, event_id: str, calendar_id: str, new_data: dict):
+        """
+        Update an event in Google Calendar.
+        :param event_id: ID of the event
+        :param calendar_id: ID of the calendar
+        :param new_data: Updated data for the event
+        """
         try:
-            self.google_calendar_service.update_event(event_id, new_data)
+            self.google_calendar_service.update_event(event_id, calendar_id, new_data)
             print(f"Udalosť s ID {event_id} bola aktualizovaná v Google Kalendári.")
         except Exception as e:
             print(f"Chyba pri aktualizovaní udalosti v Google Kalendári: {str(e)}")
             raise error.HandlerError("Nepodarilo sa aktualizovať udalosť v kalendári")
 
-    def delete_from_google_calendar(self, event_id: str):
+    def delete_from_google_calendar(self, event_id: str, calendar_id: str):
+        """
+        Delete an event from Google Calendar.
+        :param event_id: ID of the event
+        :param calendar_id: ID of the calendar
+        """
         try:
-            self.google_calendar_service.delete_event_with_deadline(event_id)
+            self.google_calendar_service.delete_event_with_deadline(event_id, calendar_id)
             print(
                 f"Udalosť s ID {event_id} bola zmazaná z Google Kalendára spolu s deadline udalosťou (ak existovala).")
         except Exception as e:
@@ -287,9 +301,9 @@ class HandlerOfInputsFromUi:
                     minutes = int(result["time_min"]) % 60
                     runner_time = self.dc.get_time_object_from_string(f'{hours}-{minutes}-{result["time_sec"]}')
                     if f"{date.year}-{date.month}" in atendence:
-                        atendance[f"{date.year}-{date.month}"] += 1
+                        atendence[f"{date.year}-{date.month}"] += 1
                     else:
-                        atendance[f"{date.year}-{date.month}"] = 1
+                        atendence[f"{date.year}-{date.month}"] = 1
                     times_after_first[race["title_sk"]] = runner_time - first_runner_time
                     date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
 
