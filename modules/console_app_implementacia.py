@@ -157,7 +157,9 @@ class ConsoleApp:
                     return []
 
             elif interface_name == "import_stat":
-                self.handler.get_runner_results(param[2], param[0], param[1])
+                gb = GraphCreator(self.handler.get_runner_results(param[2], param[0], param[1]))
+                gb.create()
+                gb.save()
                 return "SUCCESS"
 
             elif interface_name == "Import preteku":
