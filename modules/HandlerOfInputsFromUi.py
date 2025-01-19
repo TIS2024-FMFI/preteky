@@ -195,13 +195,14 @@ class HandlerOfInputsFromUi:
     def convert_txt(self, race_id=None):
         return self.convert_data(TXTConverter, race_id)
 
-    def add_to_google_calendar(self, race_id: str, calendar_id=None):
+    def add_to_google_calendar(self, race_id: str):
         """
         Add race event to Google Calendar. If a deadline exists, it adds both the main event and the deadline.
         :param race_id: ID of the race
         :param calendar_id: ID of the calendar
         :return: Event ID of the main race event
         """
+        calendar_id=self.config.GOOGLE_EMAILS
         try:
             race = self.races[race_id]
 
