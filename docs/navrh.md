@@ -228,64 +228,126 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   	- volá si pomocné moduly ak treba  
 
 
-## 5. Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
+# 5. Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
 
-V tejto časti popisujeme komunikáciu s Google Kalendárom, ktorá umožní automatické pridanie udalostí do kalendára admina pri prihlásení bežcov na preteky. Implementácia bude prebiehať prostredníctvom Google Calendar API, čo zabezpečí synchronizáciu medzi našou aplikáciou a kalendárom.
+V tejto sekcii detailne popíšeme návrh implementácie komunikácie medzi konzolovou aplikáciou a Google Kalendárom, ktorá umožní automatické pridanie, aktualizáciu a odstránenie udalostí pri registráciách a správach pretekov. Implementácia bude realizovaná prostredníctvom **Google Calendar API** a použitia **Service Account autentifikácie** pre zvýšenie bezpečnosti a automatizácie procesu.
+
+---
 
 ## 5.1 Implementácia funkčnosti
 
 ### Autorizácia a autentifikácia
-Na komunikáciu s Google Calendar API je potrebný OAuth 2.0 prístupový token. Pri prvej synchronizácii sa admin prihlási do svojho Google účtu a autorizuje aplikáciu na správu jeho kalendára. Token sa následne uloží v konfiguračnom súbore alebo zabezpečenej databáze, aby sa zamedzilo opakovanému prihlasovaniu.
+Na komunikáciu s Google Calendar API využívame **Service Account**. Tento prístupový mechanizmus eliminuje potrebu manuálneho prihlasovania, čím sa celý proces plne automatizuje.
+
+1. **Vytvorenie Service Account**:
+   - V Google Cloud Console je potrebné vytvoriť Service Account a povoliť prístup k API.
+   - Po vytvorení stiahnite JSON súbor obsahujúci poverenia.
+
+2. **Zdieľanie kalendára**:
+   - Nájdite emailovú adresu Service Account v sekcii **IAM & Admin > Service Accounts**.
+   - Zdieľajte požadovaný kalendár s týmto emailom a pridelte mu rolu **Make changes to events** (Editor).
+
+3. **Autentifikácia v aplikácii**:
+   - Nahrajte súbor s povereniami (napr. `service_account.json`) do aplikácie.
+   - Pri inicializácii autentifikácie použite knižnicu `google.oauth2.service_account`.
 
 ### Automatické vytvorenie udalosti
-Po registrácii bežcov na preteky aplikácia zavolá API endpoint na vytvorenie udalosti v kalendári. Parametre udalosti, ktoré sa odosielajú cez API, zahŕňajú:
+Pri registrácii bežcov na preteky aplikácia automaticky pridá udalosti do kalendára admina. Parametre udalosti sú:
 - **Názov udalosti**: Obsahuje názov pretekov.
 - **Dátum a čas**: Definované podľa rozpisu pretekov.
-- **Umiestnenie**: Miesto konania pretekov, ak je dostupné.
-- **Poznámka**: Ďalšie informácie alebo URL odkaz na detaily o pretekoch.
+- **Miesto**: Lokalita pretekov, ak je dostupná.
+- **Popis**: Ďalšie informácie alebo URL odkaz na detaily pretekov.
+
+Príklad kódu pre vytvorenie udalosti:
+```python
+def add_event(self, summary, location, description, start_date, end_date, calendar_id):
+    event = {
+        'summary': summary,
+        'location': location,
+        'description': description,
+        'start': {'date': start_date, 'timeZone': 'Europe/Bratislava'},
+        'end': {'date': end_date, 'timeZone': 'Europe/Bratislava'},
+    }
+    self.service.events().insert(calendarId=calendar_id, body=event).execute()
+```
 
 ### Zrušenie alebo úprava udalosti
-Pri zrušení registrácie bežca alebo pri zmene údajov pretekov aplikácia automaticky aktualizuje alebo odstráni príslušnú udalosť z Google Kalendára prostredníctvom PUT (update) alebo DELETE (delete) požiadavky na daný event ID.
+Pri zrušení alebo úprave údajov pretekov aplikácia:
+- **Aktualizuje udalosť** pomocou metódy `events().update()`.
+- **Odstráni udalosť** pomocou metódy `events().delete()`.
+
+Tieto operácie vyžadujú ID udalosti, ktoré sa uloží pri jej vytvorení.
 
 ### Formátovanie dátumu a času
-Dátumy a časy budú formátované podľa štandardu ISO 8601, ktorý vyžaduje Google Calendar API.
-
-### Výstup a potvrdenie
-Po úspešnom pridelení udalosti v kalendári API vráti ID udalosti, ktoré sa uloží pre budúce operácie (napr. zrušenie alebo úprava). Funkcia vracia bool hodnotu úspešnosti.
+Dátumy a časy sú formátované podľa štandardu ISO 8601 (napr. `2025-01-20T10:00:00+01:00`), aby boli kompatibilné s požiadavkami Google Calendar API.
 
 ---
 
-## 5.2 Replikácia a nastavenie API komunikácie
-
-Pre úspešnú replikáciu a implementáciu tejto funkcionality postupujte podľa nasledujúcich krokov:
+## 5.2 Kroky na implementáciu API komunikácie
 
 ### 1. Vytvorenie projektu v Google Cloud Console
-1. Prihláste sa na [Google Cloud Console](https://console.cloud.google.com/).
-2. Kliknite na **Create Project** a vyplňte údaje o projekte (názov projektu, organizácia, lokácia).
-3. Po vytvorení projektu prejdite do sekcie **API & Services > Library**.
-4. Vyhľadajte **Google Calendar API** a aktivujte ho.
+1. Navštívte [Google Cloud Console](https://console.cloud.google.com/).
+2. Kliknite na **Create Project** a zadajte názov projektu.
+3. Prejdite do **API & Services > Library** a povolte **Google Calendar API**.
 
-### 2. Nastavenie OAuth 2.0 autentifikácie
-1. Prejdite do **API & Services > Credentials**.
-2. Kliknite na **Create Credentials > OAuth client ID**.
-3. Nastavte typ aplikácie na **Desktop App**.
-4. Po vytvorení stiahnite súbor `credentials.json`, ktorý obsahuje potrebné prihlasovacie údaje.
+### 2. Vytvorenie Service Account
+1. Prejdite do **IAM & Admin > Service Accounts**.
+2. Kliknite na **Create Service Account** a nastavte názov.
+3. Pridajte rolu **Editor** alebo **Owner** pre správu udalostí v kalendári.
+4. Stiahnite JSON súbor poverení a uložte ho do aplikácie ako `service_account.json`.
 
-### 3. Inštalácia potrebných knižníc
-Na prácu s Google Calendar API použite nasledujúci príkaz na inštaláciu knižníc:
+### 3. Zdieľanie kalendára so Service Account
+1. Nájdite emailovú adresu Service Account v sekcii **IAM & Admin > Service Accounts**.
+2. Otvorte Google Kalendár, kliknite na **Nastavenia > Zdieľanie a povolenia**.
+3. Pridajte email Service Account a nastavte oprávnenie **Make changes to events**.
 
+### 4. Inštalácia knižníc
+Nainštalujte potrebné knižnice:
 ```bash
 pip install --upgrade google-api-python-client google-auth-httplib2 google-auth-oauthlib
 ```
 
-### 4. Implementácia funkcie
-Kód na implementáciu funkcie autentifikácie a vytvárania udalostí je dostupný v súbore 
-google_calendar_preview.py. Tento kód zabezpečuje autentifikáciu cez OAuth 2.0 a vytváranie udalostí v Google Kalendári.
+### 5. Inicializácia Google Calendar API
+Implementujte autentifikáciu pomocou Service Account:
+```python
+from google.oauth2.service_account import Credentials
+from googleapiclient.discovery import build
 
-### 5. Pridanie ďalších používateľov
-1. V Google Cloud Console prejdite na **IAM & Admin > IAM**.
-2. Kliknite na **Add** a pridajte emailové adresy testerov, pričom im pridelíte rolu **Editor** alebo **Viewer**.
-3. Uistite sa, že pridávaný používateľ má prístup k zdieľaným kalendárom a správne oprávnenia.
+def authenticate():
+    creds = Credentials.from_service_account_file('service_account.json', scopes=['https://www.googleapis.com/auth/calendar'])
+    return build('calendar', 'v3', credentials=creds)
+```
+
+### 6. Pridanie udalostí
+Pri registrácii alebo zmene údajov pretekov aplikácia automaticky zavolá metódy na pridanie, aktualizáciu alebo zrušenie udalostí.
+
+Príklad vytvorenia udalosti:
+```python
+calendar_service = authenticate()
+event = {
+    'summary': 'Názov pretekov',
+    'location': 'Miesto konania',
+    'description': 'Detaily o pretekoch',
+    'start': {'date': '2025-01-20', 'timeZone': 'Europe/Bratislava'},
+    'end': {'date': '2025-01-21', 'timeZone': 'Europe/Bratislava'},
+}
+calendar_service.events().insert(calendarId='primary', body=event).execute()
+```
+
+---
+
+## 5.3 Testovanie a validácia
+1. **Testovanie autentifikácie**:
+   - Uistite sa, že Service Account má oprávnenia na správu udalostí.
+2. **Testovanie pridania udalosti**:
+   - Otestujte metódu na vytvorenie udalosti a overte, či sa objaví v kalendári.
+3. **Testovanie aktualizácie a odstránenia**:
+   - Skontrolujte, či zmeny v aplikácii správne aktualizujú kalendár.
+
+---
+
+## 5.4 Výstup a potvrdenie
+Po úspešnom pridelení udalosti Google Calendar API vráti ID udalosti. Toto ID sa uloží na neskoršie použitie pri aktualizáciách alebo odstraňovaní. Funkcie vracajú status operácie, ktorý môže byť použitý na logovanie alebo zobrazenie v aplikácii.
 
 ---
 
