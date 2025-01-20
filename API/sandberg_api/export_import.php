@@ -48,8 +48,8 @@ class ExportImport{
         JOIN (SELECT id, meno, priezvisko, os_i_c, cip FROM Pouzivatelia) AS pouz
         ON Prihlaseni.id_pouz = pouz.id
         JOIN Kategorie_pre
-        ON Prihlaseni.id_kat = Kategorie_pre.id_kat
-        WHERE Prihlaseni.id_pret = $id_pret
+        ON Prihlaseni.id_pret = Kategorie_pre.id_pret
+        WHERE Prihlaseni.id_pret = $id_pret AND Prihlaseni.id_kat = Kategorie_pre.id_kat
         GROUP BY os_i_c, cip, priezvisko, meno, Prihlaseni.poznamka;
         EOF;
 
