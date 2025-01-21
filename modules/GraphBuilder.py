@@ -12,13 +12,15 @@ class GraphCreator:
     def create_attendance_graph(self):
         participation_data = dict(self.data[0])
         
-        start_date = datetime.strptime(self.data[5], "%Y-%m-%d %H:%M:%S")
-        end_date = datetime.strptime(self.data[6], "%Y-%m-%d %H:%M:%S")
+        start_date = self.data[5]
+        end_date = self.data[6]
+
         
         current_date = start_date
         all_months = []
         while current_date <= end_date:
-            all_months.append(current_date.strftime("%Y-%m"))
+            
+            all_months.append(f'{current_date.year}-{current_date.month}')
             current_date += timedelta(days=31) 
             current_date = current_date.replace(day=1)  
         
@@ -153,7 +155,7 @@ class GraphCreator:
         summary_data = [
             ["Meno", self.data[3]],
             ["Klub", self.data[4]],
-            ["Časový interval", f"{self.data[5].split()[0]} -> {self.data[6].split()[0]}"]
+            ["Časový interval", f"{self.data[5].year}.{self.data[5].month} -> {self.data[6].year}.{self.data[6].month}"]
         ]
 
         table = ax.table(cellText=summary_data, cellLoc="center", loc="center")
@@ -212,7 +214,7 @@ data = [
 ]
 
 # Usage
-i = GraphCreator(data)
-i.create()
-i.save()
+# i = GraphCreator(data)
+# i.create()
+# i.save()
 
