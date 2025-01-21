@@ -86,12 +86,6 @@ class HandlerOfInputsFromUi:
         else:
             raise error.HandlerError("Race already in cache")
 
-    # def import_race_to_Sandberg_Databaze(race_id : int):
-
-    #         output[i]["kategorie"] = names_of_categories
-
-    #     return output
-
     def import_race_to_Sandberg_Database(self, race_id: int):
 
         if race_id in self.races.keys():
@@ -145,6 +139,9 @@ class HandlerOfInputsFromUi:
         return output
 
     def fill_runners(self, race_id: int):
+        self.runners = []
+        if race_id not in self.races.keys():
+            self.fill_out_cache(self.mod_get.get_race_details(race_id))
         try:
             self.sandberg_handler.export_registered_runners(race_id)
         except error.SandbergDatabaseError as e:
@@ -180,8 +177,42 @@ class HandlerOfInputsFromUi:
                 raise e
         return self.runners
 
+    def fill_runners_with_category_names(self, race_id: int):
+        self.runners = []
+        if race_id not in self.races.keys():
+            self.fill_out_cache(self.mod_get.get_race_details(race_id))
+        try:
+            self.sandberg_handler.export_registered_runners(race_id)
+        except error.SandbergDatabaseError as e:
+            raise e
+        data = self.sandberg_handler.get_last_exported_data()
+
+        for runner in data:
+            for category in self.races[race_id]["categories"]:
+                if category["id"] == str(runner["ID_KATÉGORIE"]):
+                    runner_category_name = category["category_name"]
+            registration_form = {
+                "registration_id": "0",  # ID registrácie, alebo 0, ak prihlasujeme bez prepojenia na registráciu
+                "first_name": runner["MENO"],
+                "surname": runner["PRIEZVISKO"],
+                "reg_number": runner["OS.ČÍSLO"],  # registration number, temporlaly OS.Cislo
+                "sportident": runner["ČIP"],  # sportident, temporarly cislo cipu
+                "comment": runner["POZNÁMKA"],
+                "categories": [
+                    {
+                        "competition_event_id": self.races[race_id]["events"][0]["id"] if isinstance(
+                            self.races[race_id]["events"], list) else self.races[race_id]["events"]["id"],
+                        # ID etapy pretekov
+                        "competition_category_id": runner_category_name,  # ID kategórie pretekov
+                    }
+                ],
+                "services": []
+            }
+            self.runners.append(registration_form)
+
+
     def convert_data(self, converter_class, race_id=None):
-        self.fill_runners(race_id)
+        self.fill_runners_with_category_names(race_id)
         convert_class = converter_class(self.runners)
         convert_class.save_to_file()
         return converter_class(self.runners)
@@ -329,61 +360,3 @@ class HandlerOfInputsFromUi:
         return time_of_first_runner, len(results), 
 
 
-# kedze toto je ako dict a nie ako json string (co bolo povodne), tak sa pomenil database_sandberg_handler.py
-race_data_json = {
-    "id": "1887",
-    "title_sk": "STRED O LIGA  - 2. kolo",
-    "date_from": "2024-12-04",
-    "date_to": "2024-12-04",
-    "cancelled": "0",
-    "deadline": "2024-12-01",
-    "events": {
-        "id": "688"
-    },
-    "categories": [
-        {
-            "id": "97531",
-            "category_id": "160",
-            "category_name": "A - muži"
-        },
-        {
-            "id": "97541",
-            "category_id": "161",
-            "category_name": "A - ženy"
-        },
-        {
-            "id": "97551",
-            "category_id": "162",
-            "category_name": "B - muži"
-        },
-        {
-            "id": "98321",
-            "category_id": "163",
-            "category_name": "B - ženy"
-        },
-        {
-            "id": "98331",
-            "category_id": "164",
-            "category_name": "C - muži"
-        },
-        {
-            "id": "98341",
-            "category_id": "165",
-            "category_name": "C - ženy"
-        }
-    ]
-}
-
-# processor = HandlerOfInputsFromUi()
-# processor.get_runner_results('2070', '2024-01-01', '2025-01-01')
-#processor.get_race_results('1835', '623')
-# # processor.get_races_from_IsOrienteering_in_month("December")
-# processor.races[1887] = race_data_json
-# # result = processor.import_race_to_Sandberg_Databaze(1888)
-# # print(result)
-# # result1 = processor.sign_racers_to_IsOrienteering(1888)
-# # print(result1)
-# result2 = processor.convert_html(1887)
-# print(result2)
-# # result3 = processor.convert_csv(1888)
-# # result4 = processor.convert_txt(1888)
