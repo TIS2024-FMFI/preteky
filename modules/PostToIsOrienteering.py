@@ -9,7 +9,7 @@ class Mod_post():
 
     def _get_header(self):
         return {
-            'x-szos-api-key': {self._api_key},
+            'x-szos-api-key': self._api_key,
             'Content-Type': 'application/json'
         }
 
@@ -20,12 +20,14 @@ class Mod_post():
 
     def register_runner(self, race_id, registration_form):
         url = f'{self._api_endpoint}/competitions/{race_id}/entries/save'
-        response = requests.get(url, json=registration_form, headers=self._get_header())
+        response = requests.post(url, json=registration_form, headers=self._get_header())
         self._handle_response_code(response)
         return response.json()
 
     def remove_runner(self, race_id, deregistration_form):
         url = f'{self._api_endpoint}/competitions/{race_id}/entries/delete'
-        response = requests.get(url, json=deregistration_form, headers=self._get_header())
+        response = requests.post(url, json=deregistration_form, headers=self._get_header())
         self._handle_response_code(response)
         return response.json()
+
+
