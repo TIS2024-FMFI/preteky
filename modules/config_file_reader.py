@@ -1,48 +1,41 @@
 import sys
-from dataclasses import dataclass, asdict, field, fields
-import tomli
-import tomli_w
+from dataclasses import dataclass, asdict, field
+import toml
 from pathlib import Path
 
 DEFAULT_CONFIG_FILE_PATH = Path("modules/config.toml")
 
-
-@dataclass(init=False)
+@dataclass
 class ConfigFileReader:
     IS_API_KEY: str = field(repr=False, default="")
-    IS_API_ENDPOINT: str = field(default="https://is.orienteering.sk/api")
-    SANDBERG_API_ENDPOINT: str = field(default="https://senzor.robotika.sk/sks/api.php/api")
-    GOOGLE_CREDENTIALS_PATH: str = field(default="")
+    IS_API_ENDPOINT: str = "https://is.orienteering.sk/api"
+    SANDBERG_API_ENDPOINT: str = "https://senzor.robotika.sk/sks/api.php/api"
+    GOOGLE_CREDENTIALS_PATH: str = ""
     GOOGLE_EMAILS: list = field(default_factory=list)
     CLUB_ID: int = field(repr=False, default=46)
-    HOME_DIR: str = field(default="")
+    HOME_DIR: str = ""
 
-    def __init__(self, output=True, config_file_path=DEFAULT_CONFIG_FILE_PATH):
+    def __init__(self, config_file_path=DEFAULT_CONFIG_FILE_PATH, output=True):
         self.config_file_path = config_file_path
         self.output = output
-        self.GOOGLE_EMAILS = []
-        self._load_config()
-        self._save_config()
+        self._load_or_create_config()
 
-    def _create_example_config(self):
-        self._save_config()
-        exit_msg = (
-            f"Config file {self.config_file_path} was created."
-        )
-        sys.exit(exit_msg)
+    def _load_or_create_config(self):
+        if self.config_file_path.is_file():
+            self._load_config()
+        else:
+            self._save_config()
+            sys.exit(f"Config file {self.config_file_path} was created. Please edit it and restart the program.")
 
     def _load_config(self):
-        if self.config_file_path.is_file():
-            with open(self.config_file_path, 'rb') as f:
-                config_dict = tomli.load(f)
-                for fld in fields(self):
-                    if fld.name in config_dict:
-                        setattr(self, fld.name, config_dict[fld.name])
-        self._save_config()
+        config_dict = toml.load(self.config_file_path)
+        for key, value in config_dict.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
     def _save_config(self):
-        with open(self.config_file_path, "wb") as f:
-            tomli_w.dump(asdict(self), f)
+        with open(self.config_file_path, "w") as f:
+            toml.dump(asdict(self), f)
 
     def set_home_dir(self, path: str):
         self.HOME_DIR = path
