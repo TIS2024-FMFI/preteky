@@ -233,7 +233,7 @@ class HandlerOfInputsFromUi:
         :param calendar_id: ID of the calendar
         :return: Event ID of the main race event
         """
-        calendar_id=self.config.GOOGLE_EMAILS
+        calendar_id=self.config.GOOGLE_EMAIL
         try:
             race = self.races[race_id]
 
