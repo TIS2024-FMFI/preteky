@@ -12,7 +12,7 @@ class ConfigFileReader:
     IS_API_ENDPOINT: str = "https://is.orienteering.sk/api"
     SANDBERG_API_ENDPOINT: str = "https://senzor.robotika.sk/sks/api.php/api"
     GOOGLE_CREDENTIALS_PATH: str = ""
-    GOOGLE_EMAILS: str = ""
+    GOOGLE_EMAIL: str = ""
     CLUB_ID: int = field(repr=False, default=46)
     HOME_DIR: str = ""
 
