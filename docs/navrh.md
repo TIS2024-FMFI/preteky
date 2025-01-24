@@ -61,6 +61,7 @@ RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia S
 - Aplikácia používa knižnice ako requests na volanie API endpointov a spracovanie odpovedí. Vytvoríme dva spúšťacie pythonovské skripty:
 	- **Skript na import pretekov:** Tento skript bude spúšťať akciu importu vybraných pretekov. Bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
  	- **Skript na export prihlásených bežcov:** Tento skript bude spúšťať akciu exportu prihlásených bežcov na daný pretek. Opäť bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
+    	- **Skript na export aktívnych pretekov** Tento skript bude spúšťať akciu exportu aktívnych pretekov v databáze Sandberg. Opäť bude posielať HTTP požiadavky na PHP aplikáciu Sandberg, ktorá spracuje tieto požiadavky a zavolá príslušné funkcie na strane PHP aplikácie.
 
 1. Import pretekov do našej aplikácie
  - Tabuľky, ktoré sa budú používať:
@@ -106,12 +107,21 @@ RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia S
 	   	- cip (string): Číslo čipu prihláseného bežca 
 		- id_kat (integer): id kategórie pre daný pretek
 		- poznamka (string): Poznámka
+
+3. Export aktívnych pretekov
+  - Tabuľky, ktoré sa budú používať:
+    - Preteky
+ - Funkcie:
+   - `ziskaj_aktivne_preteky_id()`: Exportuje všetky aktívne preteky
+     
+ - Výstupný súbor je vo formáte json, konkrétne ako list id pretekov, ktoré sú aktívne.
    
 ### Komunikačný protokol
 
 1. **Endpointy API:**
    - **POST `/api/competitions/competition`**: Tento endpoint prijíma dáta o pretekoch a kategóriách.
    - **GET `/api/competitions/{id}/export`**: Tento endpoint exportuje prihlásených bežcov pre daný pretek.
+   - **GET `/api/competitions/active`**: Tento endpoint exportuje aktívne preteky z databázy Sandberg.
 
 2. **Formát požiadaviek a odpovedí:**
    - **POST `/api/competitions/competition`**
@@ -182,6 +192,13 @@ RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia S
            // Ďalšie záznamy...
          ]
          ```
+     - **GET `/api/competitions/active`**
+     - **Odpoveď:**
+       - Obsahuje JSON pole s id aktívnymi pretekmi.
+       - Príklad:
+         ```json
+         [ 1910, 1913, 1920 ...]
+         ```
 
 3. **Spracovanie požiadaviek v `api.php`:**
    - **POST `/api/competitions/competition`**
@@ -195,7 +212,12 @@ RESTful API umožňuje aplikáciám komunikovať cez HTTP protokol. Aplikácia S
      - Požiadavka je spracovaná nasledovne:
        - Načítajú sa dáta z URL.
        - Dáta sa exportujú pomocou funkcie `ExportImport::exportujJSON`.
-       - 
+         
+   - **GET `/api/competitions/active`**
+     - Požiadavka je spracovaná nasledovne:
+       - Načítajú sa dáta z URL.
+       - Dáta sa exportujú pomocou funkcie `ExportImport::ziskaj_aktivne_preteky_id`.
+         
 - Kód môžete vidieť v  [api.php](https://github.com/TIS2024-FMFI/preteky/blob/2593628791a43735a2c0230b2ef15df5e48c2c92/API/sandberg_api/api.php) .
 
 ## 4 Návrh "Procesora"
