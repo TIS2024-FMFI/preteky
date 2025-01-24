@@ -33,4 +33,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET' && preg_match('/\/sks\/api.php\/api\/com
 } catch (Exception $e) {
     echo json_encode(["status" => "error", "message" => $e->getMessage()]);
 }
+exit;
 }
+if ($_SERVER['REQUEST_METHOD'] == 'GET' && preg_match('/\/sks\/api.php\/api\/competitions\/active/', $_SERVER['REQUEST_URI'])) {
+    try {
+        $aktivnePretekyId = ExportImport::ziskat_aktivne_preteky_id();
+        echo json_encode(["status" => "success", "data" => $aktivnePretekyId]);
+    } catch (Exception $e) {
+        echo json_encode(["status" => "error", "message" => $e->getMessage()]);
+    }
+    exit;
+}
+?>
