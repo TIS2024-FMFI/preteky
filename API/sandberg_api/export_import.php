@@ -217,7 +217,21 @@ class ExportImport{
         }
         exit;
     }
+public static function ziskat_aktivne_preteky_id() {
+        $db = napoj_db();
+        $sql =<<<EOF
+            SELECT id FROM Preteky WHERE datetime(datum) >= datetime('now','-3 days') AND aktiv = 1 ORDER BY deadline DESC;
+EOF;
+        $ret = $db->query($sql);
+        $activeRaceIds = [];
+        while ($row = $ret->fetchArray(SQLITE3_ASSOC)) {
+            $activeRaceIds[] = $row['id'];
+        }
+        header('Content-Type: application/json');
+        echo json_encode($activeRaceIds);
+        $db->close();
+        exit;
+    }
 }
-
 ?>
 

@@ -17,3 +17,6 @@ class SandbergDatabaseHandler:
         formatter = CompetitionFormatter(json_dict)
         formatted_dict = formatter.format()
         self.last_exported_data = self.api_client.process_race(formatted_dict)
+
+    def get_active_competitions(self):
+        return self.api_client.get_active_competitions()
