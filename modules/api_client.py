@@ -48,3 +48,8 @@ class APIClient(BaseAPI):
         url = self._build_url(f"/competitions/{competition_id}/export")
         response = self._send_get_request(url)
         return ResponseHandler.handle_response(response)
+
+    def get_active_competitions(self):
+        url = self._build_url("/competitions/active")
+        response = self._send_get_request(url)
+        return ResponseHandler.handle_response(response)
