@@ -111,13 +111,13 @@ class ConsoleApp:
                 self.handler.sign_runners_to_IsOrienteering(param[0])
 
             elif interface_name == "html":
-                self.handler.convert_html(param[0])
+                self.handler.convert_html(str(param[0]))
 
             elif interface_name == "csv":
-                self.handler.convert_csv(param[0])
+                self.handler.convert_csv(str(param[0]))
 
             elif interface_name == "txt":
-                self.handler.convert_txt(param[0])
+                self.handler.convert_txt(str(param[0]))
 
             elif interface_name == "racers":
                 runners = self.handler.get_runners_from_club()
