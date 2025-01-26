@@ -99,42 +99,32 @@ class HandlerOfInputsFromUi:
             raise error.HandlerError("race_id not found in cache")
 
     def get_active_races(self):
-        try:
-            active_races = self.mod_get.get_races_from_date()
-        except error.IsOrieteeringApiError as e:
-            raise e
+        active_races = self.sandberg_handler.get_active_competitions()
         output = []
         output_dict = {"id": None, "datum": None, "nazov": None, "deadline": None,
                        "miesto": None, "kategorie": None}
-        for i in range(len(active_races)):
+        for id in active_races:
             output_dict = {"id": None, "datum": None, "nazov": None, "deadline": None,
                            "miesto": None, "kategorie": None}
-            id = active_races[i]["id"]
             try:
                 race = self.mod_get.get_race_details(id)
             except error.IsOrieteeringApiError as e:
-                raise e
-            try:
-                deadline_date = self.dc.get_date_object_from_string(
-                    race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"])
-            except error.HandlerError as e:
                 raise e
             try:
                 self.fill_out_cache(race)
             except error.HandlerError:
                 pass
 
-            if deadline_date > datetime.now():
-                ids_of_categories = [category["category_id"] for category in race["categories"]]
-                names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
-                output_dict["id"] = id
-                output_dict["dátum"] = race["events"][0]["date"]
-                output_dict["názov"] = race["title_sk"]
-                output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
+            ids_of_categories = [category["category_id"] for category in race["categories"]]
+            names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
+            output_dict["id"] = id
+            output_dict["dátum"] = race["events"][0]["date"]
+            output_dict["názov"] = race["title_sk"]
+            output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
                     "entries_to"]
-                output_dict["miesto"] = race["place"]
-                output_dict["kategorie"] = ",".join(names_of_categories)
-                output.append(output_dict)
+            output_dict["miesto"] = race["place"]
+            output_dict["kategorie"] = ",".join(names_of_categories)
+            output.append(output_dict)
 
         return output
 
