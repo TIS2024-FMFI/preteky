@@ -162,9 +162,9 @@ class HTMLConverter(ExportDataToFile):
 
 class CSVConverter(ExportDataToFile):
     def generate_content(self) -> str:
-        csv_content = "MENO;PRIEZVISKO;OS.ČÍSLO;ČIP;ID_KATÉGORIE;POZNÁMKA\n"
+        csv_content = "OS.ČÍSLO;ID_KATÉGORIE;ČIP;PRIEZVISKO;MENO;POZNÁMKA\n"
         for item in self.race_data:
-            csv_content += f"{item['first_name']};{item['surname']};{item['reg_number']};{item['sportident']};{item['categories'][0]['competition_category_id']};{item['comment']}\n"
+            csv_content += f"{item['reg_number']};{item['categories'][0]['competition_category_id']};{item['sportident']};{item['surname']};{item['first_name']};{item['comment']}\n"
         return csv_content
 
     def get_file_extension(self) -> str:
