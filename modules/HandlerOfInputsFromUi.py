@@ -33,33 +33,38 @@ class HandlerOfInputsFromUi:
         self.runners = []
         self.google_calendar_service = GoogleCalendarService()
 
-    def get_races_from_IsOrienteering_in_month(self, month: str):
-        try:
-            races = self.mod_get.get_races_in_month(month)
-        except error.IsOrieteeringApiError as e:
-            raise e
-        output = [{"id": None, "dátum": None, "názov": None, "deadline": None,
-                   "miesto": None, "kategorie": None}
-                  for _ in range(len(races))]
-        for i in range(len(races)):
-            id = races[i]["id"]
+    def get_active_races(self):
+        active_races = self.sandberg_handler.get_active_competitions()
+        output = []
+        output_dict = {"id": None, "datum": None, "nazov": None, "deadline": None,
+                       "miesto": None, "kategorie": None}
+        for id in active_races:
+            output_dict = {"id": None, "datum": None, "nazov": None, "deadline": None,
+                           "miesto": None, "kategorie": None}
             try:
                 race = self.mod_get.get_race_details(id)
             except error.IsOrieteeringApiError as e:
                 raise e
             try:
+                deadline_date = self.dc.get_date_object_from_string(
+                    race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0]["entries_to"])
+            except error.HandlerError as e:
+                raise e
+            try:
                 self.fill_out_cache(race)
             except error.HandlerError:
                 pass
+
             ids_of_categories = [category["category_id"] for category in race["categories"]]
             names_of_categories = [self.categories[category_id] for category_id in ids_of_categories]
-            output[i]["id"] = id
-            output[i]["dátum"] = races[i]["date_to"]
-            output[i]["názov"] = races[i]["title_sk"]
-            output[i]["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
-                "entries_to"]
-            output[i]["miesto"] = races[i]["place"]
-            output[i]["kategorie"] = ",".join(names_of_categories)
+            output_dict["id"] = id
+            output_dict["dátum"] = race["events"][0]["date"]
+            output_dict["názov"] = race["title_sk"]
+            output_dict["deadline"] = race["date_to"] if race["entry_dates"] == [] else race["entry_dates"][0][
+                    "entries_to"]
+            output_dict["miesto"] = race["place"]
+            output_dict["kategorie"] = ",".join(names_of_categories)
+            output.append(output_dict)
 
         return output
 
