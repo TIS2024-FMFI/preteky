@@ -28,12 +28,6 @@ class Mod_get():
         self._handle_response_code(response)
         return response.json()
 
-    def get_races_from_date(self):
-        url = f'{self._api_endpoint}/competitions'
-        param = {"date_from": {self.dc.get_realtime_date()}}
-        response = requests.get(url, headers=self._get_header(), params=param)
-        self._handle_response_code(response)
-        return response.json()
 
     def get_races_from_to(self, date_from, date_to):
         url = f'{self._api_endpoint}/competitions'
@@ -44,12 +38,6 @@ class Mod_get():
 
     def get_club_registrations(self, club_id):
         url = f'{self._api_endpoint}/clubs/{club_id}/registrations'
-        response = requests.get(url, headers=self._get_header())
-        self._handle_response_code(response)
-        return response.json()
-
-    def get_runner(self, runner_id):
-        url = f'{self._api_endpoint}/runners/{runner_id}'
         response = requests.get(url, headers=self._get_header())
         self._handle_response_code(response)
         return response.json()
@@ -70,19 +58,6 @@ class Mod_get():
 
     def get_race_results(self, race_id, event_id):
         url = f'{self._api_endpoint}/competitions/{race_id}/results/{event_id}'
-        response = requests.get(url, headers=self._get_header())
-        self._handle_response_code(response)
-        return response.json()
-
-    def get_race_registration(self, race_id, club_id):
-        url = f'{self._api_endpoint}/competitions/{race_id}/entries'
-        param = club_id
-        response = requests.get(url, headers=self._get_header(), params=param)
-        self._handle_response_code(response)
-        return response.json()
-
-    def get_runner_kategories(self, racer_registration_id, event_id):
-        url = f'{self._api_endpoint}/registrations/{racer_registration_id}/categories/{event_id}'
         response = requests.get(url, headers=self._get_header())
         self._handle_response_code(response)
         return response.json()
