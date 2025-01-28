@@ -22,11 +22,11 @@ V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.or
 - ako parametre funkcí vkladamáme udaje na zaklade ktorých chceme dáta z is.orienteering.sk filtrovať
 - requesty:
 	- preteky v mesiaci
-    		- podla mesiaca, ktorý zadáme	 
+    		- podla mesiaca, ktorý zadáme
+   	- preteky v intervali datumov
+   		- podla intervalu datumov ktory zadame 			 
     	- registracie (registrovaný pretekáry) v danom klube
     		- podla id klubu
-	- detailné informácie o pretekárovy
- 		- podla id pretekara
    	- detaily pretekov
    		- podla id pretekov
    	- vysledky pretekára v intervale medzi dvoma dátumami
@@ -34,19 +34,16 @@ V tejto kapitole sa venujeme komunikácí so stránkou [is.orieteering.sk](is.or
    	 	- datumy sú vo formáte YYYY-MM-DD
   	- výledky preteku
   		- podla id pretekov a id eventu
-  	- registrácia klubu na pretek
-  		- podla id pretekov a id klubu
-  	- kategorie na ktoré sa bežec môže prihlásiť
-  		- podla id registracie pretekara a id eventu
   	- zoznam všetkých kategórii s detailami      
 #### Mód Post
 - používame keď vkladáme dáta na is.orienteering.sk
 - na každý request bude samostantná funkcia
 - ako parameter vkladame id pretekov a data nakonfigurované v JSON stringu
-- funkcie vracaju JSON string s informaciou o registracii alebo True pri zrušení registrácie pretekara
+- funkcie vracaju JSON string s informaciou o registracii alebo deregistracii
 - requesty:
     - registrácia pretekára na preteky
     - zrušenie registrácie pretekára na preteky
+    	- toto je pouzite len pre testovanie aplikacie, nejedna sa o funkcionalitu aplikacie	
  
 
 ## 3 Návrh komunikácie medzi konzolovou aplikáciou a lokálnou databázou Sandberg
@@ -226,10 +223,16 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
 - prepája medzi sebou jednotlivé moduly ktoré komunikujú s vonkajším prostredím (is.orienteering.sk, Sandberg, Google kalendár, UI)
 - poskytuje modulom pomocné moduly:
  	- date_converter
-  		- obsahuje metody na upravovanie datumov do požadovaného formátu 
+  		- obsahuje metody na upravovanie datumov do požadovaného formátu
+    		- obsahuje metodu na konvertovanie datumu zo stringu do datetime objectu
+      		- obsahuje metodu na konvertovanie casu zo stringu do datetime objectu   
   	- error handler
-  		- obsahuje metódy ktoré odchytávaju errory
-  	 		- po odchytení erroru modul zabezpečí aby sa požadovaná chybová hláška vypísala v UI  
+  		- obsahuje triedy pre jednotlive druhy errorov
+  	 		- HandlerError
+  	   		- SandbergDatabaseError
+  	     		- GoogleCalendarServicesError
+  	       		- IsOrieteeringApiError
+  	         	- IuError 	  	   
   	- config file reader
   		- zabezpečuje čítanie configuračného súboru
   	 	- súbor má nasledujúci formát:
@@ -237,19 +240,84 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   ![config file](obrazky/config.png)
   
   	- file writer
+  		- zapisuje pretekarov prihlasenych na pretek (podla race ID, ktore je vstupny parameter) 
   	  	- vstupné dáta sú vo formáte JSON string
-  	  	- zapisuje ich do súboru
+  	  	- data obsahuju:
+  	  		- meno pretekara
+  	  	 	- priezvisko pretekara
+  	  	  	- registracne cislo
+  	  	  	- sportident (cislo cipu)
+  	  	  	- meno kategorie na ktoru je prihlaseny
+  	  	  	- poznamka   
+  	  	- zapisuje ich do súboru vo formate csv, txt, html
   	  	- na každý formát súboru (csv, txt, html) má samostatnú metodu
+  
   	- graph creator
-  		- vstupne dáta vo formate JSON string prekonvertuje na graf
+  		- vstupne dáta vo formate JSON string prekonvertuje na statistiky vo forme grafov
   	 	- pre vizual grafou [pozri](https://github.com/TIS2024-FMFI/preteky/blob/main/docs/navrh.md#9-n%C3%A1vrh-zobrazenia-%C5%A1tatist%C3%ADk)
-  	  	- pre každý tip grafu má samostatnú metódu   		
-- okrem pomocných modulou obsahuje aj modul handlerOfInputsFromUi
+  	  	   		
+- okrem pomocných modulou obsahuje aj modul HandlerOfInputsFromUi
 	- na základe dopytu z UI volá funkcie z iných modulov
  	- modulu UI vracia dáta ktoré treba vypísať
   	- volá si pomocné moduly ak treba  
-
-
+	- uklada si do cache niektore udaje:
+ 		- slovnik kategorii: globalne id kategorie : meno kategorie
+   			- vytvori sa pri spusteni aplikacie 
+   		- slovnik zavodov: id preteku : detaili preteku
+     			- preteky sa pridavaju vzdy pri ziskavani preteku z is.orienteering.sk
+       			- pouzivame ich ked pridavame pretek do sandberg databazy
+                - zoznam pretekarov:
+       			- obsahuje prihlasovacie formulare pretekarov
+          		- pouzivame ho ked prihlasujeme pretekarov na is.orienteering.sk a pri exporte do suboru
+       - popis metod HandlerOfInputsFromUi:
+       		- get_races_from_IsOrienteering_in_month(month: str)
+         		- vrati preteky v danom mesiaci (datum, nazov, datum deadlinu na prihlasovanie, miesto, mena kategori)
+           	  	- prida preteky do cache
+              	- fill_out_cache(input_race: dict)
+              		- prida dany pretek do cache
+              	 	- vyhodi error ak uz zadany pretek je v cache
+              	- import_race_to_Sandberg_Database(race_id: int)
+              		- vyberie pretek z cache na zaklade id
+              	 	- prida dany pretek do sandberg databazy
+              	  	- ak pretek s danym id nie je v cache vyhodi chybu
+              	- get_active_races()
+              		- ziska id pretekov ktore su pridane v sandberg databaze
+              	 	- ak preteky nie su cache tak ich tam prida
+              	  	- vrati zoznam pretekov (id, datum, nazov, datum deadlinu na prihlasovanie, miesto, mena kategorii)
+              	- fill_runners(race_id: int)
+              		- vycisti zoznam pretekarov v cache 
+              		- prida do cache registracne formulare pretekarov prihlasenych na pretek s danym id
+              	 	- ak sa pretek s danym id nenachadza v cache tak ho tam prida
+              	- sign_runners_to_IsOrienteering(race_id: int)
+              		- zavola funkciu fill_runners s id daneho preteku
+              	 	- prihlasy vsetkych pretekarov z cache na pretek s danym id
+              	- fill_runners_with_category_names(race_id)
+              		- funkcia funguje rovnako ako fill_runners, s tym rozdielom ze namiesto id kategorii su nazvy kategorii
+              	- convert_data(converter_class, race_id=None)
+              		- zavola funkciu fill_runners_with_category_names(race_id) s danym id preteku
+              	 	- ulozi pretekarov z cache do suboru podla converter_class
+                - convert_html(self, race_id=None), convert_csv(self, race_id=None), convert_txt(self, race_id=None)
+                	- volaju funkciu convert data, s parametrom converter_class bud HTML, CSV alebo TXT
+      		- add_to_google_calendar(race_id: str)
+        		- prida pretek ako udalost do google kalendara
+          		- prida udalost v termine deadlinu prihlasovania
+                - update_google_event(event_id: str, calendar_id: str, new_data: dict), delete_from_google_calendar(event_id: str, calendar_id: str)
+                	- sluzia na upravovanie pridanych udalosti v google kalendary
+                 	- nie je to funkcionalita nasej aplikacie
+               - get_runners_from_club()
+               		- vrati zoznam pretekarov (id pretekara, meno pretekara, priezvisko pretekara) z klubu podla id zadanom v config subore
+               - get_runner_results(runner_id, date_from, date_to)
+               		- vrati zoznam parametrov:
+                 		- atendance: slovnik rok-mesiac : pocet ucasti na pretekoch v danom mesiaci
+                   		- times_after_first: slovnik meno preteku : rozdiel casu pretekara daneho runner_id a prveho pretekara
+                     		- date_placement: slovnik meno preteku : datum preteku, umiestnenie pretekara, pocet sutaziacich
+                       		- runner_name: meno pretekara
+                         	- meno klubu
+                          	- date_from
+                          	- date_to
+                - get_race_results(race_id, event_id, competition_category_id)
+                	- vrati cas prveho pretekara na danom preteku v danej kategori a pocet pretekarov v danej kategorii       
+                   
 # 5. Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
 
 V tejto sekcii detailne popíšeme návrh implementácie komunikácie medzi konzolovou aplikáciou a Google Kalendárom, ktorá umožní automatické pridanie, aktualizáciu a odstránenie udalostí pri registráciách a správach pretekov. Implementácia bude realizovaná prostredníctvom **Google Calendar API** a použitia **Service Account autentifikácie** pre zvýšenie bezpečnosti a automatizácie procesu.
