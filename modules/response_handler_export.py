@@ -10,7 +10,7 @@ class ResponseHandler:
         try:
             json_data = response.json()
             if isinstance(json_data, dict):
-                if json_data.get('status') == "success" and "data" in json_data:
+                if json_data.get('status') == "success" and ("message" in json_data or "data" in json_data):
                     if not json_data['data']:
                         raise SandbergDatabaseError("No active races found.", response.status_code)
                 else:
