@@ -1,4 +1,4 @@
-import modules.ErrorHandler as e
+import ErrorHandler as e
 from GetFromIsOrienteering import Mod_get
 import PostToIsOrienteering as post
 import unittest
