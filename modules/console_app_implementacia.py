@@ -108,7 +108,7 @@ class ConsoleApp:
                 return races
 
             elif interface_name == "Register_racers":
-                self.handler.sign_runners_to_IsOrienteering(param[0])
+                self.handler.sign_runners_to_IsOrienteering(str(param[0]))
 
             elif interface_name == "html":
                 self.handler.convert_html(str(param[0]))
