@@ -48,6 +48,12 @@ class Mod_get():
         self._handle_response_code(response)
         return response.json()
 
+    def get_runner(self, runner_id):
+        url = f'{self._api_endpoint}/runners/{runner_id}'
+        response = requests.get(url, headers=self._get_header())
+        self._handle_response_code(response)
+        return response.json()
+        
     def get_runner_results(self, runner_id, date_from,
                            date_to):  ### date_from a date_to musia byt vo formate YYYY-MM-DD
         url = f'{self._api_endpoint}/runners/{runner_id}/results'

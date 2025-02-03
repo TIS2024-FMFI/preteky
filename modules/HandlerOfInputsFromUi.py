@@ -329,8 +329,8 @@ class HandlerOfInputsFromUi:
                     times_after_first[race["title_sk"]] = delta
 
                     date_placement[race["title_sk"]] = (date, result["place"], number_of_competitors)
-
-        runner_name = f'{runner_results[0]["first_name"]} {runner_results[0]["surname"]}'
+        runner =  self.mod_get.get_runner(runner_id)[0]
+        runner_name = f'{runner["first_name"]} {runner["surname"]}'
         output = [atendence, times_after_first, date_placement, runner_name, "SKS krúžky OB", date_from, date_to]
         return output
 
