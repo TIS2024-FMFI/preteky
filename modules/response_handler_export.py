@@ -1,4 +1,4 @@
-from ErrorHandler import SandbergDatabaseError
+from modules.ErrorHandler import SandbergDatabaseError
 
 
 class ResponseHandler:
@@ -10,8 +10,8 @@ class ResponseHandler:
         try:
             json_data = response.json()
             if isinstance(json_data, dict):
-                if json_data.get('status') == "success" and ("message" in json_data or "data" in json_data):
-                    if not json_data['data']:
+                if json_data.get('status') == "success":
+                    if "data" in json_data and not json_data["data"]:
                         raise SandbergDatabaseError("No active races found.", response.status_code)
                 else:
                     raise SandbergDatabaseError(f"Unexpected response structure in object: {json_data}",
