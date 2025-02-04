@@ -533,7 +533,7 @@ Slúži na pomenovanie základných hrubých používateľských scenárov a zob
 
 ### 10.3 Class diagram
 
-![class diagram](obrazky/master_class_diagram.drawio.png)
+![class diagram](obrazky/master_class_diagram.png)
 
 
 
