@@ -171,8 +171,8 @@ class GraphCreator:
         self.create_times_graph()
         self.create_placement_graph()
 
-    def save(self):
-        with PdfPages("athlete_statistics.pdf") as pdf:
+    def save(self, path):
+        with PdfPages(f"{path}/athlete_statistics.pdf") as pdf:
             for fig in self.figures:
                 pdf.savefig(fig)
                 plt.close(fig)
