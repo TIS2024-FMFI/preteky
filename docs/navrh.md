@@ -273,30 +273,30 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
        		- get_races_from_IsOrienteering_in_month(month: str)
          		- vrati preteky v danom mesiaci (datum, nazov, datum deadlinu na prihlasovanie, miesto, mena kategori)
            	  	- prida preteky do cache
-              	- fill_out_cache(input_race: dict)
+            - fill_out_cache(input_race: dict)
               		- prida dany pretek do cache
               	 	- vyhodi error ak uz zadany pretek je v cache
-              	- import_race_to_Sandberg_Database(race_id: int)
+            - import_race_to_Sandberg_Database(race_id: int)
               		- vyberie pretek z cache na zaklade id
               	 	- prida dany pretek do sandberg databazy
               	  	- ak pretek s danym id nie je v cache vyhodi chybu
-              	- get_active_races()
+            - get_active_races()
               		- ziska id pretekov ktore su pridane v sandberg databaze
               	 	- ak preteky nie su cache tak ich tam prida
               	  	- vrati zoznam pretekov (id, datum, nazov, datum deadlinu na prihlasovanie, miesto, mena kategorii)
-              	- fill_runners(race_id: int)
+            - fill_runners(race_id: int)
               		- vycisti zoznam pretekarov v cache 
               		- prida do cache registracne formulare pretekarov prihlasenych na pretek s danym id
               	 	- ak sa pretek s danym id nenachadza v cache tak ho tam prida
-              	- sign_runners_to_IsOrienteering(race_id: int)
+            - sign_runners_to_IsOrienteering(race_id: int)
               		- zavola funkciu fill_runners s id daneho preteku
               	 	- prihlasy vsetkych pretekarov z cache na pretek s danym id
-              	- fill_runners_with_category_names(race_id)
+            - fill_runners_with_category_names(race_id)
               		- funkcia funguje rovnako ako fill_runners, s tym rozdielom ze namiesto id kategorii su nazvy kategorii
-              	- convert_data(converter_class, race_id=None)
+            - convert_data(converter_class, race_id=None)
               		- zavola funkciu fill_runners_with_category_names(race_id) s danym id preteku
               	 	- ulozi pretekarov z cache do suboru podla converter_class
-                - convert_html(self, race_id=None), convert_csv(self, race_id=None), convert_txt(self, race_id=None)
+            - convert_html(self, race_id=None), convert_csv(self, race_id=None), convert_txt(self, race_id=None)
                 	- volaju funkciu convert data, s parametrom converter_class bud HTML, CSV alebo TXT
       		- add_to_google_calendar(race_id: str)
         		- prida pretek ako udalost do google kalendara
@@ -304,9 +304,9 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
                 - update_google_event(event_id: str, calendar_id: str, new_data: dict), delete_from_google_calendar(event_id: str, calendar_id: str)
                 	- sluzia na upravovanie pridanych udalosti v google kalendary
                  	- nie je to funkcionalita nasej aplikacie
-               - get_runners_from_club()
+            - get_runners_from_club()
                		- vrati zoznam pretekarov (id pretekara, meno pretekara, priezvisko pretekara) z klubu podla id zadanom v config subore
-               - get_runner_results(runner_id, date_from, date_to)
+            - get_runner_results(runner_id, date_from, date_to)
                		- vrati zoznam parametrov:
                  		- atendance: slovnik rok-mesiac : pocet ucasti na pretekoch v danom mesiaci
                    		- times_after_first: slovnik meno preteku : rozdiel casu pretekara daneho runner_id a prveho pretekara
@@ -315,7 +315,7 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
                          	- meno klubu
                           	- date_from
                           	- date_to
-                - get_race_results(race_id, event_id, competition_category_id)
+            - get_race_results(race_id, event_id, competition_category_id)
                 	- vrati cas prveho pretekara na danom preteku v danej kategori a pocet pretekarov v danej kategorii       
                    
 # 5. Návrh komunikácie medzi konzolovou aplikáciou a Google Kalendárom
