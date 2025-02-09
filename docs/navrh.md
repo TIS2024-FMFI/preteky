@@ -237,7 +237,7 @@ Táto kapitola opisuje centrálny subsystem procesor, ktorý má na starosti:
   		- zabezpečuje čítanie configuračného súboru
   	 	- súbor má nasledujúci formát:
   	
-  ![config file](obrazky/config.png)
+  ![config file](https://github.com/TIS2024-FMFI/preteky/blob/d4a446bfc906b1aac5c450d3c9159ce6539c07eb/docs/obrazky/Screenshot%20from%202025-02-09%2017-53-15.png)
   
   	- file writer
   		- zapisuje pretekarov prihlasenych na pretek (podla race ID, ktore je vstupny parameter) 
