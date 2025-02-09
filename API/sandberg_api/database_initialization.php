@@ -12,7 +12,7 @@ function delete_column_api_comp_cat_id() {
         id_pret INTEGER NOT NULL,
         id_kat INTEGER NOT NULL
     );
-    SQL;
+SQL;
     $db->exec($createNewTableSQL);
     $db->exec("DROP TABLE Kategorie_pre");
     $db->exec("ALTER TABLE Kategorie_pre_new RENAME TO Kategorie_pre");
