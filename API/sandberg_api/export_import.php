@@ -77,7 +77,7 @@ class ExportImport{
         $db = napoj_db();
         $sql = <<<EOF
         SELECT id FROM Kategorie WHERE id = "$id";
-    EOF;
+        EOF;
 
         $ret = $db->query($sql);
         $row = $ret ? $ret->fetchArray(SQLITE3_ASSOC) : null;
@@ -92,7 +92,7 @@ class ExportImport{
         $db = napoj_db();
         $sql = <<<EOF
         SELECT * FROM Kategorie_pre WHERE id_pret = "$id_pret" AND id = "$category_id";
-    EOF;
+        EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
@@ -114,7 +114,7 @@ class ExportImport{
         $sql = <<<EOF
         INSERT INTO Preteky (id, nazov, datum, deadline, aktiv, poznamka)
         VALUES ("$ID", "$NAZOV2", "$DATUM", "$DEADLINE", "1", "$POZNAMKA2");
-    EOF;
+        EOF;
 
         $db->exec($sql);
 
@@ -139,7 +139,7 @@ class ExportImport{
         $sql = <<<EOF
         INSERT INTO Kategorie (id,nazov)
         VALUES ("$id","$nazov");
-    EOF;
+        EOF;
         $ret = $db->exec($sql);
         if (!$ret) {
             echo $db->lastErrorMsg();
@@ -183,7 +183,7 @@ class ExportImport{
         $db = napoj_db();
         $sql = <<<EOF
         SELECT * FROM Kategorie_pre WHERE id = "$id_kat";
-    EOF;
+        EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
@@ -217,11 +217,11 @@ class ExportImport{
         }
         exit;
     }
-public static function ziskat_aktivne_preteky_id() {
+    public static function ziskat_aktivne_preteky_id() {
         $db = napoj_db();
         $sql =<<<EOF
             SELECT id FROM Preteky WHERE datetime(datum) >= datetime('now','-3 days') AND aktiv = 1 ORDER BY deadline DESC;
-EOF;
+        EOF;
         $ret = $db->query($sql);
         $activeRaceIds = [];
         while ($row = $ret->fetchArray(SQLITE3_ASSOC)) {
