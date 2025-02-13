@@ -1,12 +1,13 @@
 <?php
-include_once'preteky.php';
+include_once 'preteky.php';
 
-class ExportImport{
-    public static function existuju_prihlaseni($id_pret)
+class ExportImport
+{
+    public static function existuju_prihlaseni($id_pret): bool
     {
         $db = napoj_db();
         $sql = <<<EOF
-        SELECT COUNT(*) as count FROM Prihlaseni WHERE id_pret = "$id_pret";
+        SELECT COUNT(*) as count FROM Prihlaseni WHERE id_pret = '$id_pret';
         EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
@@ -14,16 +15,16 @@ class ExportImport{
         return $row['count'] > 0;
     }
 
-    static function existuje_pretek($id)
+    static function existuje_pretek($id): bool
     {
         $db = napoj_db();
         $sql = <<<EOF
-        SELECT id FROM Preteky WHERE id = "$id";
+        SELECT id FROM Preteky WHERE id = '$id';
         EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return $row ? true : false;
+        return (bool)$row;
     }
 
     public static function exportujJSON($id_pret)
@@ -39,7 +40,7 @@ class ExportImport{
         if (!self::existuju_prihlaseni($id_pret)) {
             echo json_encode(["status" => "error", "message" => "No participants registered for race with ID $id_pret."]);
             $db->close();
-        exit;
+            exit;
         }
 
         $sql = <<<EOF
@@ -49,7 +50,7 @@ class ExportImport{
         ON Prihlaseni.id_pouz = pouz.id
         JOIN Kategorie_pre
         ON Prihlaseni.id_pret = Kategorie_pre.id_pret
-        WHERE Prihlaseni.id_pret = $id_pret AND Prihlaseni.id_kat = Kategorie_pre.id_kat
+        WHERE Prihlaseni.id_pret = '$id_pret' AND Prihlaseni.id_kat = Kategorie_pre.id_kat
         GROUP BY os_i_c, cip, priezvisko, meno, Prihlaseni.poznamka;
         EOF;
 
@@ -76,7 +77,7 @@ class ExportImport{
     {
         $db = napoj_db();
         $sql = <<<EOF
-        SELECT id FROM Kategorie WHERE id = "$id";
+        SELECT id FROM Kategorie WHERE id = '$id';
         EOF;
 
         $ret = $db->query($sql);
@@ -87,16 +88,16 @@ class ExportImport{
         return $row ? $row['id'] : false;
     }
 
-    static function existuje_kat_preteku($id_pret, $category_id)
+    static function existuje_kat_preteku($id_pret, $category_id): bool
     {
         $db = napoj_db();
         $sql = <<<EOF
-        SELECT * FROM Kategorie_pre WHERE id_pret = "$id_pret" AND id = "$category_id";
+        SELECT * FROM Kategorie_pre WHERE id_pret = '$id_pret' AND id = '$category_id';
         EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return $row ? true : false;
+        return (bool)$row;
     }
 
     public static function pridaj_pretek_s_id($ID, $NAZOV, $DATUM, $DEADLINE, $POZNAMKA)
@@ -113,7 +114,7 @@ class ExportImport{
 
         $sql = <<<EOF
         INSERT INTO Preteky (id, nazov, datum, deadline, aktiv, poznamka)
-        VALUES ("$ID", "$NAZOV2", "$DATUM", "$DEADLINE", "1", "$POZNAMKA2");
+        VALUES ('$ID', '$NAZOV2', '$DATUM', '$DEADLINE', '1', '$POZNAMKA2');
         EOF;
 
         $db->exec($sql);
@@ -123,7 +124,7 @@ class ExportImport{
         return $ID;
     }
 
-    static function pridaj_pretek_s_kontrolou($id, $nazov, $datum, $deadline, $poznamka)
+    static function pridaj_pretek_s_kontrolou($id, $nazov, $datum, $deadline, $poznamka): bool
     {
         $existujuci_id = self::existuje_pretek($id);
         if ($existujuci_id) {
@@ -138,7 +139,7 @@ class ExportImport{
         $db = napoj_db();
         $sql = <<<EOF
         INSERT INTO Kategorie (id,nazov)
-        VALUES ("$id","$nazov");
+        VALUES ('$id','$nazov');
         EOF;
         $ret = $db->exec($sql);
         if (!$ret) {
@@ -157,18 +158,18 @@ class ExportImport{
         return self::pridaj_kategoriu_s_id($id, $nazov);
     }
 
-    static function pridaj_kat_preteku_s_id($id_pret, $id, $id_kat )
+    static function pridaj_kat_preteku_s_id($id_pret, $id, $id_kat)
     {
         $db = napoj_db();
         $sql = <<<EOF
         INSERT INTO Kategorie_pre (id, id_pret, id_kat)
-        VALUES ("$id","$id_pret","$id_kat");
+        VALUES ('$id','$id_pret','$id_kat');
         EOF;
         $ret = $db->exec($sql);
-            if (!$ret) {
-                echo $db->lastErrorMsg();
-            }
-            $db->close();
+        if (!$ret) {
+            echo $db->lastErrorMsg();
+        }
+        $db->close();
     }
 
     static function pridaj_kat_preteku_s_kontrolou($id_pret, $id, $id_kat)
@@ -179,18 +180,19 @@ class ExportImport{
         self::pridaj_kat_preteku_s_id($id_pret, $id, $id_kat);
     }
 
-    static function existuje_kat_pre($id_kat){
+    static function existuje_kat_pre($id_kat): bool
+    {
         $db = napoj_db();
         $sql = <<<EOF
-        SELECT * FROM Kategorie_pre WHERE id = "$id_kat";
+        SELECT * FROM Kategorie_pre WHERE id = '$id_kat';
         EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return $row ? true : false;
+        return (bool)$row;
     }
 
-    public static function spracuj_pretek($competition, $categories) 
+    public static function spracuj_pretek($competition, $categories): array
     {
         $existuje = self::pridaj_pretek_s_kontrolou(
             $competition['id'],
@@ -204,7 +206,7 @@ class ExportImport{
                 $category['category_id'], //globálna kategória
                 $category['name']
             );
-            if (self::existuje_kat_pre($category['id'])){
+            if (self::existuje_kat_pre($category['id'])) {
                 return ["status" => "error", "message" => "Race with these categories already exists."];
                 exit;
             }
@@ -217,9 +219,11 @@ class ExportImport{
         }
         exit;
     }
-    public static function ziskat_aktivne_preteky_id() {
+
+    public static function ziskat_aktivne_preteky_id()
+    {
         $db = napoj_db();
-        $sql =<<<EOF
+        $sql = <<<EOF
             SELECT id FROM Preteky WHERE datetime(datum) >= datetime('now','-3 days') AND aktiv = 1 ORDER BY deadline DESC;
         EOF;
         $ret = $db->query($sql);
@@ -233,5 +237,6 @@ class ExportImport{
         exit;
     }
 }
-?>
+
+
 
