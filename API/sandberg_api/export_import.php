@@ -3,7 +3,7 @@ include_once 'preteky.php';
 
 class ExportImport
 {
-    public static function existuju_prihlaseni($id_pret): bool
+    public static function existuju_prihlaseni($id_pret)
     {
         $db = napoj_db();
         $sql = <<<EOF
@@ -15,7 +15,7 @@ class ExportImport
         return $row['count'] > 0;
     }
 
-    static function existuje_pretek($id): bool
+    static function existuje_pretek($id)
     {
         $db = napoj_db();
         $sql = <<<EOF
@@ -88,7 +88,7 @@ class ExportImport
         return $row ? $row['id'] : false;
     }
 
-    static function existuje_kat_preteku($id_pret, $category_id): bool
+    static function existuje_kat_preteku($id_pret, $category_id)
     {
         $db = napoj_db();
         $sql = <<<EOF
@@ -124,7 +124,7 @@ class ExportImport
         return $ID;
     }
 
-    static function pridaj_pretek_s_kontrolou($id, $nazov, $datum, $deadline, $poznamka): bool
+    static function pridaj_pretek_s_kontrolou($id, $nazov, $datum, $deadline, $poznamka)
     {
         $existujuci_id = self::existuje_pretek($id);
         if ($existujuci_id) {
@@ -180,7 +180,7 @@ class ExportImport
         self::pridaj_kat_preteku_s_id($id_pret, $id, $id_kat);
     }
 
-    static function existuje_kat_pre($id_kat): bool
+    static function existuje_kat_pre($id_kat) // Removed : bool
     {
         $db = napoj_db();
         $sql = <<<EOF
@@ -237,6 +237,3 @@ class ExportImport
         exit;
     }
 }
-
-
-
