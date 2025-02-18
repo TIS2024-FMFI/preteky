@@ -6,8 +6,11 @@ class ExportImport
     public static function existuju_prihlaseni($id_pret)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
         $sql = <<<EOF
-        SELECT COUNT(*) as count FROM Prihlaseni WHERE id_pret = '$id_pret';
+        SELECT COUNT(*) as count FROM Prihlaseni WHERE id_pret = "$id_pret";
         EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
@@ -18,18 +21,27 @@ class ExportImport
     static function existuje_pretek($id)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
+
         $sql = <<<EOF
-        SELECT id FROM Preteky WHERE id = '$id';
+        SELECT id FROM Preteky WHERE id = "$id";
         EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return (bool)$row;
+        return $row ? true : false;
     }
 
     public static function exportujJSON($id_pret)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
 
         if (!self::existuje_pretek($id_pret)) {
             echo json_encode(["status" => "error", "message" => "Race with ID $id_pret not found."]);
@@ -50,7 +62,7 @@ class ExportImport
         ON Prihlaseni.id_pouz = pouz.id
         JOIN Kategorie_pre
         ON Prihlaseni.id_pret = Kategorie_pre.id_pret
-        WHERE Prihlaseni.id_pret = '$id_pret' AND Prihlaseni.id_kat = Kategorie_pre.id_kat
+        WHERE Prihlaseni.id_pret = $id_pret AND Prihlaseni.id_kat = Kategorie_pre.id_kat
         GROUP BY os_i_c, cip, priezvisko, meno, Prihlaseni.poznamka;
         EOF;
 
@@ -76,9 +88,13 @@ class ExportImport
     static function existuje_kategoria($id)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
         $sql = <<<EOF
-        SELECT id FROM Kategorie WHERE id = '$id';
-        EOF;
+        SELECT id FROM Kategorie WHERE id = "$id";
+    EOF;
 
         $ret = $db->query($sql);
         $row = $ret ? $ret->fetchArray(SQLITE3_ASSOC) : null;
@@ -91,18 +107,26 @@ class ExportImport
     static function existuje_kat_preteku($id_pret, $category_id)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
         $sql = <<<EOF
-        SELECT * FROM Kategorie_pre WHERE id_pret = '$id_pret' AND id = '$category_id';
-        EOF;
+        SELECT * FROM Kategorie_pre WHERE id_pret = "$id_pret" AND id = "$category_id";
+    EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return (bool)$row;
+        return $row ? true : false;
     }
 
     public static function pridaj_pretek_s_id($ID, $NAZOV, $DATUM, $DEADLINE, $POZNAMKA)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
 
         $NAZOV2 = htmlentities($NAZOV, ENT_QUOTES, 'UTF-8');
         $reg_exUrl = "/(http|https|ftp|ftps):\/\/[a-zA-Z0-9\-.]+\.[a-zA-Z]{2,3}(\/\S*)?/";
@@ -114,8 +138,8 @@ class ExportImport
 
         $sql = <<<EOF
         INSERT INTO Preteky (id, nazov, datum, deadline, aktiv, poznamka)
-        VALUES ('$ID', '$NAZOV2', '$DATUM', '$DEADLINE', '1', '$POZNAMKA2');
-        EOF;
+        VALUES ("$ID", "$NAZOV2", "$DATUM", "$DEADLINE", "1", "$POZNAMKA2");
+    EOF;
 
         $db->exec($sql);
 
@@ -137,10 +161,14 @@ class ExportImport
     static function pridaj_kategoriu_s_id($id, $nazov)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
         $sql = <<<EOF
         INSERT INTO Kategorie (id,nazov)
-        VALUES ('$id','$nazov');
-        EOF;
+        VALUES ("$id","$nazov");
+    EOF;
         $ret = $db->exec($sql);
         if (!$ret) {
             echo $db->lastErrorMsg();
@@ -161,9 +189,13 @@ class ExportImport
     static function pridaj_kat_preteku_s_id($id_pret, $id, $id_kat)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
         $sql = <<<EOF
         INSERT INTO Kategorie_pre (id, id_pret, id_kat)
-        VALUES ('$id','$id_pret','$id_kat');
+        VALUES ("$id","$id_pret","$id_kat");
         EOF;
         $ret = $db->exec($sql);
         if (!$ret) {
@@ -180,19 +212,23 @@ class ExportImport
         self::pridaj_kat_preteku_s_id($id_pret, $id, $id_kat);
     }
 
-    static function existuje_kat_pre($id_kat) // Removed : bool
+    static function existuje_kat_pre($id_kat)
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
         $sql = <<<EOF
-        SELECT * FROM Kategorie_pre WHERE id = '$id_kat';
-        EOF;
+        SELECT * FROM Kategorie_pre WHERE id = "$id_kat";
+    EOF;
         $ret = $db->query($sql);
         $row = $ret->fetchArray(SQLITE3_ASSOC);
         $db->close();
-        return (bool)$row;
+        return $row ? true : false;
     }
 
-    public static function spracuj_pretek($competition, $categories): array
+    public static function spracuj_pretek($competition, $categories)
     {
         $existuje = self::pridaj_pretek_s_kontrolou(
             $competition['id'],
@@ -219,13 +255,16 @@ class ExportImport
         }
         exit;
     }
-
     public static function ziskat_aktivne_preteky_id()
     {
         $db = napoj_db();
+        if (!$db) {
+            error_log("ERROR: Database connection failed");
+        }
+
         $sql = <<<EOF
             SELECT id FROM Preteky WHERE datetime(datum) >= datetime('now','-3 days') AND aktiv = 1 ORDER BY deadline DESC;
-        EOF;
+EOF;
         $ret = $db->query($sql);
         $activeRaceIds = [];
         while ($row = $ret->fetchArray(SQLITE3_ASSOC)) {
@@ -237,3 +276,4 @@ class ExportImport
         exit;
     }
 }
+?>
