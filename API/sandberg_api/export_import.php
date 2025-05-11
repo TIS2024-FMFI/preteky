@@ -68,7 +68,10 @@ class ExportImport
 
         $ret = $db->query($sql);
         $results = [];
+        $id_pret_length = strlen((string)$id_pret);
         while ($row = $ret->fetchArray(SQLITE3_ASSOC)) {
+            $id_kat_trimmed = (int)substr($row['id_kat'], $id_pret_length);
+            $row['id_kat'] = $id_kat_trimmed;
             $results[] = [
                 'MENO' => $row['meno'],
                 'PRIEZVISKO' => $row['priezvisko'],
@@ -242,11 +245,14 @@ class ExportImport
                 $category['category_id'], //globálna kategória
                 $category['name']
             );
-            if (self::existuje_kat_pre($category['id'])) {
-                return ["status" => "error", "message" => "Race with these categories already exists."];
-                exit;
-            }
-            self::pridaj_kat_preteku_s_kontrolou($competition['id'], $category['id'], $category['category_id']);
+//             if (self::existuje_kat_pre($category['id'])) {
+//                 return ["status" => "error", "message" => "Race with these categories already exists."];
+//                 exit;
+//             }
+            $competition_id = $competition['id'];
+            $category_id = $category['id'];
+            $combined_string = $competition_id . $category_id;
+            self::pridaj_kat_preteku_s_kontrolou($competition['id'], $combined_string, $category['category_id']);
         }
         if ($existuje) {
             return ["status" => "error", "message" => "Race with ID {$competition['id']} already exists."];
