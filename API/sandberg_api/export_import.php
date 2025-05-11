@@ -245,10 +245,6 @@ class ExportImport
                 $category['category_id'], //globálna kategória
                 $category['name']
             );
-//             if (self::existuje_kat_pre($category['id'])) {
-//                 return ["status" => "error", "message" => "Race with these categories already exists."];
-//                 exit;
-//             }
             $competition_id = $competition['id'];
             $category_id = $category['id'];
             $combined_string = $competition_id . $category_id;
